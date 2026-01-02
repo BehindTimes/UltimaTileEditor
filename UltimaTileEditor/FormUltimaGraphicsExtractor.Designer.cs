@@ -1,0 +1,321 @@
+﻿namespace UltimaTileEditor
+{
+    partial class FormUltimaEditor
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            gbGame = new GroupBox();
+            rbUltima2 = new RadioButton();
+            rbUltima3 = new RadioButton();
+            rbUltima4 = new RadioButton();
+            rbUltima5 = new RadioButton();
+            rbUltima1 = new RadioButton();
+            gbGameLocation = new GroupBox();
+            btnGameDataBrowse = new Button();
+            lblGameData = new Label();
+            tbGameDataDir = new TextBox();
+            gbOutImages = new GroupBox();
+            btnImageBrowse = new Button();
+            tbImagesDir = new TextBox();
+            lblImagesDirectory = new Label();
+            gbFilesLocated = new GroupBox();
+            lbFiles = new ListBox();
+            gbImages = new GroupBox();
+            lbImages = new ListBox();
+            btnExtract = new Button();
+            btnCompress = new Button();
+            gbGame.SuspendLayout();
+            gbGameLocation.SuspendLayout();
+            gbOutImages.SuspendLayout();
+            gbFilesLocated.SuspendLayout();
+            gbImages.SuspendLayout();
+            SuspendLayout();
+            // 
+            // gbGame
+            // 
+            gbGame.Controls.Add(rbUltima2);
+            gbGame.Controls.Add(rbUltima3);
+            gbGame.Controls.Add(rbUltima4);
+            gbGame.Controls.Add(rbUltima5);
+            gbGame.Controls.Add(rbUltima1);
+            gbGame.Dock = DockStyle.Left;
+            gbGame.Location = new Point(0, 0);
+            gbGame.Name = "gbGame";
+            gbGame.Size = new Size(105, 503);
+            gbGame.TabIndex = 0;
+            gbGame.TabStop = false;
+            gbGame.Text = "Game";
+            // 
+            // rbUltima2
+            // 
+            rbUltima2.AutoSize = true;
+            rbUltima2.Location = new Point(21, 47);
+            rbUltima2.Name = "rbUltima2";
+            rbUltima2.Size = new Size(69, 19);
+            rbUltima2.TabIndex = 5;
+            rbUltima2.Text = "Ultima 2";
+            rbUltima2.UseVisualStyleBackColor = true;
+            rbUltima2.CheckedChanged += rbUltima2_CheckedChanged;
+            // 
+            // rbUltima3
+            // 
+            rbUltima3.AutoSize = true;
+            rbUltima3.Location = new Point(21, 72);
+            rbUltima3.Name = "rbUltima3";
+            rbUltima3.Size = new Size(69, 19);
+            rbUltima3.TabIndex = 4;
+            rbUltima3.Text = "Ultima 3";
+            rbUltima3.UseVisualStyleBackColor = true;
+            rbUltima3.CheckedChanged += rbUltima3_CheckedChanged;
+            // 
+            // rbUltima4
+            // 
+            rbUltima4.AutoSize = true;
+            rbUltima4.Location = new Point(21, 97);
+            rbUltima4.Name = "rbUltima4";
+            rbUltima4.Size = new Size(69, 19);
+            rbUltima4.TabIndex = 3;
+            rbUltima4.Text = "Ultima 4";
+            rbUltima4.UseVisualStyleBackColor = true;
+            rbUltima4.CheckedChanged += rbUltima4_CheckedChanged;
+            // 
+            // rbUltima5
+            // 
+            rbUltima5.AutoSize = true;
+            rbUltima5.Checked = true;
+            rbUltima5.Location = new Point(21, 122);
+            rbUltima5.Name = "rbUltima5";
+            rbUltima5.Size = new Size(69, 19);
+            rbUltima5.TabIndex = 2;
+            rbUltima5.TabStop = true;
+            rbUltima5.Text = "Ultima 5";
+            rbUltima5.UseVisualStyleBackColor = true;
+            rbUltima5.CheckedChanged += rbUltima5_CheckedChanged;
+            // 
+            // rbUltima1
+            // 
+            rbUltima1.AutoSize = true;
+            rbUltima1.Location = new Point(21, 22);
+            rbUltima1.Name = "rbUltima1";
+            rbUltima1.Size = new Size(69, 19);
+            rbUltima1.TabIndex = 0;
+            rbUltima1.Text = "Ultima 1";
+            rbUltima1.UseVisualStyleBackColor = true;
+            rbUltima1.CheckedChanged += rbUltima1_CheckedChanged;
+            // 
+            // gbGameLocation
+            // 
+            gbGameLocation.Controls.Add(btnGameDataBrowse);
+            gbGameLocation.Controls.Add(lblGameData);
+            gbGameLocation.Controls.Add(tbGameDataDir);
+            gbGameLocation.Dock = DockStyle.Top;
+            gbGameLocation.Location = new Point(105, 0);
+            gbGameLocation.Name = "gbGameLocation";
+            gbGameLocation.Size = new Size(734, 64);
+            gbGameLocation.TabIndex = 1;
+            gbGameLocation.TabStop = false;
+            gbGameLocation.Text = "Game Files Location";
+            // 
+            // btnGameDataBrowse
+            // 
+            btnGameDataBrowse.Location = new Point(646, 20);
+            btnGameDataBrowse.Name = "btnGameDataBrowse";
+            btnGameDataBrowse.Size = new Size(75, 23);
+            btnGameDataBrowse.TabIndex = 2;
+            btnGameDataBrowse.Text = "Browse";
+            btnGameDataBrowse.UseVisualStyleBackColor = true;
+            btnGameDataBrowse.Click += btnGameDataBrowse_Click;
+            // 
+            // lblGameData
+            // 
+            lblGameData.AutoSize = true;
+            lblGameData.Location = new Point(6, 24);
+            lblGameData.Name = "lblGameData";
+            lblGameData.Size = new Size(119, 15);
+            lblGameData.TabIndex = 0;
+            lblGameData.Text = "Game Data Directory:";
+            // 
+            // tbGameDataDir
+            // 
+            tbGameDataDir.Location = new Point(131, 19);
+            tbGameDataDir.Name = "tbGameDataDir";
+            tbGameDataDir.ReadOnly = true;
+            tbGameDataDir.Size = new Size(506, 23);
+            tbGameDataDir.TabIndex = 1;
+            // 
+            // gbOutImages
+            // 
+            gbOutImages.Controls.Add(btnImageBrowse);
+            gbOutImages.Controls.Add(tbImagesDir);
+            gbOutImages.Controls.Add(lblImagesDirectory);
+            gbOutImages.Dock = DockStyle.Top;
+            gbOutImages.Location = new Point(105, 64);
+            gbOutImages.Name = "gbOutImages";
+            gbOutImages.Size = new Size(734, 62);
+            gbOutImages.TabIndex = 2;
+            gbOutImages.TabStop = false;
+            gbOutImages.Text = "Image Files Location";
+            // 
+            // btnImageBrowse
+            // 
+            btnImageBrowse.Location = new Point(646, 17);
+            btnImageBrowse.Name = "btnImageBrowse";
+            btnImageBrowse.Size = new Size(75, 23);
+            btnImageBrowse.TabIndex = 3;
+            btnImageBrowse.Text = "Browse";
+            btnImageBrowse.UseVisualStyleBackColor = true;
+            btnImageBrowse.Click += btnImageBrowse_Click;
+            // 
+            // tbImagesDir
+            // 
+            tbImagesDir.Location = new Point(131, 17);
+            tbImagesDir.Name = "tbImagesDir";
+            tbImagesDir.ReadOnly = true;
+            tbImagesDir.Size = new Size(506, 23);
+            tbImagesDir.TabIndex = 3;
+            // 
+            // lblImagesDirectory
+            // 
+            lblImagesDirectory.AutoSize = true;
+            lblImagesDirectory.Location = new Point(6, 20);
+            lblImagesDirectory.Name = "lblImagesDirectory";
+            lblImagesDirectory.Size = new Size(99, 15);
+            lblImagesDirectory.TabIndex = 1;
+            lblImagesDirectory.Text = "Images Directory:";
+            // 
+            // gbFilesLocated
+            // 
+            gbFilesLocated.Controls.Add(lbFiles);
+            gbFilesLocated.Dock = DockStyle.Left;
+            gbFilesLocated.Location = new Point(105, 126);
+            gbFilesLocated.Name = "gbFilesLocated";
+            gbFilesLocated.Size = new Size(320, 377);
+            gbFilesLocated.TabIndex = 3;
+            gbFilesLocated.TabStop = false;
+            gbFilesLocated.Text = "Files";
+            // 
+            // lbFiles
+            // 
+            lbFiles.Dock = DockStyle.Fill;
+            lbFiles.FormattingEnabled = true;
+            lbFiles.Location = new Point(3, 19);
+            lbFiles.Name = "lbFiles";
+            lbFiles.Size = new Size(314, 355);
+            lbFiles.TabIndex = 0;
+            // 
+            // gbImages
+            // 
+            gbImages.Controls.Add(lbImages);
+            gbImages.Dock = DockStyle.Left;
+            gbImages.Location = new Point(425, 126);
+            gbImages.Name = "gbImages";
+            gbImages.Size = new Size(320, 377);
+            gbImages.TabIndex = 4;
+            gbImages.TabStop = false;
+            gbImages.Text = "Images";
+            // 
+            // lbImages
+            // 
+            lbImages.Dock = DockStyle.Fill;
+            lbImages.FormattingEnabled = true;
+            lbImages.Location = new Point(3, 19);
+            lbImages.Name = "lbImages";
+            lbImages.Size = new Size(314, 355);
+            lbImages.TabIndex = 0;
+            // 
+            // btnExtract
+            // 
+            btnExtract.Location = new Point(751, 145);
+            btnExtract.Name = "btnExtract";
+            btnExtract.Size = new Size(75, 23);
+            btnExtract.TabIndex = 5;
+            btnExtract.Text = "Extract";
+            btnExtract.UseVisualStyleBackColor = true;
+            btnExtract.Click += btnExtract_Click;
+            // 
+            // btnCompress
+            // 
+            btnCompress.Location = new Point(751, 468);
+            btnCompress.Name = "btnCompress";
+            btnCompress.Size = new Size(75, 23);
+            btnCompress.TabIndex = 6;
+            btnCompress.Text = "Compress";
+            btnCompress.UseVisualStyleBackColor = true;
+            btnCompress.Click += btnCompress_Click;
+            // 
+            // FormUltimaEditor
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(839, 503);
+            Controls.Add(btnCompress);
+            Controls.Add(btnExtract);
+            Controls.Add(gbImages);
+            Controls.Add(gbFilesLocated);
+            Controls.Add(gbOutImages);
+            Controls.Add(gbGameLocation);
+            Controls.Add(gbGame);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            Name = "FormUltimaEditor";
+            Text = "Ultima PC Graphics Extractor";
+            Load += FormUltimaEditor_Load;
+            gbGame.ResumeLayout(false);
+            gbGame.PerformLayout();
+            gbGameLocation.ResumeLayout(false);
+            gbGameLocation.PerformLayout();
+            gbOutImages.ResumeLayout(false);
+            gbOutImages.PerformLayout();
+            gbFilesLocated.ResumeLayout(false);
+            gbImages.ResumeLayout(false);
+            ResumeLayout(false);
+        }
+
+        #endregion
+
+        private GroupBox gbGame;
+        private RadioButton rbUltima2;
+        private RadioButton rbUltima3;
+        private RadioButton rbUltima4;
+        private RadioButton rbUltima5;
+        private RadioButton rbUltima1;
+        private GroupBox gbGameLocation;
+        private Button btnGameDataBrowse;
+        private TextBox tbGameDataDir;
+        private Label lblGameData;
+        private GroupBox gbOutImages;
+        private Button btnImageBrowse;
+        private TextBox tbImagesDir;
+        private Label lblImagesDirectory;
+        private GroupBox gbFilesLocated;
+        private ListBox lbFiles;
+        private GroupBox gbImages;
+        private ListBox lbImages;
+        private Button btnExtract;
+        private Button btnCompress;
+    }
+}
