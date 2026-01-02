@@ -14,28 +14,28 @@ Stay within the bounds of EGA for Ultima 1, 4, and 5 and CGA for Ultima 2 and 3.
 
 EGA Colors:
 
-Black (#000000)
-Blue (#0000AA)
-Green (#00AA00)
-Cyan (#00AAAA)
-Red (#AA0000)
-Magenta (#AA00AA)
-Brown (#AA5500)
-Light Gray (#AAAAAA)
-Dark Gray (#555555)
-Bright Blue (#5555FF)
-Bright Green (#55FF55)
-Bright Cyan (#55FFFF)
-Bright Red (#FF5555)
-Bright Magenta (#FF55FF)
-Bright Yellow (#FFFF55)
-White (#FFFFFF)
+* Black (#000000)
+* Blue (#0000AA)
+* Green (#00AA00)
+* Cyan (#00AAAA)
+* Red (#AA0000)
+* Magenta (#AA00AA)
+* Brown (#AA5500)
+* Light Gray (#AAAAAA)
+* Dark Gray (#555555)
+* Bright Blue (#5555FF)
+* Bright Green (#55FF55)
+* Bright Cyan (#55FFFF)
+* Bright Red (#FF5555)
+* Bright Magenta (#FF55FF)
+* Bright Yellow (#FFFF55)
+* White (#FFFFFF)
 
 CGA Colors:
 
-Black (#000000)
-Cyan (#00AAAA)
-Magenta (#AA00AA)
-Light Gray (#AAAAAA)
+* Black (#000000)
+* Cyan (#00AAAA)
+* Magenta (#AA00AA)
+* Light Gray (#AAAAAA)
 
 All invalid colors will be treated as black.
