@@ -103,14 +103,14 @@ namespace UltimaTileEditor
                             ie3.extractImages(itemsArray, strImagesDir);
                             break;
                         case UltimaGame.Ultima4:
-                            UltimaIVImageExtractor ie4 = new UltimaIVImageExtractor();
+                            Ultima4ImageExtractor ie4 = new Ultima4ImageExtractor();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             ie4.extractImages(itemsArray, strImagesDir);
                             break;
                         case UltimaGame.Ultima5:
-                            UltimaVImageExtractor ie5 = new UltimaVImageExtractor();
+                            Ultima5ImageExtractor ie5 = new Ultima5ImageExtractor();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
-                            ie5.extractImages(itemsArray, strImagesDir);
+                            ie5.ExtractImages(itemsArray, strImagesDir);
                             break;
                         default:
                             break;
@@ -148,14 +148,14 @@ namespace UltimaTileEditor
                             ie3.compressImages(itemsArray, strDataDir);
                             break;
                         case UltimaGame.Ultima4:
-                            UltimaIVImageExtractor ie4 = new UltimaIVImageExtractor();
+                            Ultima4ImageExtractor ie4 = new Ultima4ImageExtractor();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             ie4.compressImages(itemsArray, strDataDir);
                             break;
                         case UltimaGame.Ultima5:
-                            UltimaVImageExtractor ie5 = new UltimaVImageExtractor();
+                            Ultima5ImageExtractor ie5 = new Ultima5ImageExtractor();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
-                            ie5.compressImages(itemsArray, strDataDir);
+                            ie5.CompressImages(itemsArray, strDataDir);
                             break;
                         default:
                             break;

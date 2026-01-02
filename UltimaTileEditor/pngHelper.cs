@@ -46,7 +46,7 @@ namespace UltimaTileEditor
             return pixColor;
         }
 
-        private Color GetColor(byte curByte)
+        public Color GetColor(byte curByte)
         {
             Color pixColor = Color.Black;
 

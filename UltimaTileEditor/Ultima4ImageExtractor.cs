@@ -4,7 +4,7 @@ using System.Text;
 
 namespace UltimaTileEditor
 {
-    internal class UltimaIVImageExtractor
+    internal class Ultima4ImageExtractor
     {
         public void extractImages(string[] images, string strOutDir)
         {
