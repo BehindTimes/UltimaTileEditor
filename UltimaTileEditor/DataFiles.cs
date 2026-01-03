@@ -16,7 +16,7 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima5Files = [ "CREATE", "DNG1", "DNG2", "DNG3", "END1", "END2", "ENDSC", "ITEMS",
             "MON0", "MON1", "MON2", "MON3", "MON4", "MON5", "MON6", "MON7", "STARTSC",
-            "STORY1", "STORY2", "STORY3", "STORY4", "STORY5", "STORY6", "TEXT", "TILES" ];
+            "STORY1", "STORY2", "STORY3", "STORY4", "STORY5", "STORY6", "TEXT", "TILES", "ULTIMA" ];
 
         public static readonly List<string> Ultima5ImageFiles = [ "TILES" ];
 
