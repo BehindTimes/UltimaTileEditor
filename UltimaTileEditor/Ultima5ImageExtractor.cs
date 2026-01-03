@@ -87,6 +87,11 @@ namespace UltimaTileEditor
             for (int index = 0; index < numImages; index++)
             {
                 temp_offset = offsets[index];
+                // For dungeons, offsets 8 & 24 are always 0.
+                if(temp_offset == 0)
+                {
+                    continue;
+                }
                 int width = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
                 temp_offset += 2;
                 int height = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
