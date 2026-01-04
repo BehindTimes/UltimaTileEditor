@@ -14,7 +14,7 @@ namespace UltimaTileEditor
             Ultima5
         }
 
-        UltimaGame m_curGame = UltimaGame.Ultima5;
+        UltimaGame m_curGame = UltimaGame.Ultima4;
         List<string> m_DataFiles = [];
         List<string> m_ImageFiles = [];
 

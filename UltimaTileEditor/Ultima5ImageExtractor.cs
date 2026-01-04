@@ -11,8 +11,7 @@ namespace UltimaTileEditor
     {
         public void ExtractImages(string[] images, string strOutDir)
         {
-            lzwDecompressor lzw = new lzwDecompressor();
-            pngHelper helper = new pngHelper();
+            LzwDecompressor lzw = new LzwDecompressor();
 
             foreach (string image in images)
             {
@@ -20,18 +19,18 @@ namespace UltimaTileEditor
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
                     byte[]? lzw_out;
-                    lzw.extract(file_bytes, out lzw_out);
+                    lzw.Extract(file_bytes, out lzw_out);
                     if (lzw_out != null)
                     {
                         string fullPath = Path.Combine(strOutDir, "TILES.png");
-                        helper.MakePngU5(lzw_out, fullPath);
+                        MakePngU5(lzw_out, fullPath);
                     }
                 }
                 else
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
                     byte[]? lzw_out;
-                    lzw.extract(file_bytes, out lzw_out);
+                    lzw.Extract(file_bytes, out lzw_out);
                     if (lzw_out != null)
                     {
                         string? value = System.IO.Path.GetFileNameWithoutExtension(image);
@@ -51,23 +50,122 @@ namespace UltimaTileEditor
             }
         }
 
+        public void MakePngU5(byte[] lzw, string strPng)
+        {
+            try
+            {
+                byte[] file_bytes = lzw;
+                if (file_bytes.Length != 65536)
+                {
+                    return;
+                }
+                using (Bitmap b = new Bitmap(512, 256))
+                {
+                    LoadImageU5(file_bytes, b);
+                    b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+                    Console.WriteLine("Image Created");
+                }
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("LZW file does not exist!");
+                return;
+            }
+        }
+
         public void CompressImages(string[] images, string strOutDir)
         {
-            lzwDecompressor lzw = new lzwDecompressor();
-            pngHelper helper = new pngHelper();
+            LzwDecompressor lzw = new LzwDecompressor();
 
             foreach (string image in images)
             {
                 if (image.EndsWith("TILES.png"))
                 {
                     byte[]? file_bytes;
-                    helper.MakeLZWU5(out file_bytes, image);
+                    MakeLZWU5(out file_bytes, image);
 
                     if(file_bytes != null)
                     {
                         string fullPath = Path.Combine(strOutDir, "TILES.16");
                         lzw.compress(file_bytes, fullPath);
                     }         
+                }
+            }
+        }
+
+        public void LoadImageU5(byte[] file_bytes, Bitmap b)
+        {
+            pngHelper helper = new pngHelper();
+
+            for (int y_index = 0; y_index < 16; ++y_index)
+            {
+                for (int x_index = 0; x_index < 32; ++x_index)
+                {
+                    long cur_tile = (y_index * 32 + x_index) * 128;
+                    for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
+                    {
+                        for (int pix_x_index = 0; pix_x_index < 8; ++pix_x_index)
+                        {
+                            byte cur_byte = file_bytes[cur_tile + ((pix_y_index * 8) + pix_x_index)];
+                            byte b1 = (byte)((cur_byte >> 4) & 0xF);
+                            byte b2 = (byte)(cur_byte & 0xF);
+
+                            Color pixColor1 = helper.GetColor(b1);
+                            Color pixColor2 = helper.GetColor(b2);
+
+                            b.SetPixel((x_index * 16) + pix_x_index * 2, (y_index * 16) + pix_y_index, pixColor1);
+                            b.SetPixel((x_index * 16) + pix_x_index * 2 + 1, (y_index * 16) + pix_y_index, pixColor2);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void MakeLZWU5(out byte[]? file_bytes, string strPng)
+        {
+            file_bytes = null;
+            try
+            {
+                byte[] destination = new byte[256 * 256];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 256 && image.Width != 512)
+                {
+                    Console.WriteLine("Image must be 512x256 pixels!");
+                    return;
+                }
+                WriteImageU5(destination, image);
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
+        public void WriteImageU5(byte[] file_bytes, Bitmap b)
+        {
+            pngHelper helper = new pngHelper();
+
+            for (int y_index = 0; y_index < 16; ++y_index)
+            {
+                for (int x_index = 0; x_index < 32; ++x_index)
+                {
+                    long cur_tile = (y_index * 32 + x_index) * 128;
+                    for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
+                    {
+                        for (int pix_x_index = 0; pix_x_index < 16; pix_x_index += 2)
+                        {
+                            Color color1 = b.GetPixel((x_index * 16) + pix_x_index, (y_index * 16) + pix_y_index);
+                            Color color2 = b.GetPixel((x_index * 16) + pix_x_index + 1, (y_index * 16) + pix_y_index);
+
+                            byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
+                            byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
+
+                            byte outbyte = (byte)(b1 + b2);
+                            file_bytes[cur_tile + ((pix_y_index * 8) + (pix_x_index / 2))] = outbyte;
+                        }
+                    }
                 }
             }
         }

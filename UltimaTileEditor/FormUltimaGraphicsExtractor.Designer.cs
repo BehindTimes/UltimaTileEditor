@@ -95,10 +95,12 @@
             // rbUltima4
             // 
             rbUltima4.AutoSize = true;
+            rbUltima4.Checked = true;
             rbUltima4.Location = new Point(21, 97);
             rbUltima4.Name = "rbUltima4";
             rbUltima4.Size = new Size(69, 19);
             rbUltima4.TabIndex = 3;
+            rbUltima4.TabStop = true;
             rbUltima4.Text = "Ultima 4";
             rbUltima4.UseVisualStyleBackColor = true;
             rbUltima4.CheckedChanged += rbUltima4_CheckedChanged;
@@ -106,12 +108,10 @@
             // rbUltima5
             // 
             rbUltima5.AutoSize = true;
-            rbUltima5.Checked = true;
             rbUltima5.Location = new Point(21, 122);
             rbUltima5.Name = "rbUltima5";
             rbUltima5.Size = new Size(69, 19);
             rbUltima5.TabIndex = 2;
-            rbUltima5.TabStop = true;
             rbUltima5.Text = "Ultima 5";
             rbUltima5.UseVisualStyleBackColor = true;
             rbUltima5.CheckedChanged += rbUltima5_CheckedChanged;
