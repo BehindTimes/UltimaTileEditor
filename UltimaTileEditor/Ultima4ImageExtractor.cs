@@ -17,7 +17,16 @@ namespace UltimaTileEditor
                     if (file_bytes != null)
                     {
                         string fullPath = Path.Combine(strOutDir, "SHAPES.png");
-                        MakePngU4(file_bytes, fullPath);
+                        MakePngU4(file_bytes, fullPath, 2, 32768);
+                    }
+                }
+                else if (image.EndsWith("CHARSET.EGA"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strOutDir, "CHARSET.png");
+                        MakePngU4(file_bytes, fullPath, 1, 0x2000);
                     }
                 }
                 else
@@ -84,11 +93,25 @@ namespace UltimaTileEditor
                 if (image.EndsWith("SHAPES.png"))
                 {
                     byte[]? file_bytes;
-                    MakeU4(out file_bytes, image);
+                    MakeU4(out file_bytes, image, 2);
 
                     if (file_bytes != null)
                     {
                         string fullPath = Path.Combine(strOutDir, "SHAPES.EGA");
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                        }
+                    }
+                }
+                else if (image.EndsWith("CHARSET.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU4(out file_bytes, image, 1);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strOutDir, "CHARSET.EGA");
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
@@ -119,7 +142,7 @@ namespace UltimaTileEditor
                                     lzw.CompressU4Lzw(file_bytes, fullPath);
                                 }
                             }
-                            else if(rle_files.Contains(value))
+                            else if (rle_files.Contains(value))
                             {
                                 byte[]? file_bytes;
                                 MakeU4Lzw(out file_bytes, image);
@@ -274,7 +297,7 @@ namespace UltimaTileEditor
             }
         }
 
-        private void LoadImageU4(byte[] file_bytes, Bitmap b)
+        private void LoadImageU4(byte[] file_bytes, Bitmap b, int mult)
         {
             pngHelper helper = new pngHelper();
 
@@ -282,38 +305,38 @@ namespace UltimaTileEditor
             {
                 for (int x_index = 0; x_index < 16; ++x_index)
                 {
-                    long cur_tile = (y_index * 16 + x_index) * 128;
-                    for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
+                    long cur_tile = (y_index * 16 + x_index) * (32 * mult * mult);
+                    for (int pix_y_index = 0; pix_y_index < (8 * mult); ++pix_y_index)
                     {
-                        for (int pix_x_index = 0; pix_x_index < 8; ++pix_x_index)
+                        for (int pix_x_index = 0; pix_x_index < (4 * mult); ++pix_x_index)
                         {
-                            byte cur_byte = file_bytes[cur_tile + ((pix_y_index * 8) + pix_x_index)];
+                            byte cur_byte = file_bytes[cur_tile + ((pix_y_index * (4 * mult)) + pix_x_index)];
                             byte b1 = (byte)((cur_byte >> 4) & 0xF);
                             byte b2 = (byte)(cur_byte & 0xF);
 
                             Color pixColor1 = helper.GetColor(b1);
                             Color pixColor2 = helper.GetColor(b2);
 
-                            b.SetPixel((x_index * 16) + pix_x_index * 2, (y_index * 16) + pix_y_index, pixColor1);
-                            b.SetPixel((x_index * 16) + pix_x_index * 2 + 1, (y_index * 16) + pix_y_index, pixColor2);
+                            b.SetPixel((x_index * (8 * mult)) + pix_x_index * 2, (y_index * (8 * mult)) + pix_y_index, pixColor1);
+                            b.SetPixel((x_index * (8 * mult)) + pix_x_index * 2 + 1, (y_index * (8 * mult)) + pix_y_index, pixColor2);
                         }
                     }
                 }
             }
         }
 
-        private void MakePngU4(byte[] lzw, string strPng)
+        private void MakePngU4(byte[] lzw, string strPng, int mult, int file_size)
         {
             try
             {
                 byte[] file_bytes = lzw;
-                if (file_bytes.Length != 32768)
+                if (file_bytes.Length != file_size)
                 {
                     return;
                 }
-                using (Bitmap b = new Bitmap(256, 256))
+                using (Bitmap b = new Bitmap(128 * mult, 128 * mult))
                 {
-                    LoadImageU4(file_bytes, b);
+                    LoadImageU4(file_bytes, b, mult);
                     b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
                     Console.WriteLine("Image Created");
                 }
@@ -325,7 +348,7 @@ namespace UltimaTileEditor
             }
         }
 
-        private void WriteTilesU4(byte[] file_bytes, Bitmap b)
+        private void WriteTilesU4(byte[] file_bytes, Bitmap b, int mult)
         {
             pngHelper helper = new pngHelper();
 
@@ -333,19 +356,19 @@ namespace UltimaTileEditor
             {
                 for (int x_index = 0; x_index < 16; ++x_index)
                 {
-                    long cur_tile = (y_index * 16 + x_index) * 128;
-                    for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
+                    long cur_tile = (y_index * 16 + x_index) * (32 * mult * mult);
+                    for (int pix_y_index = 0; pix_y_index < (8 * mult); ++pix_y_index)
                     {
-                        for (int pix_x_index = 0; pix_x_index < 16; pix_x_index += 2)
+                        for (int pix_x_index = 0; pix_x_index < (8 * mult); pix_x_index += 2)
                         {
-                            Color color1 = b.GetPixel((x_index * 16) + pix_x_index, (y_index * 16) + pix_y_index);
-                            Color color2 = b.GetPixel((x_index * 16) + pix_x_index + 1, (y_index * 16) + pix_y_index);
+                            Color color1 = b.GetPixel((x_index * (8 * mult)) + pix_x_index, (y_index * (8 * mult)) + pix_y_index);
+                            Color color2 = b.GetPixel((x_index * (8 * mult)) + pix_x_index + 1, (y_index * (8 * mult)) + pix_y_index);
 
                             byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
                             byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
 
                             byte outbyte = (byte)(b1 + b2);
-                            file_bytes[cur_tile + ((pix_y_index * 8) + (pix_x_index / 2))] = outbyte;
+                            file_bytes[cur_tile + ((pix_y_index * (4 * mult)) + (pix_x_index / 2))] = outbyte;
                         }
                     }
                 }
@@ -374,19 +397,19 @@ namespace UltimaTileEditor
             }
         }
 
-        private void MakeU4(out byte[]? file_bytes, string strPng)
+        private void MakeU4(out byte[]? file_bytes, string strPng, int mult)
         {
             file_bytes = null;
             try
             {
-                byte[] destination = new byte[128 * 256];
+                byte[] destination = new byte[(64 * mult) * (128 * mult)];
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
-                if (image.Height != 256 && image.Width != 256)
+                if (image.Height != 128 * mult && image.Width != 128 * mult)
                 {
-                    Console.WriteLine("Image must be 256x256 pixels!");
+                    Console.WriteLine("Image must be {0}x{1} pixels!", 128 * mult, 128 * mult);
                     return;
                 }
-                WriteTilesU4(destination, image);
+                WriteTilesU4(destination, image, mult);
                 file_bytes = destination;
             }
             catch (IOException)
