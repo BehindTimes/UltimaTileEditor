@@ -14,14 +14,20 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima5ImageFiles = [ "TILES" ];
 
-        //public static readonly List<string> Ultima4Files = [ "SHAPES", "ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
-        //    "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE"];
+        /*public static readonly List<string> Ultima4Files = [ "SHAPES", "ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
+            "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE",
+            "START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
+            "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
+            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE"];*/
 
         public static readonly List<string> Ultima4Files = ["SHAPES"];
 
         public static readonly List<string> Ultima4ImageFiles = ["SHAPES"];
-        //public static readonly List<string> Ultima4ImageFiles = ["SHAPES", "ANIMATE", "ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
-        //    "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE"];
+        /*public static readonly List<string> Ultima4ImageFiles = ["SHAPES", "ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
+            "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE",
+            "START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
+            "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
+            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE"];*/
 
         public static readonly List<string> Ultima3Files = ["SHAPES"];
 

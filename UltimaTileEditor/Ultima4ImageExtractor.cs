@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace UltimaTileEditor
@@ -26,6 +27,9 @@ namespace UltimaTileEditor
                     {
                         string[] compressed_files = { "ABACUS", "ANIMATE", "GYPSY", "HONCOM", "INSIDE", "OUTSIDE",
                             "PORTAL", "SACHONOR", "SPIRHUM", "TITLE", "TREE", "VALJUS", "WAGON" };
+                        string[] rle_files = { "START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
+                            "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
+                            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE" };
                         if (compressed_files.Contains(value))
                         {
                             LzwDecompressor lzw = new LzwDecompressor();
@@ -45,9 +49,28 @@ namespace UltimaTileEditor
                                 }
                             }
                         }
+                        else if (rle_files.Contains(value))
+                        {
+                            byte[] file_bytes = File.ReadAllBytes(image);
+                            byte[]? rle_out;
+
+                            readRLEFile(file_bytes, out rle_out);
+
+                            if (rle_out != null && rle_out.Length == 32000)
+                            {
+                                string fullPath = Path.Combine(strOutDir, value + ".png");
+
+                                using (Bitmap b = new Bitmap(320, 200))
+                                {
+                                    LoadImage320x200(rle_out, b);
+                                    b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                                    Console.WriteLine("Image Created");
+                                }
+                            }
+                        }
                         else
                         {
-                            
+
                         }
                     }
                 }
@@ -81,6 +104,9 @@ namespace UltimaTileEditor
                         {
                             string[] compressed_files = { "ABACUS", "ANIMATE", "GYPSY", "HONCOM", "INSIDE", "OUTSIDE",
                             "PORTAL", "SACHONOR", "SPIRHUM", "TITLE", "TREE", "VALJUS", "WAGON" };
+                            string[] rle_files = { "START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
+                            "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
+                            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE" };
                             if (compressed_files.Contains(value))
                             {
                                 byte[]? file_bytes;
@@ -93,6 +119,16 @@ namespace UltimaTileEditor
                                     lzw.CompressU4Lzw(file_bytes, fullPath);
                                 }
                             }
+                            else if(rle_files.Contains(value))
+                            {
+                                byte[]? file_bytes;
+                                MakeU4Lzw(out file_bytes, image);
+                                if ((null != file_bytes))
+                                {
+                                    string fullPath = Path.Combine(strOutDir, value + "_test.EGA");
+                                    writeRLEFile(file_bytes, fullPath);
+                                }
+                            }
                         }
                     }
                 }
@@ -100,7 +136,102 @@ namespace UltimaTileEditor
             MessageBox.Show("File written!");
         }
 
-        public void MakeU4Lzw(out byte[]? file_bytes, string strPng)
+        private void writeRLEFile(byte[] file_bytes, string outFile)
+        {
+            int in_pos = 0;
+
+            using (BinaryWriter binWriter =
+                    new BinaryWriter(File.Open(outFile, FileMode.Create)))
+            {
+                while (in_pos < file_bytes.Length)
+                {
+                    byte curval = file_bytes[in_pos];
+                    int length = 1;
+                    for(int index = 1; index < 255; index++)
+                    {
+                        if(in_pos + index >= file_bytes.Length)
+                        {
+                            break;
+                        }
+                        byte tempval = file_bytes[in_pos + index];
+                        if(tempval != curval)
+                        {
+                            break;
+                        }
+                        length++;
+                    }
+                    
+                    if(curval != 2 && length < 5)
+                    {
+                        binWriter.Write((byte)curval);
+                        if(length == 2)
+                        {
+                            binWriter.Write((byte)curval);
+                            in_pos++;
+                        }
+                        else if (length == 3)
+                        {
+                            binWriter.Write((byte)curval);
+                            binWriter.Write((byte)curval);
+                            in_pos +=2 ;
+                        }
+                        else if (length == 4)
+                        {
+                            binWriter.Write((byte)curval);
+                            binWriter.Write((byte)curval);
+                            binWriter.Write((byte)curval);
+                            in_pos += 3;
+                        }
+                        in_pos++;
+                    }
+                    else
+                    {
+                        binWriter.Write((byte)2);
+                        binWriter.Write((byte)length);
+                        binWriter.Write((byte)curval);
+                        in_pos += length;
+                    }
+                }
+            }
+        }
+
+        private void readRLEFile(byte[] file_bytes, out byte[]? rle_bytes)
+        {
+            rle_bytes = null;
+            byte[] destination = new byte[200 * 160];
+
+            int in_pos = 0;
+            int out_pos = 0;
+            while(in_pos < file_bytes.Length)
+            {
+                byte curval = file_bytes[in_pos];
+                
+                if(curval != 0x2)
+                {
+                    destination[out_pos] = curval;
+                    out_pos++;
+                }
+                else
+                {
+                    if(in_pos + 2 > file_bytes.Length)
+                    {
+                        return; // Invalid file
+                    }
+                    int count = file_bytes[in_pos + 1];
+                    byte value = file_bytes[in_pos + 2];
+                    in_pos += 2;
+                    for (int index = 0; index < count; index++)
+                    {
+                        destination[out_pos] = value;
+                        out_pos++;
+                    }
+                }
+                in_pos++;
+            }
+            rle_bytes = destination;
+        }
+
+        private void MakeU4Lzw(out byte[]? file_bytes, string strPng)
         {
             file_bytes = null;
             try
@@ -143,7 +274,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void LoadImageU4(byte[] file_bytes, Bitmap b)
+        private void LoadImageU4(byte[] file_bytes, Bitmap b)
         {
             pngHelper helper = new pngHelper();
 
@@ -171,7 +302,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakePngU4(byte[] lzw, string strPng)
+        private void MakePngU4(byte[] lzw, string strPng)
         {
             try
             {
