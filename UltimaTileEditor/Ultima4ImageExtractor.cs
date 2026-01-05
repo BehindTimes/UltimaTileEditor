@@ -6,7 +6,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima4ImageExtractor
     {
-        public void extractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strOutDir)
         {
             foreach (string image in images)
             {
@@ -54,7 +54,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void compressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strOutDir)
         {
             foreach (string image in images)
             {
@@ -69,10 +69,56 @@ namespace UltimaTileEditor
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
-                            MessageBox.Show("File written!");
                         }
                     }
                 }
+                else
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        if (value != null)
+                        {
+                            string[] compressed_files = { "ABACUS", "ANIMATE", "GYPSY", "HONCOM", "INSIDE", "OUTSIDE",
+                            "PORTAL", "SACHONOR", "SPIRHUM", "TITLE", "TREE", "VALJUS", "WAGON" };
+                            if (compressed_files.Contains(value))
+                            {
+                                byte[]? file_bytes;
+                                MakeU4Lzw(out file_bytes, image);
+                                if ((null != file_bytes))
+                                {
+                                    LzwDecompressor lzw = new LzwDecompressor();
+
+                                    string fullPath = Path.Combine(strOutDir, value + "_test.EGA");
+                                    lzw.CompressU4Lzw(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            MessageBox.Show("File written!");
+        }
+
+        public void MakeU4Lzw(out byte[]? file_bytes, string strPng)
+        {
+            file_bytes = null;
+            try
+            {
+                byte[] destination = new byte[200 * 160];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 200 && image.Width != 320)
+                {
+                    Console.WriteLine("Image must be 320x200 pixels!");
+                    return;
+                }
+                WriteLzwImageU4(destination, image, 320, 200);
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("PNG file does not exist!");
+                return;
             }
         }
 
@@ -148,7 +194,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void WriteImageU4(byte[] file_bytes, Bitmap b)
+        private void WriteTilesU4(byte[] file_bytes, Bitmap b)
         {
             pngHelper helper = new pngHelper();
 
@@ -175,7 +221,29 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakeU4(out byte[]? file_bytes, string strPng)
+        private void WriteLzwImageU4(byte[] file_bytes, Bitmap b, int width, int height)
+        {
+            pngHelper helper = new pngHelper();
+            int curByte = 0;
+
+            for (int y_index = 0; y_index < height; ++y_index)
+            {
+                for (int x_index = 0; x_index < width; x_index += 2)
+                {
+                    Color color1 = b.GetPixel(x_index, y_index);
+                    Color color2 = b.GetPixel(x_index + 1, y_index);
+
+                    byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
+                    byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
+
+                    byte outbyte = (byte)(b1 + b2);
+                    file_bytes[curByte] = outbyte;
+                    curByte++;
+                }
+            }
+        }
+
+        private void MakeU4(out byte[]? file_bytes, string strPng)
         {
             file_bytes = null;
             try
@@ -187,7 +255,7 @@ namespace UltimaTileEditor
                     Console.WriteLine("Image must be 256x256 pixels!");
                     return;
                 }
-                WriteImageU4(destination, image);
+                WriteTilesU4(destination, image);
                 file_bytes = destination;
             }
             catch (IOException)

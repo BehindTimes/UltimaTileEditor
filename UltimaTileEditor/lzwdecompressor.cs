@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Formats.Asn1;
 using System.Numerics;
 using System.Text;
 
@@ -82,6 +84,7 @@ namespace UltimaTileEditor
 
         bool Get_next_codeword_u4(out int codeword, byte[] source)
         {
+            int curByte = bits_read / 8;
             codeword = (source[bits_read / 8] << 8) + source[bits_read / 8 + 1];
             codeword = codeword >> (4 - (bits_read % 8));
             codeword = codeword & 0xfff;
@@ -104,11 +107,6 @@ namespace UltimaTileEditor
         void Output_root(byte root, ref byte[] destination)
         {
             destination[position] = root;
-            position++;
-        }
-
-        void Output_root_fake(byte root)
-        {
             position++;
         }
 
@@ -392,14 +390,14 @@ namespace UltimaTileEditor
             return true;
         }
 
-        public bool compress(byte[] file_bytes, string outFile)
+        public bool Compress(byte[] file_bytes, string outFile)
         {
             using (BinaryWriter binWriter =
                     new BinaryWriter(File.Open(outFile, FileMode.Create)))
             {
                 binWriter.Write(file_bytes.Length);
 
-                build_dictionary(file_bytes, 0, binWriter);
+                Build_dictionary(file_bytes, 0, binWriter);
 
             }
 
@@ -409,7 +407,7 @@ namespace UltimaTileEditor
         byte code_word_remainder = 0;
         int code_word_shift = 0;
 
-        void write_code_word(int code_word, int code_word_size, BinaryWriter binWriter)
+        void Write_code_word(int code_word, int code_word_size, BinaryWriter binWriter)
         {
             int temp_int = code_word << code_word_shift;
             temp_int += code_word_remainder;
@@ -424,7 +422,7 @@ namespace UltimaTileEditor
             code_word_remainder = (byte)(temp_int & 0xFF);
         }
 
-        int build_dictionary(byte[] file_bytes, int start_pos, BinaryWriter binWriter)
+        int Build_dictionary(byte[] file_bytes, int start_pos, BinaryWriter binWriter)
         {
             code_word_remainder = 0;
             code_word_shift = 0;
@@ -434,7 +432,7 @@ namespace UltimaTileEditor
             int temp_pos = start_pos;
             bool invalid = false;
 
-            write_code_word(0x100, codeword_size, binWriter);
+            Write_code_word(0x100, codeword_size, binWriter);
 
             while (temp_pos < file_bytes.Length)
             {
@@ -446,7 +444,7 @@ namespace UltimaTileEditor
                 if (temp_pos >= file_bytes.Length)
                 {
                     // Write the code word
-                    write_code_word(temp_list[0], codeword_size, binWriter);
+                    Write_code_word(temp_list[0], codeword_size, binWriter);
                     break; // We've reached the end, so just write this
                 }
                 temp_list.Add(file_bytes[temp_pos]);
@@ -468,7 +466,7 @@ namespace UltimaTileEditor
                     if (temp_pos >= file_bytes.Length)
                     {
                         // Write the sequence
-                        write_code_word(next_free_codeword + seq_index, codeword_size, binWriter);
+                        Write_code_word(next_free_codeword + seq_index, codeword_size, binWriter);
                         invalid = true;
                         break; // We've reached the end, so just write this
                     }
@@ -483,7 +481,7 @@ namespace UltimaTileEditor
                 {
                     temp_pos -= (temp_list.Count - 1);
                     cur_dict.Clear();
-                    write_code_word(0x100, codeword_size, binWriter);
+                    Write_code_word(0x100, codeword_size, binWriter);
                     codeword_size = 9;
                     continue;
                 }
@@ -494,16 +492,16 @@ namespace UltimaTileEditor
                 if (sequence_found)
                 {
                     // Write the sequence
-                    write_code_word(next_free_codeword + seq_index, codeword_size, binWriter);
+                    Write_code_word(next_free_codeword + seq_index, codeword_size, binWriter);
 
                 }
                 else
                 {
                     // Write the code word
-                    write_code_word(temp_list[0], codeword_size, binWriter);
+                    Write_code_word(temp_list[0], codeword_size, binWriter);
                 }
             }
-            write_code_word(0x101, codeword_size, binWriter);
+            Write_code_word(0x101, codeword_size, binWriter);
 
             if (code_word_shift > 0)
             {
@@ -535,7 +533,7 @@ namespace UltimaTileEditor
         */
 
 
-        public bool mightBeValidCompressedFile(byte[] file_bytes)
+        public bool MightBeValidCompressedFile(byte[] file_bytes)
         {
             if(file_bytes.Length == 0)
             {
@@ -559,9 +557,9 @@ namespace UltimaTileEditor
         // No errors: (long) decompressed size
         // Error: (long) -1
         //
-        int lzwGetDecompressedSize(byte[] file_bytes)
+        int LzwGetDecompressedSize(byte[] file_bytes)
         {
-            return generalizedDecompress(file_bytes, null);
+            return GeneralizedDecompress(file_bytes, null);
         }
 
         // pushes the string associated with codeword onto the stack
@@ -581,7 +579,7 @@ namespace UltimaTileEditor
             elementsInStack++;
         }
 
-        private int generalizedDecompress(byte[] source, byte[]? outFile)
+        private int GeneralizedDecompress(byte[] source, byte[]? outFile)
         {
             dict = new Dict_entry[D_SIZE];
             mystack = new byte[S_SIZE];
@@ -614,7 +612,7 @@ namespace UltimaTileEditor
             {
                 bool bValid = Get_next_codeword_u4(out old_code, source);
                 character = (byte)old_code;
-                if(outFile != null)
+                if (outFile != null)
                 {
                     outFile[bytes_written] = character;
                 }
@@ -663,7 +661,7 @@ namespace UltimaTileEditor
                     }
 
                     // add OLD_CODE + CHARACTER to the translation table
-                    newpos = getNewHashCode(character, old_code, ref dict);
+                    newpos = GetNewHashCode(character, old_code, ref dict);
 
                     dict[newpos].root = character;
                     dict[newpos].codeword = old_code;
@@ -717,32 +715,32 @@ namespace UltimaTileEditor
             return bytes_written;
         }
 
-        private int getNewHashCode(byte root, int codeword, ref Dict_entry[] dictionary)
+        private int GetNewHashCode(byte root, int codeword, ref Dict_entry[] dictionary)
         {
             int hashCode = 0;
 
             // probe 1
-            hashCode = probe1(root, codeword);
-            if (hashPosFound(hashCode, root, codeword, ref dictionary))
+            hashCode = Probe1(root, codeword);
+            if (HashPosFound(hashCode, root, codeword, ref dictionary))
             {
                 return (hashCode);
             }
             // probe 2
-            hashCode = probe2(root, codeword);
-            if (hashPosFound(hashCode, root, codeword, ref dictionary))
+            hashCode = Probe2(root, codeword);
+            if (HashPosFound(hashCode, root, codeword, ref dictionary))
             {
                 return (hashCode);
             }
             // probe 3
             do
             {
-                hashCode = probe3(hashCode);
-            } while (!hashPosFound(hashCode, root, codeword, ref dictionary));
+                hashCode = Probe3(hashCode);
+            } while (!HashPosFound(hashCode, root, codeword, ref dictionary));
 
             return hashCode;
         }
 
-        bool hashPosFound(int hashCode, byte root, int codeword, ref Dict_entry[] dictionary)
+        bool HashPosFound(int hashCode, byte root, int codeword, ref Dict_entry[] dictionary)
         {
             if (hashCode > 0xff)   /* hash codes must not be roots */
             {
@@ -772,14 +770,14 @@ namespace UltimaTileEditor
             }
         }
 
-        int probe1(byte root, int codeword)
+        int Probe1(byte root, int codeword)
         {
             int newHashCode = ((root << 4) ^ codeword) & 0xfff;
             return (newHashCode);
         }
 
         /* The secondary probe uses some assembler instructions that aren't easily translated to C. */
-        int probe2(byte root, int codeword)
+        int Probe2(byte root, int codeword)
         {
             /* registers[0] == AX, registers[1] == DX */
             int[] registers = new int[2];
@@ -820,7 +818,7 @@ namespace UltimaTileEditor
             return ((int)registers[0]);
         }
 
-        int probe3(int hashCode)
+        int Probe3(int hashCode)
         {
             const int probeOffset = 0x1fd;   /* I think 0x1fd is prime */
 
@@ -831,18 +829,187 @@ namespace UltimaTileEditor
         public bool ExtractU4(byte[] file_bytes, out byte[]? outFile)
         {
             outFile = null;
-            if(!mightBeValidCompressedFile(file_bytes))
+            if(!MightBeValidCompressedFile(file_bytes))
             {
                 return false;
             }
-            int decompressed_filesize = lzwGetDecompressedSize(file_bytes);
+            int decompressed_filesize = LzwGetDecompressedSize(file_bytes);
             if (decompressed_filesize <= 0)
             {
                 return false;
             }
 
             outFile = new byte[decompressed_filesize];
-            generalizedDecompress(file_bytes, outFile);
+            GeneralizedDecompress(file_bytes, outFile);
+
+            return true;
+        }
+
+        void Write_code_word_U4(int code_word, BinaryWriter binWriter)
+        {
+            int temp_int = 0;
+            if (code_word_shift == 0)
+            {
+                temp_int = (code_word >> 4) & 0xFF;
+                binWriter.Write((byte)temp_int);
+                code_word_remainder = (byte)(code_word & 0xF);
+                code_word_shift = 4;
+            }
+            else
+            {
+                temp_int = (code_word_remainder << 4) & 0xF0;
+                temp_int += ((code_word >> 8) & 0xF);
+                binWriter.Write((byte)temp_int);
+                temp_int = code_word & 0xFF;
+                binWriter.Write((byte)temp_int);
+                code_word_remainder = 0;
+                code_word_shift = 0;
+            }
+        }
+
+        void Write_code_word_U4_finish(int code_word, BinaryWriter binWriter)
+        {
+            int temp_int = 0;
+            if (code_word_shift == 0)
+            {
+                temp_int = (code_word >> 4) & 0xFF;
+                binWriter.Write((byte)temp_int);
+                code_word_remainder = (byte)(code_word & 0xF);
+                code_word_shift = 4;
+                temp_int = (code_word << 4) & 0xF0;
+                binWriter.Write((byte)temp_int);
+            }
+            else
+            {
+                temp_int = (code_word_remainder << 4) & 0xF0;
+                temp_int += ((code_word >> 8) & 0xF);
+                binWriter.Write((byte)temp_int);
+                temp_int = code_word & 0xFF;
+                binWriter.Write((byte)temp_int);
+                code_word_remainder = 0;
+                code_word_shift = 0;
+            }
+        }
+
+        int Build_dictionary_U4(byte[] file_bytes, int start_pos, BinaryWriter binWriter)
+        {
+            int temp_pos = start_pos;
+            const int maxDictEntries = 0xccc;
+            dict = new Dict_entry[D_SIZE];
+            Dictionary<List<byte>, int> dict_sequences = new Dictionary<List<byte>, int>();
+            List<byte> curSequence = new List<byte>();
+            bool has_remainder = false;
+            int codewordsInDictionary = 0;
+
+            if (file_bytes.Length <= 0)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < 0x100; i++)
+            {
+                dict[i].occupied = true;
+                curSequence = new List<byte>();
+                curSequence.Add((byte)i);
+                dict_sequences.Add(curSequence, i);
+            }
+           
+            curSequence = new List<byte>();
+            curSequence.Add(file_bytes[temp_pos]);
+            temp_pos++;
+
+            List<byte> tempSequence = new List<byte>(curSequence);
+
+            while (temp_pos < file_bytes.Length)
+            {
+                tempSequence.Add(file_bytes[temp_pos]);
+                if (dict_sequences.Keys.Any(p => p.SequenceEqual(tempSequence)))
+                {
+                    curSequence = new List<byte>(tempSequence);
+                    temp_pos++;
+                    has_remainder = true;
+                    continue;
+                }
+                else
+                {
+                    has_remainder = false;
+                    var match = dict_sequences.Keys.First(p => p.SequenceEqual(curSequence));
+                    if (!dict_sequences.ContainsKey(match))
+                    {
+                        MessageBox.Show("Corrupt sequence");
+                        return -1;
+                    }
+
+                    int code_word = dict_sequences[match];
+
+                    Write_code_word_U4(code_word, binWriter);
+
+                    byte root = curSequence[0];
+                    byte root1 = tempSequence.Last();
+                    int new_code = GetNewHashCode(root1, code_word, ref dict);
+                    dict[new_code].occupied = true;
+                    dict[new_code].root = root1;
+                    dict[new_code].codeword = code_word;
+                    dict_sequences.Add(tempSequence, new_code);
+                    tempSequence = new List<byte>();
+                    tempSequence.Add(file_bytes[temp_pos]);
+                    curSequence = new List<byte>(tempSequence);
+
+                    codewordsInDictionary++;
+                    if (codewordsInDictionary > maxDictEntries)
+                    {
+                        match = dict_sequences.Keys.First(p => p.SequenceEqual(curSequence));
+                        code_word = dict_sequences[match];
+                        Write_code_word_U4(code_word, binWriter);
+                        temp_pos++;
+                        if(temp_pos >= file_bytes.Length)
+                        {
+                            return -1;
+                        }
+                        tempSequence = new List<byte>();
+                        tempSequence.Add(file_bytes[temp_pos]);
+                        curSequence = new List<byte>(tempSequence);
+
+                        /* wipe dictionary */
+                        dict_sequences = new Dictionary<List<byte>, int>();
+                        codewordsInDictionary = 0;
+                        dict = new Dict_entry[D_SIZE];
+                        for (int i = 0; i < 0x100; i++)
+                        {
+                            dict[i].occupied = true;
+                            curSequence = new List<byte>();
+                            curSequence.Add((byte)i);
+                            dict_sequences.Add(curSequence, i);
+                        }
+
+                        curSequence = new List<byte>();
+                        curSequence.Add(file_bytes[temp_pos]);
+                    }
+
+                    temp_pos++;
+                }
+            }
+            if(has_remainder)
+            {
+                var match = dict_sequences.Keys.First(p => p.SequenceEqual(curSequence));
+                if (!dict_sequences.ContainsKey(match))
+                {
+                    MessageBox.Show("Corrupt sequence");
+                    return -1;
+                }
+                int code_word = dict_sequences[match];
+                Write_code_word_U4_finish(code_word, binWriter);
+            }
+            return -1;
+        }
+
+        public bool CompressU4Lzw(byte[] file_bytes, string outFile)
+        {
+            using (BinaryWriter binWriter =
+                    new BinaryWriter(File.Open(outFile, FileMode.Create)))
+            {
+                Build_dictionary_U4(file_bytes, 0, binWriter);
+            }
 
             return true;
         }

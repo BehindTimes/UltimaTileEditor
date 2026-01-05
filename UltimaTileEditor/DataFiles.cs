@@ -20,6 +20,8 @@ namespace UltimaTileEditor
         public static readonly List<string> Ultima4Files = ["SHAPES"];
 
         public static readonly List<string> Ultima4ImageFiles = ["SHAPES"];
+        //public static readonly List<string> Ultima4ImageFiles = ["SHAPES", "ANIMATE", "ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
+        //    "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE"];
 
         public static readonly List<string> Ultima3Files = ["SHAPES"];
 

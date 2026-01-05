@@ -87,7 +87,7 @@ namespace UltimaTileEditor
                     if(file_bytes != null)
                     {
                         string fullPath = Path.Combine(strOutDir, "TILES.16");
-                        lzw.compress(file_bytes, fullPath);
+                        lzw.Compress(file_bytes, fullPath);
                     }         
                 }
             }
