@@ -6,7 +6,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima2ImageExtractor
     {
-        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             int dataStartOffset = 0x7c40;
             int tileSize = 66;
@@ -29,7 +29,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             int dataStartOffset = 0x7c40;
 

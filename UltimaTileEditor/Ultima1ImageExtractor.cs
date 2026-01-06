@@ -6,7 +6,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima1ImageExtractor
     {
-        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             foreach (string tempimage in images)
             {
@@ -20,7 +20,16 @@ namespace UltimaTileEditor
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
-                            MakePngU1(file_bytes, fullPath, 13, 4, true);
+                            switch(palette)
+                            {
+                                case 1: // CGA - Not supported
+                                    break;
+                                case 2: // Tandy - Not supported
+                                    break;
+                                default: // EGA
+                                    MakePngU1EGA(file_bytes, fullPath, 13, 4, true);
+                                    break;
+                            }   
                         }
                     }
                     else if (image.EndsWith("MOND.BIN"))
@@ -29,7 +38,16 @@ namespace UltimaTileEditor
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
-                            MakePngU1(file_bytes, fullPath, 19, 1, true);
+                            switch (palette)
+                            {
+                                case 1: // CGA - Not supported
+                                    break;
+                                case 2: // Tandy - Not supported
+                                    break;
+                                default: // EGA
+                                    MakePngU1EGA(file_bytes, fullPath, 19, 1, true);
+                                    break;
+                            }
                         }
                     }
                     else if (image.EndsWith("TOWN.BIN"))
@@ -38,7 +56,16 @@ namespace UltimaTileEditor
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
-                            MakePngU1(file_bytes, fullPath, 17, 3, false);
+                            switch (palette)
+                            {
+                                case 1: // CGA - Not supported
+                                    break;
+                                case 2: // Tandy - Not supported
+                                    break;
+                                default: // EGA
+                                    MakePngU1EGA(file_bytes, fullPath, 17, 3, false);
+                                    break;
+                            }
                         }
                     }
                     else if (image.EndsWith("CASTLE.16"))
@@ -63,8 +90,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
+            bool written = false;
             foreach (string tempimage in images)
             {
                 string image = Path.Combine(strImageDir, tempimage);
@@ -110,26 +138,28 @@ namespace UltimaTileEditor
                             using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                             {
                                 binWriter.Write(file_bytes);
+                                written = true;
                             }
                         }
                     }
                     else if (image.EndsWith("CASTLE.png"))
                     {
                         byte[]? file_bytes;
-                        if (imageType == 3) // 16 color
+                        if (palette == 0) // 16 color
                         {
                             string fullPath = Path.Combine(strDataDir, value + "_test.16");
                             MakeU1Image(out file_bytes, image);
                             if(null != file_bytes)
                             {
                                 WriteU1Image(file_bytes, fullPath);
+                                written = true;
                             }
                         }
-                        else if (imageType == 4) // 4 color
+                        else if (palette == 1) // 4 color - Not Supported
                         {
                             string fullPath = Path.Combine(strDataDir, value + "_test.4");
                         }
-                        else
+                        else // Tandy - Not Supported
                         {
 
                         }
@@ -140,7 +170,10 @@ namespace UltimaTileEditor
                     }
                 }
             }
-            MessageBox.Show("Files written!");
+            if(written)
+            {
+                MessageBox.Show("Files written!");
+            }
         }
 
         private void WriteU1Image(byte[] file_bytes, string strOut)
@@ -244,7 +277,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakePngU1(byte[] lzw, string strPng, int width, int height, bool is16)
+        public void MakePngU1EGA(byte[] lzw, string strPng, int width, int height, bool is16)
         {
             try
             {

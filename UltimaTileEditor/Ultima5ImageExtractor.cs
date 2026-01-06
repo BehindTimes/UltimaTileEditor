@@ -9,7 +9,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima5ImageExtractor
     {
-        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             LzwDecompressor lzw = new LzwDecompressor();
 
@@ -29,23 +29,30 @@ namespace UltimaTileEditor
                 }
                 else
                 {
-                    byte[] file_bytes = File.ReadAllBytes(image);
-                    byte[]? lzw_out;
-                    lzw.Extract(file_bytes, out lzw_out);
-                    if (lzw_out != null)
+                    if(palette == 0) // EGA
                     {
-                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
-                        if(value != null)
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        byte[]? lzw_out;
+                        lzw.Extract(file_bytes, out lzw_out);
+                        if (lzw_out != null)
                         {
-                            if(value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
+                            string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                            if (value != null)
                             {
-                                CreateMaskImages(lzw_out, strImageDir, value);
+                                if (value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
+                                {
+                                    CreateMaskImages(lzw_out, strImageDir, value);
+                                }
+                                else
+                                {
+                                    CreateImages(lzw_out, strImageDir, value);
+                                }
                             }
-                            else
-                            {
-                                CreateImages(lzw_out, strImageDir, value);
-                            }                
                         }
+                    }
+                    else // CGA - Not Supported
+                    {
+
                     }
                 }
             }
@@ -74,7 +81,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             LzwDecompressor lzw = new LzwDecompressor();
 
@@ -82,16 +89,23 @@ namespace UltimaTileEditor
             {
                 string image = Path.Combine(strImageDir, tempimage);
 
-                if (image.EndsWith("TILES.png"))
+                if(palette == 0) // EGA
                 {
-                    byte[]? file_bytes;
-                    MakeLZWU5(out file_bytes, image);
-
-                    if(file_bytes != null)
+                    if (image.EndsWith("TILES.png"))
                     {
-                        string fullPath = Path.Combine(strDataDir, "TILES.16");
-                        lzw.Compress(file_bytes, fullPath);
-                    }         
+                        byte[]? file_bytes;
+                        MakeLZWU5(out file_bytes, image);
+
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strDataDir, "TILES.16");
+                            lzw.Compress(file_bytes, fullPath);
+                        }
+                    }
+                }
+                else // CGA - Not supported
+                {
+
                 }
             }
         }

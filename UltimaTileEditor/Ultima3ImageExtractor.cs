@@ -6,7 +6,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima3ImageExtractor
     {
-        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             foreach (string tempimage in images)
             {
@@ -23,7 +23,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             foreach (string tempimage in images)
             {

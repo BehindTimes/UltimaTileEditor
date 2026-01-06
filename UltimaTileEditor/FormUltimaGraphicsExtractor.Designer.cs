@@ -49,6 +49,8 @@
             btnExtract = new Button();
             btnCompress = new Button();
             pnlGame = new Panel();
+            gbPalette = new GroupBox();
+            cbPalette = new ComboBox();
             gbFileType = new GroupBox();
             cbFileType = new ComboBox();
             pnlLoc = new Panel();
@@ -60,6 +62,7 @@
             gbFilesLocated.SuspendLayout();
             gbImages.SuspendLayout();
             pnlGame.SuspendLayout();
+            gbPalette.SuspendLayout();
             gbFileType.SuspendLayout();
             pnlLoc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -283,6 +286,7 @@
             // 
             // pnlGame
             // 
+            pnlGame.Controls.Add(gbPalette);
             pnlGame.Controls.Add(gbFileType);
             pnlGame.Controls.Add(gbGame);
             pnlGame.Dock = DockStyle.Left;
@@ -291,13 +295,35 @@
             pnlGame.Size = new Size(128, 411);
             pnlGame.TabIndex = 1;
             // 
+            // gbPalette
+            // 
+            gbPalette.Controls.Add(cbPalette);
+            gbPalette.Dock = DockStyle.Fill;
+            gbPalette.Location = new Point(0, 231);
+            gbPalette.Name = "gbPalette";
+            gbPalette.Size = new Size(128, 180);
+            gbPalette.TabIndex = 2;
+            gbPalette.TabStop = false;
+            gbPalette.Text = "Palette";
+            // 
+            // cbPalette
+            // 
+            cbPalette.Dock = DockStyle.Top;
+            cbPalette.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbPalette.FormattingEnabled = true;
+            cbPalette.Location = new Point(3, 19);
+            cbPalette.Name = "cbPalette";
+            cbPalette.Size = new Size(122, 23);
+            cbPalette.TabIndex = 1;
+            cbPalette.SelectedIndexChanged += cbPalette_SelectedIndexChanged;
+            // 
             // gbFileType
             // 
             gbFileType.Controls.Add(cbFileType);
-            gbFileType.Dock = DockStyle.Fill;
+            gbFileType.Dock = DockStyle.Top;
             gbFileType.Location = new Point(0, 167);
             gbFileType.Name = "gbFileType";
-            gbFileType.Size = new Size(128, 244);
+            gbFileType.Size = new Size(128, 64);
             gbFileType.TabIndex = 1;
             gbFileType.TabStop = false;
             gbFileType.Text = "File Type";
@@ -373,6 +399,7 @@
             gbFilesLocated.ResumeLayout(false);
             gbImages.ResumeLayout(false);
             pnlGame.ResumeLayout(false);
+            gbPalette.ResumeLayout(false);
             gbFileType.ResumeLayout(false);
             pnlLoc.ResumeLayout(false);
             splitContainer1.Panel1.ResumeLayout(false);
@@ -411,5 +438,7 @@
         private Panel pnlControl;
         private GroupBox gbFileType;
         private ComboBox cbFileType;
+        private GroupBox gbPalette;
+        private ComboBox cbPalette;
     }
 }
