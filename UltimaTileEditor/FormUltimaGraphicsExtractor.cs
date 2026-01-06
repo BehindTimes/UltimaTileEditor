@@ -288,31 +288,15 @@ namespace UltimaTileEditor
                             break;
                         case 1: // .16 Masked Images
                             m_DataFiles = DataFiles.Ultima5Masked;
-                            m_ImageFiles = DataFiles.Ultima5Masked;
+                            m_ImageFiles = DataFiles.Ultima5MaskedImage;
                             break;
                         case 2: // .16 Dungeon Images
-                            m_DataFiles = DataFiles.Ultima5DngImage;
+                            m_DataFiles = DataFiles.Ultima5Dng;
                             m_ImageFiles = DataFiles.Ultima5DngImage;
                             break;
                         case 3: // .16 Images
-                            m_DataFiles = DataFiles.Ultima5Images;
-                            m_ImageFiles = DataFiles.Ultima5Images;
-                            break;
-                        case 4: // .4 Tiles
-                            m_DataFiles = DataFiles.Ultima5Tiles;
-                            m_ImageFiles = DataFiles.Ultima5Tiles;
-                            break;
-                        case 5: // .4 Masked Images
-                            m_DataFiles = DataFiles.Ultima5Masked;
-                            m_ImageFiles = DataFiles.Ultima5Masked;
-                            break;
-                        case 6: // .4 Dungeon Images
-                            m_DataFiles = DataFiles.Ultima5DngImage;
-                            m_ImageFiles = DataFiles.Ultima5DngImage;
-                            break;
-                        case 7: // .4 Images
-                            m_DataFiles = DataFiles.Ultima5Images;
-                            m_ImageFiles = DataFiles.Ultima5Images;
+                            m_DataFiles = DataFiles.Ultima5Pict;
+                            m_ImageFiles = DataFiles.Ultima5PictImage;
                             break;
                         default: // .16 Tiles
                             m_DataFiles = DataFiles.Ultima5Tiles;
