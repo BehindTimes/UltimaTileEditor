@@ -53,7 +53,8 @@ namespace UltimaTileEditor
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
-                                    LoadImage320x200(lzw_out, b);
+                                    pngHelper helper = new pngHelper();
+                                    helper.LoadImage320x200(lzw_out, b, 0);
                                     b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                                     Console.WriteLine("Image Created");
                                 }
@@ -72,7 +73,8 @@ namespace UltimaTileEditor
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
-                                    LoadImage320x200(rle_out, b);
+                                    pngHelper helper = new pngHelper();
+                                    helper.LoadImage320x200(rle_out, b, 0);
                                     b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                                     Console.WriteLine("Image Created");
                                 }
@@ -262,6 +264,7 @@ namespace UltimaTileEditor
             file_bytes = null;
             try
             {
+                pngHelper helper = new pngHelper();
                 byte[] destination = new byte[200 * 160];
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != 200 && image.Width != 320)
@@ -269,34 +272,13 @@ namespace UltimaTileEditor
                     Console.WriteLine("Image must be 320x200 pixels!");
                     return;
                 }
-                WriteLzwImageU4(destination, image, 320, 200);
+                helper.CreateImage(destination, image, 320, 200);
                 file_bytes = destination;
             }
             catch (IOException)
             {
                 Console.WriteLine("PNG file does not exist!");
                 return;
-            }
-        }
-
-        private void LoadImage320x200(byte[] file_bytes, Bitmap b)
-        {
-            pngHelper helper = new pngHelper();
-
-            for (int y_index = 0; y_index < 200; ++y_index)
-            {
-                for (int x_index = 0; x_index < 160; ++x_index)
-                {
-                    byte cur_byte = file_bytes[y_index * 160 + x_index];
-                    byte b1 = (byte)((cur_byte >> 4) & 0xF);
-                    byte b2 = (byte)(cur_byte & 0xF);
-
-                    Color pixColor1 = helper.GetColor(b1);
-                    Color pixColor2 = helper.GetColor(b2);
-
-                    b.SetPixel(x_index * 2, y_index, pixColor1);
-                    b.SetPixel(x_index * 2 + 1, y_index, pixColor2);
-                }
             }
         }
 
@@ -374,28 +356,6 @@ namespace UltimaTileEditor
                             file_bytes[cur_tile + ((pix_y_index * (4 * mult)) + (pix_x_index / 2))] = outbyte;
                         }
                     }
-                }
-            }
-        }
-
-        private void WriteLzwImageU4(byte[] file_bytes, Bitmap b, int width, int height)
-        {
-            pngHelper helper = new pngHelper();
-            int curByte = 0;
-
-            for (int y_index = 0; y_index < height; ++y_index)
-            {
-                for (int x_index = 0; x_index < width; x_index += 2)
-                {
-                    Color color1 = b.GetPixel(x_index, y_index);
-                    Color color2 = b.GetPixel(x_index + 1, y_index);
-
-                    byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
-                    byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
-
-                    byte outbyte = (byte)(b1 + b2);
-                    file_bytes[curByte] = outbyte;
-                    curByte++;
                 }
             }
         }

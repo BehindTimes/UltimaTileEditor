@@ -35,5 +35,7 @@ namespace UltimaTileEditor
         public static readonly List<string> Ultima1CGAFiles = ["CGAMOND", "CGATILES", "CGATOWN"];
 
         public static readonly List<string> Ultima1T1KFiles = ["T1KMOND", "T1KTILES", "T1KTOWN"];
+
+        public static readonly List<string> Ultima1Image = ["CASTLE"];
     }
 }

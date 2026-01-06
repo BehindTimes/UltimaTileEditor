@@ -39,6 +39,8 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("EGA Tiles");
                     cbFileType.Items.Add("CGA Tiles");
                     cbFileType.Items.Add("T1K Tiles");
+                    cbFileType.Items.Add(".16 Image");
+                    cbFileType.Items.Add(".4 Image");
                     cbFileType.SelectedIndex = 0;
                     break;
                 case UltimaGame.Ultima2:
@@ -226,6 +228,14 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima1T1KFiles;
                             m_ImageFiles = DataFiles.Ultima1T1KFiles;
                             break;
+                        case 3:
+                            m_DataFiles = DataFiles.Ultima1Image;
+                            m_ImageFiles = DataFiles.Ultima1Image;
+                            break;
+                        case 4:
+                            m_DataFiles = DataFiles.Ultima1Image;
+                            m_ImageFiles = DataFiles.Ultima1Image;
+                            break;
                         default: // EGA Tiles
                             m_DataFiles = DataFiles.Ultima1EGAFiles;
                             m_ImageFiles = DataFiles.Ultima1EGAFiles;
@@ -320,7 +330,18 @@ namespace UltimaTileEditor
                 switch (m_curGame)
                 {
                     case UltimaGame.Ultima1:
-                        strExt = ".BIN";
+                        if (cbFileType.SelectedIndex == 3)
+                        {
+                            strExt = ".16";
+                        }
+                        else if (cbFileType.SelectedIndex == 4)
+                        {
+                            strExt = ".16";
+                        }
+                        else
+                        {
+                            strExt = ".BIN";
+                        }
                         break;
                     case UltimaGame.Ultima2:
                         strExt = ".EXE";

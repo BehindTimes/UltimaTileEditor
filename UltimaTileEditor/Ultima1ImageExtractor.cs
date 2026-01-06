@@ -41,6 +41,24 @@ namespace UltimaTileEditor
                             MakePngU1(file_bytes, fullPath, 17, 3, false);
                         }
                     }
+                    else if (image.EndsWith("CASTLE.16"))
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            if (file_bytes.Length == 32000)
+                            {
+                                using (Bitmap b = new Bitmap(320, 200))
+                                {
+                                    pngHelper helper = new pngHelper();
+                                    helper.LoadImage320x200(file_bytes, b, 1);
+                                    b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                                    Console.WriteLine("Image Created");
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -95,9 +113,67 @@ namespace UltimaTileEditor
                             }
                         }
                     }
+                    else if (image.EndsWith("CASTLE.png"))
+                    {
+                        byte[]? file_bytes;
+                        if (imageType == 3) // 16 color
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + "_test.16");
+                            MakeU1Image(out file_bytes, image);
+                            if(null != file_bytes)
+                            {
+                                WriteU1Image(file_bytes, fullPath);
+                            }
+                        }
+                        else if (imageType == 4) // 4 color
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + "_test.4");
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    else
+                    {
+                        
+                    }
                 }
             }
             MessageBox.Show("Files written!");
+        }
+
+        private void WriteU1Image(byte[] file_bytes, string strOut)
+        {
+            using (BinaryWriter binWriter = new BinaryWriter(File.Open(strOut, FileMode.Create)))
+            {
+                binWriter.Write(file_bytes);
+            }
+        }
+
+        private void MakeU1Image(out byte[]? file_bytes, string strPng)
+        {
+            file_bytes = null;
+            try
+            {
+                pngHelper helper = new pngHelper();
+                byte[] destination = new byte[200 * 160];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 200 && image.Width != 320)
+                {
+                    Console.WriteLine("Image must be 320x200 pixels!");
+                    return;
+                }
+                // Because of the custom palette which shares the same colors,
+                // a perfect replication of the original file cannot be accomplished
+                helper.CreateImageWithPalette(destination, image, 320, 200, 1);
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("PNG file does not exist!");
+                return;
+            }
         }
 
         public void LoadImageU1_8(byte[] file_bytes, Bitmap b, int width, int height)
