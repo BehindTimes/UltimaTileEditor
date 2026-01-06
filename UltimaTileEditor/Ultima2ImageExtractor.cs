@@ -6,14 +6,15 @@ namespace UltimaTileEditor
 {
     internal class Ultima2ImageExtractor
     {
-        public void ExtractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
             int dataStartOffset = 0x7c40;
             int tileSize = 66;
             int numTiles = 64;
 
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strDataDir, tempimage);
                 if (image.EndsWith("ULTIMAII.EXE"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
@@ -21,19 +22,20 @@ namespace UltimaTileEditor
                     Array.Copy(file_bytes, dataStartOffset, tile_data, 0, tileSize * numTiles);
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "ULTIMAII.png");
+                        string fullPath = Path.Combine(strImageDir, "ULTIMAII.png");
                         MakePngU2(tile_data, fullPath, numTiles, tileSize);
                     }
                 }
             }
         }
 
-        public void CompressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
             int dataStartOffset = 0x7c40;
 
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strImageDir, tempimage);
                 if (image.EndsWith("ULTIMAII.png"))
                 {
                     byte[]? file_bytes;
@@ -41,7 +43,7 @@ namespace UltimaTileEditor
 
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "ULTIMAII.EXE");
+                        string fullPath = Path.Combine(strDataDir, "ULTIMAII.EXE");
                         byte[] exe_bytes = File.ReadAllBytes(fullPath);
                         if(exe_bytes.Length > dataStartOffset + file_bytes.Length)
                         {

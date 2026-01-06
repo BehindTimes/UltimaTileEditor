@@ -6,83 +6,93 @@ namespace UltimaTileEditor
 {
     internal class Ultima1ImageExtractor
     {
-        public void ExtractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
-                if (image.EndsWith("TILES.BIN"))
+                string image = Path.Combine(strDataDir, tempimage);
+                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                if (value != null)
                 {
-                    byte[] file_bytes = File.ReadAllBytes(image);
-                    if (file_bytes != null)
+                    if (image.EndsWith("TILES.BIN"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "TILES.png");
-                        MakePngU1(file_bytes, fullPath, 13, 4, true);
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            MakePngU1(file_bytes, fullPath, 13, 4, true);
+                        }
                     }
-                }
-                else if (image.EndsWith("MOND.BIN"))
-                {
-                    byte[] file_bytes = File.ReadAllBytes(image);
-                    if (file_bytes != null)
+                    else if (image.EndsWith("MOND.BIN"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "MOND.png");
-                        MakePngU1(file_bytes, fullPath, 19, 1, true);
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            MakePngU1(file_bytes, fullPath, 19, 1, true);
+                        }
                     }
-                }
-                else if (image.EndsWith("TOWN.BIN"))
-                {
-                    byte[] file_bytes = File.ReadAllBytes(image);
-                    if (file_bytes != null)
+                    else if (image.EndsWith("TOWN.BIN"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "TOWN.png");
-                        MakePngU1(file_bytes, fullPath, 17, 3, false);
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            MakePngU1(file_bytes, fullPath, 17, 3, false);
+                        }
                     }
                 }
             }
         }
 
-        public void CompressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
-                if (image.EndsWith("TILES.png"))
+                string image = Path.Combine(strImageDir, tempimage);
+                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                if (value != null)
                 {
-                    byte[]? file_bytes;
-                    MakeU1(out file_bytes, image, 13, 4, true);
-
-                    if (file_bytes != null)
+                    if (image.EndsWith("TILES.png"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "EGATILES.BIN");
-                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        byte[]? file_bytes;
+                        MakeU1(out file_bytes, image, 13, 4, true);
+
+                        if (file_bytes != null)
                         {
-                            binWriter.Write(file_bytes);
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                            {
+                                binWriter.Write(file_bytes);
+                            }
                         }
                     }
-                }
-                else if (image.EndsWith("MOND.png"))
-                {
-                    byte[]? file_bytes;
-                    MakeU1(out file_bytes, image, 19, 1, true);
-
-                    if (file_bytes != null)
+                    else if (image.EndsWith("MOND.png"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "EGAMOND.BIN");
-                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        byte[]? file_bytes;
+                        MakeU1(out file_bytes, image, 19, 1, true);
+
+                        if (file_bytes != null)
                         {
-                            binWriter.Write(file_bytes);
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                            {
+                                binWriter.Write(file_bytes);
+                            }
                         }
                     }
-                }
-                else if (image.EndsWith("TOWN.png"))
-                {
-                    byte[]? file_bytes;
-                    MakeU1(out file_bytes, image, 17, 3, false);
-
-                    if (file_bytes != null)
+                    else if (image.EndsWith("TOWN.png"))
                     {
-                        string fullPath = Path.Combine(strOutDir, "EGATOWN.BIN");
-                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        byte[]? file_bytes;
+                        MakeU1(out file_bytes, image, 17, 3, false);
+
+                        if (file_bytes != null)
                         {
-                            binWriter.Write(file_bytes);
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                            {
+                                binWriter.Write(file_bytes);
+                            }
                         }
                     }
                 }

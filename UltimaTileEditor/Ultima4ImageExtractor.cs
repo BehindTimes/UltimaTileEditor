@@ -7,16 +7,17 @@ namespace UltimaTileEditor
 {
     internal class Ultima4ImageExtractor
     {
-        public void ExtractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strDataDir, tempimage);
                 if (image.EndsWith("SHAPES.EGA"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "SHAPES.png");
+                        string fullPath = Path.Combine(strImageDir, "SHAPES.png");
                         MakePngU4(file_bytes, fullPath, 2, 32768);
                     }
                 }
@@ -25,7 +26,7 @@ namespace UltimaTileEditor
                     byte[] file_bytes = File.ReadAllBytes(image);
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "CHARSET.png");
+                        string fullPath = Path.Combine(strImageDir, "CHARSET.png");
                         MakePngU4(file_bytes, fullPath, 1, 0x2000);
                     }
                 }
@@ -48,7 +49,7 @@ namespace UltimaTileEditor
                             lzw.ExtractU4(file_bytes, out lzw_out);
                             if (lzw_out != null && lzw_out.Length == 32000)
                             {
-                                string fullPath = Path.Combine(strOutDir, value + ".png");
+                                string fullPath = Path.Combine(strImageDir, value + ".png");
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
@@ -67,7 +68,7 @@ namespace UltimaTileEditor
 
                             if (rle_out != null && rle_out.Length == 32000)
                             {
-                                string fullPath = Path.Combine(strOutDir, value + ".png");
+                                string fullPath = Path.Combine(strImageDir, value + ".png");
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
@@ -86,10 +87,12 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strImageDir, tempimage);
+
                 if (image.EndsWith("SHAPES.png"))
                 {
                     byte[]? file_bytes;
@@ -97,7 +100,7 @@ namespace UltimaTileEditor
 
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "SHAPES.EGA");
+                        string fullPath = Path.Combine(strDataDir, "SHAPES.EGA");
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
@@ -111,7 +114,7 @@ namespace UltimaTileEditor
 
                     if (file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "CHARSET.EGA");
+                        string fullPath = Path.Combine(strDataDir, "CHARSET.EGA");
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
@@ -138,7 +141,7 @@ namespace UltimaTileEditor
                                 {
                                     LzwDecompressor lzw = new LzwDecompressor();
 
-                                    string fullPath = Path.Combine(strOutDir, value + "_test.EGA");
+                                    string fullPath = Path.Combine(strDataDir, value + ".EGA");
                                     lzw.CompressU4Lzw(file_bytes, fullPath);
                                 }
                             }
@@ -148,7 +151,7 @@ namespace UltimaTileEditor
                                 MakeU4Lzw(out file_bytes, image);
                                 if ((null != file_bytes))
                                 {
-                                    string fullPath = Path.Combine(strOutDir, value + "_test.EGA");
+                                    string fullPath = Path.Combine(strDataDir, value + ".EGA");
                                     writeRLEFile(file_bytes, fullPath);
                                 }
                             }

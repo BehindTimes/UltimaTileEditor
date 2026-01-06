@@ -48,11 +48,25 @@
             lbImages = new ListBox();
             btnExtract = new Button();
             btnCompress = new Button();
+            pnlGame = new Panel();
+            gbFileType = new GroupBox();
+            cbFileType = new ComboBox();
+            pnlLoc = new Panel();
+            splitContainer1 = new SplitContainer();
+            pnlControl = new Panel();
             gbGame.SuspendLayout();
             gbGameLocation.SuspendLayout();
             gbOutImages.SuspendLayout();
             gbFilesLocated.SuspendLayout();
             gbImages.SuspendLayout();
+            pnlGame.SuspendLayout();
+            gbFileType.SuspendLayout();
+            pnlLoc.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            pnlControl.SuspendLayout();
             SuspendLayout();
             // 
             // gbGame
@@ -62,10 +76,10 @@
             gbGame.Controls.Add(rbUltima4);
             gbGame.Controls.Add(rbUltima5);
             gbGame.Controls.Add(rbUltima1);
-            gbGame.Dock = DockStyle.Left;
+            gbGame.Dock = DockStyle.Top;
             gbGame.Location = new Point(0, 0);
             gbGame.Name = "gbGame";
-            gbGame.Size = new Size(105, 503);
+            gbGame.Size = new Size(128, 167);
             gbGame.TabIndex = 0;
             gbGame.TabStop = false;
             gbGame.Text = "Game";
@@ -133,16 +147,16 @@
             gbGameLocation.Controls.Add(lblGameData);
             gbGameLocation.Controls.Add(tbGameDataDir);
             gbGameLocation.Dock = DockStyle.Top;
-            gbGameLocation.Location = new Point(105, 0);
+            gbGameLocation.Location = new Point(0, 0);
             gbGameLocation.Name = "gbGameLocation";
-            gbGameLocation.Size = new Size(734, 64);
+            gbGameLocation.Size = new Size(572, 64);
             gbGameLocation.TabIndex = 1;
             gbGameLocation.TabStop = false;
             gbGameLocation.Text = "Game Files Location";
             // 
             // btnGameDataBrowse
             // 
-            btnGameDataBrowse.Location = new Point(646, 20);
+            btnGameDataBrowse.Location = new Point(488, 19);
             btnGameDataBrowse.Name = "btnGameDataBrowse";
             btnGameDataBrowse.Size = new Size(75, 23);
             btnGameDataBrowse.TabIndex = 2;
@@ -164,7 +178,7 @@
             tbGameDataDir.Location = new Point(131, 19);
             tbGameDataDir.Name = "tbGameDataDir";
             tbGameDataDir.ReadOnly = true;
-            tbGameDataDir.Size = new Size(506, 23);
+            tbGameDataDir.Size = new Size(351, 23);
             tbGameDataDir.TabIndex = 1;
             // 
             // gbOutImages
@@ -173,16 +187,16 @@
             gbOutImages.Controls.Add(tbImagesDir);
             gbOutImages.Controls.Add(lblImagesDirectory);
             gbOutImages.Dock = DockStyle.Top;
-            gbOutImages.Location = new Point(105, 64);
+            gbOutImages.Location = new Point(0, 64);
             gbOutImages.Name = "gbOutImages";
-            gbOutImages.Size = new Size(734, 62);
+            gbOutImages.Size = new Size(572, 59);
             gbOutImages.TabIndex = 2;
             gbOutImages.TabStop = false;
             gbOutImages.Text = "Image Files Location";
             // 
             // btnImageBrowse
             // 
-            btnImageBrowse.Location = new Point(646, 17);
+            btnImageBrowse.Location = new Point(488, 12);
             btnImageBrowse.Name = "btnImageBrowse";
             btnImageBrowse.Size = new Size(75, 23);
             btnImageBrowse.TabIndex = 3;
@@ -195,7 +209,7 @@
             tbImagesDir.Location = new Point(131, 17);
             tbImagesDir.Name = "tbImagesDir";
             tbImagesDir.ReadOnly = true;
-            tbImagesDir.Size = new Size(506, 23);
+            tbImagesDir.Size = new Size(351, 23);
             tbImagesDir.TabIndex = 3;
             // 
             // lblImagesDirectory
@@ -210,10 +224,10 @@
             // gbFilesLocated
             // 
             gbFilesLocated.Controls.Add(lbFiles);
-            gbFilesLocated.Dock = DockStyle.Left;
-            gbFilesLocated.Location = new Point(105, 126);
+            gbFilesLocated.Dock = DockStyle.Fill;
+            gbFilesLocated.Location = new Point(0, 0);
             gbFilesLocated.Name = "gbFilesLocated";
-            gbFilesLocated.Size = new Size(320, 377);
+            gbFilesLocated.Size = new Size(242, 288);
             gbFilesLocated.TabIndex = 3;
             gbFilesLocated.TabStop = false;
             gbFilesLocated.Text = "Files";
@@ -224,16 +238,16 @@
             lbFiles.FormattingEnabled = true;
             lbFiles.Location = new Point(3, 19);
             lbFiles.Name = "lbFiles";
-            lbFiles.Size = new Size(314, 355);
+            lbFiles.Size = new Size(236, 266);
             lbFiles.TabIndex = 0;
             // 
             // gbImages
             // 
             gbImages.Controls.Add(lbImages);
-            gbImages.Dock = DockStyle.Left;
-            gbImages.Location = new Point(425, 126);
+            gbImages.Dock = DockStyle.Fill;
+            gbImages.Location = new Point(0, 0);
             gbImages.Name = "gbImages";
-            gbImages.Size = new Size(320, 377);
+            gbImages.Size = new Size(236, 288);
             gbImages.TabIndex = 4;
             gbImages.TabStop = false;
             gbImages.Text = "Images";
@@ -244,14 +258,14 @@
             lbImages.FormattingEnabled = true;
             lbImages.Location = new Point(3, 19);
             lbImages.Name = "lbImages";
-            lbImages.Size = new Size(314, 355);
+            lbImages.Size = new Size(230, 266);
             lbImages.TabIndex = 0;
             // 
             // btnExtract
             // 
-            btnExtract.Location = new Point(751, 145);
+            btnExtract.Location = new Point(0, 19);
             btnExtract.Name = "btnExtract";
-            btnExtract.Size = new Size(75, 23);
+            btnExtract.Size = new Size(80, 23);
             btnExtract.TabIndex = 5;
             btnExtract.Text = "Extract";
             btnExtract.UseVisualStyleBackColor = true;
@@ -259,26 +273,92 @@
             // 
             // btnCompress
             // 
-            btnCompress.Location = new Point(751, 468);
+            btnCompress.Location = new Point(3, 253);
             btnCompress.Name = "btnCompress";
-            btnCompress.Size = new Size(75, 23);
+            btnCompress.Size = new Size(80, 23);
             btnCompress.TabIndex = 6;
             btnCompress.Text = "Compress";
             btnCompress.UseVisualStyleBackColor = true;
             btnCompress.Click += btnCompress_Click;
             // 
+            // pnlGame
+            // 
+            pnlGame.Controls.Add(gbFileType);
+            pnlGame.Controls.Add(gbGame);
+            pnlGame.Dock = DockStyle.Left;
+            pnlGame.Location = new Point(0, 0);
+            pnlGame.Name = "pnlGame";
+            pnlGame.Size = new Size(128, 411);
+            pnlGame.TabIndex = 1;
+            // 
+            // gbFileType
+            // 
+            gbFileType.Controls.Add(cbFileType);
+            gbFileType.Dock = DockStyle.Fill;
+            gbFileType.Location = new Point(0, 167);
+            gbFileType.Name = "gbFileType";
+            gbFileType.Size = new Size(128, 244);
+            gbFileType.TabIndex = 1;
+            gbFileType.TabStop = false;
+            gbFileType.Text = "File Type";
+            // 
+            // cbFileType
+            // 
+            cbFileType.Dock = DockStyle.Top;
+            cbFileType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbFileType.FormattingEnabled = true;
+            cbFileType.Location = new Point(3, 19);
+            cbFileType.Name = "cbFileType";
+            cbFileType.Size = new Size(122, 23);
+            cbFileType.TabIndex = 0;
+            cbFileType.SelectedIndexChanged += cbFileType_SelectedIndexChanged;
+            // 
+            // pnlLoc
+            // 
+            pnlLoc.Controls.Add(gbOutImages);
+            pnlLoc.Controls.Add(gbGameLocation);
+            pnlLoc.Dock = DockStyle.Top;
+            pnlLoc.Location = new Point(128, 0);
+            pnlLoc.Name = "pnlLoc";
+            pnlLoc.Size = new Size(572, 123);
+            pnlLoc.TabIndex = 7;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Location = new Point(128, 123);
+            splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(gbFilesLocated);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(gbImages);
+            splitContainer1.Size = new Size(482, 288);
+            splitContainer1.SplitterDistance = 242;
+            splitContainer1.TabIndex = 9;
+            // 
+            // pnlControl
+            // 
+            pnlControl.Controls.Add(btnExtract);
+            pnlControl.Controls.Add(btnCompress);
+            pnlControl.Dock = DockStyle.Right;
+            pnlControl.Location = new Point(610, 123);
+            pnlControl.Name = "pnlControl";
+            pnlControl.Size = new Size(90, 288);
+            pnlControl.TabIndex = 10;
+            // 
             // FormUltimaEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(839, 503);
-            Controls.Add(btnCompress);
-            Controls.Add(btnExtract);
-            Controls.Add(gbImages);
-            Controls.Add(gbFilesLocated);
-            Controls.Add(gbOutImages);
-            Controls.Add(gbGameLocation);
-            Controls.Add(gbGame);
+            ClientSize = new Size(700, 411);
+            Controls.Add(splitContainer1);
+            Controls.Add(pnlControl);
+            Controls.Add(pnlLoc);
+            Controls.Add(pnlGame);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             Name = "FormUltimaEditor";
@@ -292,6 +372,14 @@
             gbOutImages.PerformLayout();
             gbFilesLocated.ResumeLayout(false);
             gbImages.ResumeLayout(false);
+            pnlGame.ResumeLayout(false);
+            gbFileType.ResumeLayout(false);
+            pnlLoc.ResumeLayout(false);
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            pnlControl.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -317,5 +405,11 @@
         private ListBox lbImages;
         private Button btnExtract;
         private Button btnCompress;
+        private Panel pnlGame;
+        private Panel pnlLoc;
+        private SplitContainer splitContainer1;
+        private Panel pnlControl;
+        private GroupBox gbFileType;
+        private ComboBox cbFileType;
     }
 }

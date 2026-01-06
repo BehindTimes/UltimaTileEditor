@@ -6,26 +6,28 @@ namespace UltimaTileEditor
 {
     internal class Ultima3ImageExtractor
     {
-        public void extractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strDataDir, tempimage);
                 if (image.EndsWith("SHAPES.ULT"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
                     if (file_bytes != null && file_bytes.Length == 5120)
                     {
-                        string fullPath = Path.Combine(strOutDir, "SHAPES.png");
+                        string fullPath = Path.Combine(strImageDir, "SHAPES.png");
                         MakePngU3(file_bytes, fullPath);
                     }
                 }
             }
         }
 
-        public void compressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strImageDir, tempimage);
                 if (image.EndsWith("SHAPES.png"))
                 {
                     byte[]? file_bytes;
@@ -33,7 +35,7 @@ namespace UltimaTileEditor
 
                     if (file_bytes != null && file_bytes.Length == 5120)
                     {
-                        string fullPath = Path.Combine(strOutDir, "SHAPES.ULT");
+                        string fullPath = Path.Combine(strDataDir, "SHAPES.ULT");
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);

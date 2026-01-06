@@ -9,12 +9,13 @@ namespace UltimaTileEditor
 {
     internal class Ultima5ImageExtractor
     {
-        public void ExtractImages(string[] images, string strOutDir)
+        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
             LzwDecompressor lzw = new LzwDecompressor();
 
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strDataDir, tempimage);
                 if (image.EndsWith("TILES.16"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
@@ -22,7 +23,7 @@ namespace UltimaTileEditor
                     lzw.Extract(file_bytes, out lzw_out);
                     if (lzw_out != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "TILES.png");
+                        string fullPath = Path.Combine(strImageDir, "TILES.png");
                         MakePngU5(lzw_out, fullPath);
                     }
                 }
@@ -38,11 +39,11 @@ namespace UltimaTileEditor
                         {
                             if(value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
                             {
-                                CreateMaskImages(lzw_out, strOutDir, value);
+                                CreateMaskImages(lzw_out, strImageDir, value);
                             }
                             else
                             {
-                                CreateImages(lzw_out, strOutDir, value);
+                                CreateImages(lzw_out, strImageDir, value);
                             }                
                         }
                     }
@@ -73,12 +74,14 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strOutDir)
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType)
         {
             LzwDecompressor lzw = new LzwDecompressor();
 
-            foreach (string image in images)
+            foreach (string tempimage in images)
             {
+                string image = Path.Combine(strImageDir, tempimage);
+
                 if (image.EndsWith("TILES.png"))
                 {
                     byte[]? file_bytes;
@@ -86,7 +89,7 @@ namespace UltimaTileEditor
 
                     if(file_bytes != null)
                     {
-                        string fullPath = Path.Combine(strOutDir, "TILES.16");
+                        string fullPath = Path.Combine(strDataDir, "TILES.16");
                         lzw.Compress(file_bytes, fullPath);
                     }         
                 }
