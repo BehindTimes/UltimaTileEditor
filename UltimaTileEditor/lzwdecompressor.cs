@@ -508,7 +508,6 @@ namespace UltimaTileEditor
                 binWriter.Write(code_word_remainder);
             }
 
-            MessageBox.Show("File written!");
             return -1;
         }
 

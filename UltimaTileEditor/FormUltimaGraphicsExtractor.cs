@@ -170,6 +170,9 @@ namespace UltimaTileEditor
                     ChangeDataFiles();
                 }
             }
+            // Force the garbage collector to run.  Otherwise the program could crash if you try extracting
+            // and compressing the same images without closing the application
+            System.GC.Collect();
         }
 
         private void btnCompress_Click(object sender, EventArgs e)
@@ -217,6 +220,9 @@ namespace UltimaTileEditor
                     ChangeDataFiles();
                 }
             }
+            // Force the garbage collector to run.  Otherwise the program could crash if you try extracting
+            // and compressing the same images without closing the application
+            System.GC.Collect();
         }
 
         private void ChangeDataFiles()
@@ -371,7 +377,7 @@ namespace UltimaTileEditor
                             {
                                 string strFileName = System.IO.Path.GetFileName(strFile);
                                 lbFiles.Items.Add(strFileName);
-                            }  
+                            }
                         }
                     }
                 }

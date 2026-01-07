@@ -21,7 +21,7 @@ namespace UltimaTileEditor
             "STORY5_0", "STORY5_1",
             "STORY6_0", "STORY6_1", "STORY6_2", "STORY6_3", "STORY6_4", "STORY6_5", "STORY6_6", "STORY6_7",
             "TEXT_0", "TEXT_1", "TEXT_2", "TEXT_3", "TEXT_4", "TEXT_5",
-            "ULTIMA_0", "ULTIMA_`", "ULTIMA_2", "ULTIMA_3", "ULTIMA_4" ];
+            "ULTIMA_0", "ULTIMA_1", "ULTIMA_2", "ULTIMA_3", "ULTIMA_4" ];
 
         public static readonly List<string> Ultima5Tiles = [ "TILES" ];
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Formats.Tar;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
@@ -41,7 +42,7 @@ namespace UltimaTileEditor
                             {
                                 if (value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
                                 {
-                                    CreateMaskImages(lzw_out, strImageDir, value);
+                                    CreateMaskImages(lzw_out, strImageDir, value);  
                                 }
                                 else
                                 {
@@ -85,13 +86,15 @@ namespace UltimaTileEditor
         {
             LzwDecompressor lzw = new LzwDecompressor();
 
+            Dictionary<string, Dictionary<int, Bitmap>> image_data = new Dictionary<string, Dictionary<int, Bitmap>>();
+
             foreach (string tempimage in images)
             {
                 string image = Path.Combine(strImageDir, tempimage);
 
                 if(palette == 0) // EGA
                 {
-                    if (image.EndsWith("TILES.png"))
+                    if (tempimage.EndsWith("TILES.png"))
                     {
                         byte[]? file_bytes;
                         MakeLZWU5(out file_bytes, image);
@@ -100,6 +103,73 @@ namespace UltimaTileEditor
                         {
                             string fullPath = Path.Combine(strDataDir, "TILES.16");
                             lzw.Compress(file_bytes, fullPath);
+                            MessageBox.Show("File written!");
+                        }
+                    }
+                    else
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+
+                        if (value != null)
+                        {
+                            string strName;
+                            int picNum = 0;
+                            string[] nameParams = value.Split('_');
+                            if (nameParams.Length == 2)
+                            {
+                                strName = nameParams[0];
+                                if (int.TryParse(nameParams[1], out picNum))
+                                {
+                                    if (DataFiles.Ultima5Pict.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Masked.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Dng.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -108,6 +178,454 @@ namespace UltimaTileEditor
 
                 }
             }
+
+            // Now that the files are loaded, combine them
+            if (palette == 0) // EGA
+            {
+                switch(imageType)
+                {
+                    case 1: // Masked Images
+                        foreach(string key in image_data.Keys)
+                        {
+                            if(ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes = null;
+                                BuildMaskImage16(out file_bytes, key, image_data[key], image_data[key].Count);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        MessageBox.Show("File written!");
+                        break;
+                    case 2: // Dungeon Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage16(out file_bytes, key, image_data[key], 28, true);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        MessageBox.Show("File written!");
+                        break;
+                    case 3: // Regular Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage16(out file_bytes, key, image_data[key], image_data[key].Count, true);
+
+                                if(file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        MessageBox.Show("File written!");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void BuildMaskImage16(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys)
+        {
+            file_bytes = null;
+            List<byte> outImage = new List<byte>();
+            byte num1 = (byte)((numKeys >> 8) & 0xFF);
+            byte num2 = (byte)(numKeys & 0xFF);
+            outImage.Add(num2);
+            outImage.Add(num1);
+            int curPos = 2 + numKeys * 4;
+            for (int index = 0; index < numKeys; index++)
+            {
+                byte b3 = (byte)((curPos >> 8) & 0xFF);
+                byte b4 = (byte)((curPos >> 0) & 0xFF);
+                outImage.Add(b4);
+                outImage.Add(b3);
+
+                if (value.ContainsKey(index))
+                {
+                    int bufWidth = value[index].Width;
+                    int tempBuf = 8 - (bufWidth % 8);
+                    tempBuf %= 8;
+
+                    bufWidth += tempBuf;
+                    curPos += ((bufWidth / 2) * value[index].Height);
+                    curPos += 4; // Remember to include width & height
+                    byte b1 = (byte)((curPos >> 8) & 0xFF);
+                    byte b2 = (byte)((curPos >> 0) & 0xFF);
+                    outImage.Add(b2);
+                    outImage.Add(b1);
+                    curPos += ((bufWidth / 8) * value[index].Height);
+                    curPos += 4; // Remember to include width & height
+                }
+                else
+                {
+                    return; // Shouldn't happen, so error
+                }
+            }
+            for (int index = 0; index < numKeys; index++)
+            {
+                int bufWidth = value[index].Width;
+                int tempBuf = 8 - (bufWidth % 8);
+                tempBuf %= 8;
+
+                // Write the width & height for the image
+                byte b3 = (byte)((value[index].Width >> 8) & 0xFF);
+                byte b4 = (byte)((value[index].Width >> 0) & 0xFF);
+                outImage.Add(b4);
+                outImage.Add(b3);
+                b3 = (byte)((value[index].Height >> 8) & 0xFF);
+                b4 = (byte)((value[index].Height >> 0) & 0xFF);
+                outImage.Add(b4);
+                outImage.Add(b3);
+                byte[] imageBuf;
+                byte[] maskBuf;
+                GenerateImageMaskBytes(out imageBuf, out maskBuf, value[index], bufWidth / 2);
+                outImage.AddRange(imageBuf);
+                // Write the width & height for the image mask
+                b3 = (byte)((value[index].Width >> 8) & 0xFF);
+                b4 = (byte)((value[index].Width >> 0) & 0xFF);
+                outImage.Add(b4);
+                outImage.Add(b3);
+                b3 = (byte)((value[index].Height >> 8) & 0xFF);
+                b4 = (byte)((value[index].Height >> 0) & 0xFF);
+                outImage.Add(b4);
+                outImage.Add(b3);
+                outImage.AddRange(maskBuf);
+            }
+
+            file_bytes = outImage.ToArray();
+        }
+
+        private void BuildImage16(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys, bool excludeDungeonKeys)
+        {
+            file_bytes = null;
+            List<byte> outImage = new List<byte>();
+            byte num1 = (byte)((numKeys >> 8) & 0xFF);
+            byte num2 = (byte)(numKeys & 0xFF);
+            outImage.Add(num2);
+            outImage.Add(num1);
+            int curPos = 2 + numKeys * 4;
+            for(int index = 0; index < numKeys; index++)
+            {
+                byte b1 = (byte)((curPos >> 24) & 0xFF);
+                byte b2 = (byte)((curPos >> 16) & 0xFF);
+                byte b3 = (byte)((curPos >> 8) & 0xFF);
+                byte b4 = (byte)((curPos >> 0) & 0xFF);
+                if (excludeDungeonKeys && (index == 8 || index == 24))
+                {
+                    outImage.Add(0);
+                    outImage.Add(0);
+                    outImage.Add(0);
+                    outImage.Add(0);
+                }
+                else
+                {
+                    outImage.Add(b4);
+                    outImage.Add(b3);
+                    outImage.Add(b2);
+                    outImage.Add(b1);
+                } 
+
+                if (value.ContainsKey(index))
+                {
+                    int bufWidth = value[index].Width;
+                    int tempBuf = 8 - (bufWidth % 8);
+                    tempBuf %= 8;
+
+                    bufWidth += tempBuf;
+                    curPos += ((bufWidth / 2) * value[index].Height);
+                    curPos += 4; // Remember to include width & height
+                }
+            }
+            for (int index = 0; index < numKeys; index++)
+            {
+                if (value.ContainsKey(index))
+                {
+                    int bufWidth = value[index].Width;
+                    int tempBuf = 8 - (bufWidth % 8);
+                    tempBuf %= 8;
+
+                    bufWidth += tempBuf;
+                    curPos += ((bufWidth / 2) * value[index].Height);
+                    curPos += 4; // Remember to include width & height
+
+                    byte b3 = (byte)((value[index].Width >> 8) & 0xFF);
+                    byte b4 = (byte)((value[index].Width >> 0) & 0xFF);
+                    outImage.Add(b4);
+                    outImage.Add(b3);
+                    b3 = (byte)((value[index].Height >> 8) & 0xFF);
+                    b4 = (byte)((value[index].Height >> 0) & 0xFF);
+                    outImage.Add(b4);
+                    outImage.Add(b3);
+                    byte[] imageBuf;
+
+                    GenerateImageBytes(out imageBuf, value[index], bufWidth / 2);
+                    outImage.AddRange(imageBuf);
+                }
+            }
+            file_bytes = outImage.ToArray();
+        }
+
+        private void GenerateImageMaskBytes(out byte[] file_bytes, out byte[] mask_bytes, Bitmap b, int bufWidth)
+        {
+            pngHelper helper = new pngHelper();
+
+            file_bytes = new byte[bufWidth * b.Height];
+            mask_bytes = new byte[bufWidth / 4 * b.Height];
+            int temp_index = 0;
+
+            for (int indexY = 0; indexY < b.Height; indexY++)
+            {
+                temp_index = (indexY * bufWidth) / 4;
+
+                for (int indexX = 0; indexX < b.Width; indexX += 2)
+                {
+                    int offsetByte = indexX / 8;
+
+                    Color color1 = b.GetPixel(indexX, indexY);
+                    byte b1 = (byte)((helper.GetByteIgnoreAlpha(color1) << 4) & 0xF0);
+                    byte b2 = 0;
+                    if (color1.A < 128)
+                    {
+                        int offsetval = (1 << (7 - ((indexX % 8) % 8)));
+                        mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                    }
+
+                    if (indexX + 1 < b.Width)
+                    {
+                        Color color2 = b.GetPixel(indexX + 1, indexY);
+                        b2 = (byte)(helper.GetByteIgnoreAlpha(color2) & 0x0F);
+                        if (color2.A < 128)
+                        {
+                            int offsetval = (1 << (7 - (((indexX + 1) % 8) % 8)));
+                            mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                        }
+                    }
+                    byte outbyte = (byte)(b1 + b2);
+                    file_bytes[indexY * bufWidth + (indexX / 2)] = outbyte;
+                }
+            }
+        }
+
+        private void GenerateImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth)
+        {
+            pngHelper helper = new pngHelper();
+
+            file_bytes = new byte[bufWidth * b.Height];
+            for (int indexY = 0; indexY < b.Height; indexY++)
+            {
+                for (int indexX = 0; indexX < b.Width; indexX += 2)
+                {
+                    Color color1 = b.GetPixel(indexX, indexY);
+                    byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
+                    byte b2 = 0;
+
+                    if(indexX + 1 < b.Width)
+                    {
+                        Color color2 = b.GetPixel(indexX + 1, indexY);
+                        b2 = (byte)(helper.GetByte(color2) & 0x0F);
+                    }
+                    byte outbyte = (byte)(b1 + b2);
+                    file_bytes[indexY * bufWidth + (indexX / 2)] = outbyte;
+                }
+            }
+        }
+
+        private bool Checkkeys(Dictionary<int, Bitmap> value, int numKeys, bool excludeDungeonKeys)
+        {
+            bool valid = true;
+            for (int index = 0; index < numKeys; index++)
+            {
+                if (!value.ContainsKey(index))
+                {
+                    if (excludeDungeonKeys)
+                    {
+                        if (index == 8 || index == 24)
+                        {
+                            continue;
+                        }
+                    }
+                    valid = false;
+                    break;
+                }
+            }
+            return valid;
+        }
+
+        private bool ValidateImageArray(string key, Dictionary<int, Bitmap> value)
+        {
+            switch(key)
+            {
+                case "CREATE":
+                    if(value.Count == 11)
+                    {
+                        return Checkkeys(value, 11, false);
+                    }
+                    break;
+                case "END1":
+                    if (value.Count == 3)
+                    {
+                        return Checkkeys(value, 3, false);
+                    }
+                    break;
+                case "END2":
+                    if (value.Count == 3)
+                    {
+                        return Checkkeys(value, 3, false);
+                    }
+                    break;
+                case "ENDSC":
+                    if (value.Count == 1)
+                    {
+                        return Checkkeys(value, 1, false);
+                    }
+                    break;
+                case "STARTSC":
+                    if (value.Count == 3)
+                    {
+                        return Checkkeys(value, 3, false);
+                    }
+                    break;
+                case "STORY1":
+                    if (value.Count == 3)
+                    {
+                        return Checkkeys(value, 3, false);
+                    }
+                    break;
+                case "STORY2":
+                    if (value.Count == 4)
+                    {
+                        return Checkkeys(value, 4, false);
+                    }
+                    break;
+                case "STORY3":
+                    if (value.Count == 2)
+                    {
+                        return Checkkeys(value, 2, false);
+                    }
+                    break;
+                case "STORY4":
+                    if (value.Count == 2)
+                    {
+                        return Checkkeys(value, 2, false);
+                    }
+                    break;
+                case "STORY5":
+                    if (value.Count == 2)
+                    {
+                        return Checkkeys(value, 2, false);
+                    }
+                    break;
+                case "STORY6":
+                    if (value.Count == 8)
+                    {
+                        return Checkkeys(value, 8, false);
+                    }
+                    break;
+                case "TEXT":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "ULTIMA":
+                    if (value.Count == 5)
+                    {
+                        return Checkkeys(value, 5, false);
+                    }
+                    break;
+                case "DNG1":
+                    if (value.Count == 26)
+                    {
+                        return Checkkeys(value, 28, true);
+                    }
+                    break;
+                case "DNG2":
+                    if (value.Count == 26)
+                    {
+                        return Checkkeys(value, 28, true);
+                    }
+                    break;
+                case "DNG3":
+                    if (value.Count == 26)
+                    {
+                        return Checkkeys(value, 28, true);
+                    }
+                    break;
+                case "ITEMS":
+                    if (value.Count == 20)
+                    {
+                        return Checkkeys(value, 20, false);
+                    }
+                    break;
+                case "MON0":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON1":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON2":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON3":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON4":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON5":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON6":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                case "MON7":
+                    if (value.Count == 6)
+                    {
+                        return Checkkeys(value, 6, false);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return false;
         }
 
         public void LoadImageU5(byte[] file_bytes, Bitmap b)
