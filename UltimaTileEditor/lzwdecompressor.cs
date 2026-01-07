@@ -398,7 +398,6 @@ namespace UltimaTileEditor
                 binWriter.Write(file_bytes.Length);
 
                 Build_dictionary(file_bytes, 0, binWriter);
-
             }
 
             return true;

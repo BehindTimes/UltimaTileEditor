@@ -71,6 +71,8 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("Masked Images");
                     cbFileType.Items.Add("Dungeon Images");
                     cbFileType.Items.Add("Images");
+                    cbFileType.Items.Add("CH Files");
+                    cbFileType.Items.Add("HCS Files");
                     cbPalette.Items.Add("EGA");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
@@ -304,6 +306,14 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima5Pict;
                             m_ImageFiles = DataFiles.Ultima5PictImage;
                             break;
+                        case 4: // .CH Files
+                            m_DataFiles = DataFiles.Ultima5CharFiles;
+                            m_ImageFiles = DataFiles.Ultima5CharFiles;
+                            break;
+                        case 5: // .HCS Files
+                            m_DataFiles = DataFiles.Ultima5CharFiles;
+                            m_ImageFiles = DataFiles.Ultima5CharFiles;
+                            break;
                         default: // .16 Tiles
                             m_DataFiles = DataFiles.Ultima5Tiles;
                             m_ImageFiles = DataFiles.Ultima5Tiles;
@@ -357,7 +367,18 @@ namespace UltimaTileEditor
                         }
                         else
                         {
-                            strExt = ".16";
+                            if(cbFileType.SelectedIndex == 4)
+                            {
+                                strExt = ".CH";
+                            }
+                            else if (cbFileType.SelectedIndex == 5)
+                            {
+                                strExt = ".HCS";
+                            }
+                            else
+                            {
+                                strExt = ".16";
+                            } 
                         }
                         break;
                     default:

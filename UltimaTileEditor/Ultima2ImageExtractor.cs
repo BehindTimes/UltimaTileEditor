@@ -18,6 +18,11 @@ namespace UltimaTileEditor
                 if (image.EndsWith("ULTIMAII.EXE"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
+                    // Sanity check to make sure it's not a modified Ultima 2
+                    if(file_bytes.Length != 37344)
+                    {
+                        return;
+                    }
                     byte[] tile_data = new byte[tileSize * numTiles];
                     Array.Copy(file_bytes, dataStartOffset, tile_data, 0, tileSize * numTiles);
                     if (file_bytes != null)
@@ -45,7 +50,12 @@ namespace UltimaTileEditor
                     {
                         string fullPath = Path.Combine(strDataDir, "ULTIMAII.EXE");
                         byte[] exe_bytes = File.ReadAllBytes(fullPath);
-                        if(exe_bytes.Length > dataStartOffset + file_bytes.Length)
+                        // Sanity check to make sure it's not a modified Ultima 2
+                        if (exe_bytes.Length != 37344)
+                        {
+                            return;
+                        }
+                        if (exe_bytes.Length > dataStartOffset + file_bytes.Length)
                         {
                             Array.Copy(file_bytes, 0, exe_bytes, dataStartOffset, file_bytes.Length);
                         }

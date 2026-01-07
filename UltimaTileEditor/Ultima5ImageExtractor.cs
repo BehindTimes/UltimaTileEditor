@@ -28,6 +28,32 @@ namespace UltimaTileEditor
                         MakePngU5(lzw_out, fullPath);
                     }
                 }
+                else if (image.EndsWith("IBM.CH") || image.EndsWith("RUNES.CH"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes.Length == 1024)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if(value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            CreateSimpleBitmap(file_bytes, 8, 8, 16, 8, fullPath);
+                        }
+                    }
+                }
+                else if (image.EndsWith("IBM.HCS") || image.EndsWith("RUNES.HCS"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes.Length == 3072)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            CreateSimpleBitmap(file_bytes, 16, 12, 16, 8, fullPath);
+                        }
+                    }
+                }
                 else
                 {
                     if(palette == 0) // EGA
@@ -59,6 +85,46 @@ namespace UltimaTileEditor
             }
         }
 
+        public void CreateSimpleBitmap(byte[] file_data, int tile_width, int tile_height, int numX, int numY, string strBitmap)
+        {
+            using (Bitmap b = new Bitmap(numX * tile_width, numY * tile_height))
+            {
+                int curTile = 0;
+                int tempWidth = 0;
+                int tempHeight = 0;
+                for (int index = 0; index < file_data.Length; index++)
+                {
+                    byte curData = file_data[index];
+                    for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                    {
+                        int curX = (curTile % numX) * tile_width + tempIndexX + tempWidth;
+                        int curY = (curTile / numX) * tile_height + tempHeight;
+                        int curVal = (curData >> (7 - tempIndexX)) & 0x1;
+                        if (curVal == 0)
+                        {
+                            b.SetPixel(curX, curY, Color.Black);
+                        }
+                        else
+                        {
+                            b.SetPixel(curX, curY, Color.White);
+                        }
+                    }
+                    tempWidth += 8;
+                    if(tempWidth >= tile_width)
+                    {
+                        tempWidth = 0;
+                        tempHeight++;
+                    }
+                    if(tempHeight >= tile_height)
+                    {
+                        tempHeight = 0;
+                        curTile++;
+                    }
+                }
+                b.Save(strBitmap, System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
+
         public void MakePngU5(byte[] lzw, string strPng)
         {
             try
@@ -79,6 +145,43 @@ namespace UltimaTileEditor
             {
                 Console.WriteLine("LZW file does not exist!");
                 return;
+            }
+        }
+
+        public void ReadSimpleBitmap(Bitmap b, int tile_width, int tile_height, int numX, int numY, string strOutFile)
+        {
+            byte[] file_data = new byte[(tile_width / 8) * tile_height * numY * numX];
+            int curPos = 0;
+            for (int indexY = 0; indexY < numY; indexY++)
+            {
+                for (int indexX = 0; indexX < numX; indexX++)
+                {
+                    for(int indexHeight = 0; indexHeight < tile_height; indexHeight++)
+                    {
+                        for (int indexWidth = 0; indexWidth < tile_width / 8; indexWidth++)
+                        {
+                            byte curByte = 0;
+                            for(int x = 0; x < 8; x++)
+                            {
+                                int curX = (indexX * tile_width) + (indexWidth * 8) + x;
+                                int curY = (indexY * tile_height) + indexHeight;
+                                Color tempColor = b.GetPixel(curX, curY);
+                                if(tempColor.R == 255 && tempColor.G == 255 && tempColor.B == 255)
+                                {
+                                    curByte |= (byte)(1 << (7 - x));
+                                }
+                            }
+                            file_data[curPos] = curByte;
+                            curPos++;
+                        }
+                    }
+                }
+            }
+
+            using (BinaryWriter binWriter =
+                    new BinaryWriter(File.Open(strOutFile, FileMode.Create)))
+            {
+                binWriter.Write(file_data);
             }
         }
 
@@ -104,6 +207,48 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strDataDir, "TILES.16");
                             lzw.Compress(file_bytes, fullPath);
                             MessageBox.Show("File written!");
+                        }
+                    }
+                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 4)
+                    {
+                        try
+                        {
+                            Bitmap b = (Bitmap)Image.FromFile(image);
+                            if (b.Width == 128 && b.Height == 64)
+                            {
+                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                                if(value != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, value + ".CH");
+                                    ReadSimpleBitmap(b, 8, 8, 16, 8, fullPath);
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                            return;
+                        }
+                    }
+                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 5)
+                    {
+                        try
+                        {
+                            Bitmap b = (Bitmap)Image.FromFile(image);
+                            if(b.Width == 256 && b.Height == 96)
+                            {
+                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                                if (value != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, value + ".HCS");
+                                    ReadSimpleBitmap(b, 16, 12, 16, 8, fullPath);
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                            return;
                         }
                     }
                     else
@@ -233,6 +378,12 @@ namespace UltimaTileEditor
                                 }
                             }
                         }
+                        MessageBox.Show("File written!");
+                        break;
+                    case 4: // CH files
+                        MessageBox.Show("File written!");
+                        break;
+                    case 5: // HCS files
                         MessageBox.Show("File written!");
                         break;
                     default:
