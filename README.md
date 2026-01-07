@@ -46,9 +46,12 @@ Notes:
 
 Ultima 1:
 * EGA Title Screen has a weird palette.  It does not support Cyan, Magenta, Red, nor Yellow.
+
 Ultima 2
 * The tiles are stored in the executable.  Whereas with upgrades to the other games, this tool could potentially still work, as the files are separate, this will not be true with Ultima 2.
+
 Ultima 5
 * The character sets are monochrome. Only white and black are supported colors with those.
+
 Ultima 4: Threat of the Trinity
 * Being a fan game, there are new files here.  Select Ultima 4 from the program, but you might need to rename files (case-sensitive) to access the appropriate extractor/compressor (RLE, LZW, etc.).
