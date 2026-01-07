@@ -53,6 +53,7 @@ namespace UltimaTileEditor
                     break;
                 case UltimaGame.Ultima3:
                     cbFileType.Items.Add("Tiles");
+                    cbFileType.Items.Add("Character Set");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
@@ -263,8 +264,17 @@ namespace UltimaTileEditor
                     m_ImageFiles = DataFiles.Ultima2Files;
                     break;
                 case UltimaGame.Ultima3:
-                    m_DataFiles = DataFiles.Ultima3Files;
-                    m_ImageFiles = DataFiles.Ultima3Files;
+                    switch (cbFileType.SelectedIndex)
+                    {
+                        case 1: // Character Set
+                            m_DataFiles = DataFiles.Ultima3Charset;
+                            m_ImageFiles = DataFiles.Ultima3Charset;
+                            break;
+                        default:
+                            m_DataFiles = DataFiles.Ultima3Files;
+                            m_ImageFiles = DataFiles.Ultima3Files;
+                            break;
+                    }
                     break;
                 case UltimaGame.Ultima4:
                     switch (cbFileType.SelectedIndex)

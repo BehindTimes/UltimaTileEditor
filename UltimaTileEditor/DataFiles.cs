@@ -64,6 +64,8 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima3Files = ["SHAPES"];
 
+        public static readonly List<string> Ultima3Charset = ["CHARSET"];
+
         public static readonly List<string> Ultima2Files = ["ULTIMAII"];
 
         public static readonly List<string> Ultima1EGAFiles = ["EGAMOND", "EGATILES", "EGATOWN"];

@@ -85,7 +85,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CreateSimpleBitmap(byte[] file_data, int tile_width, int tile_height, int numX, int numY, string strBitmap)
+        private void CreateSimpleBitmap(byte[] file_data, int tile_width, int tile_height, int numX, int numY, string strBitmap)
         {
             using (Bitmap b = new Bitmap(numX * tile_width, numY * tile_height))
             {
