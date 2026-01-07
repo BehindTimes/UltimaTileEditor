@@ -54,4 +54,4 @@ Ultima 5
 * The character sets are monochrome. Only white and black are supported colors with those.
 
 Ultima 4: Threat of the Trinity
-* Being a fan game, there are new files here.  Select Ultima 4 from the program, but you might need to rename files (case-sensitive) to access the appropriate extractor/compressor (RLE, LZW, etc.).
+* Being a fan game, there are new files here.  Select Ultima 4 from the program, but you might need to rename files (case-sensitive) to valid Ultima 4 files to access the appropriate extractor/compressor (RLE, LZW, etc.).  And after the appropriate extraction and insertion, you can just rename them back to the original name.
