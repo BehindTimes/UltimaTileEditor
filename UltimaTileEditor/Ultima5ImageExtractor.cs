@@ -5,6 +5,7 @@ using System.Formats.Tar;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace UltimaTileEditor
 {
@@ -34,7 +35,7 @@ namespace UltimaTileEditor
                     if (file_bytes.Length == 1024)
                     {
                         string? value = System.IO.Path.GetFileNameWithoutExtension(image);
-                        if(value != null)
+                        if (value != null)
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             CreateSimpleBitmap(file_bytes, 8, 8, 16, 8, fullPath);
@@ -54,9 +55,32 @@ namespace UltimaTileEditor
                         }
                     }
                 }
+                else if (image.EndsWith("BRITISH.BIT") || image.EndsWith("TITLE.BIT"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    byte[]? lzw_out;
+                    lzw.Extract(file_bytes, out lzw_out);
+                    if (lzw_out != null)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            CreateBitImages(lzw_out, value, strImageDir);
+                        }
+                    }
+                }
+                else if (image.EndsWith("WD.BIT")) // This file is not compressed
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        CreateBitImages(file_bytes, value, strImageDir);
+                    }
+                }
                 else
                 {
-                    if(palette == 0) // EGA
+                    if (palette == 0) // EGA
                     {
                         byte[] file_bytes = File.ReadAllBytes(image);
                         byte[]? lzw_out;
@@ -68,7 +92,7 @@ namespace UltimaTileEditor
                             {
                                 if (value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
                                 {
-                                    CreateMaskImages(lzw_out, strImageDir, value);  
+                                    CreateMaskImages(lzw_out, strImageDir, value);
                                 }
                                 else
                                 {
@@ -82,6 +106,317 @@ namespace UltimaTileEditor
 
                     }
                 }
+            }
+        }
+
+        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+            LzwDecompressor lzw = new LzwDecompressor();
+
+            Dictionary<string, Dictionary<int, Bitmap>> image_data = new Dictionary<string, Dictionary<int, Bitmap>>();
+            bool written = false;
+
+            foreach (string tempimage in images)
+            {
+                string image = Path.Combine(strImageDir, tempimage);
+
+                if (palette == 0) // EGA
+                {
+                    if (tempimage.EndsWith("TILES.png"))
+                    {
+                        byte[]? file_bytes;
+                        MakeLZWU5(out file_bytes, image);
+
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strDataDir, "TILES.16");
+                            lzw.Compress(file_bytes, fullPath);
+                            written = true;
+                        }
+                    }
+                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 4)
+                    {
+                        try
+                        {
+                            Bitmap b = (Bitmap)System.Drawing.Image.FromFile(image);
+                            if (b.Width == 128 && b.Height == 64)
+                            {
+                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                                if (value != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, value + ".CH");
+                                    ReadSimpleBitmap(b, 8, 8, 16, 8, fullPath);
+                                    written = true;
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                            return;
+                        }
+                    }
+                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 5)
+                    {
+                        try
+                        {
+                            Bitmap b = (Bitmap)System.Drawing.Image.FromFile(image);
+                            if (b.Width == 256 && b.Height == 96)
+                            {
+                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                                if (value != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, value + ".HCS");
+                                    ReadSimpleBitmap(b, 16, 12, 16, 8, fullPath);
+                                    written = true;
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+
+                        if (value != null)
+                        {
+                            string strName;
+                            int picNum = 0;
+                            string[] nameParams = value.Split('_');
+                            if (nameParams.Length == 2)
+                            {
+                                strName = nameParams[0];
+                                if (int.TryParse(nameParams[1], out picNum))
+                                {
+                                    if (DataFiles.Ultima5Pict.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Masked.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Dng.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5BitFiles.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else // CGA - Not supported
+                {
+
+                }
+            }
+
+            // Now that the files are loaded, combine them
+            if (palette == 0) // EGA
+            {
+                switch (imageType)
+                {
+                    case 1: // Masked Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes = null;
+                                BuildMaskImage16(out file_bytes, key, image_data[key], image_data[key].Count);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        written = true;
+                        break;
+                    case 2: // Dungeon Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage16(out file_bytes, key, image_data[key], 28, true);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        written = true;
+                        break;
+                    case 3: // Regular Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage16(out file_bytes, key, image_data[key], image_data[key].Count, true);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".16");
+                                    lzw.Compress(file_bytes, fullPath);
+                                    written = true;
+                                }
+                            }
+                        }
+                        break;
+                    case 4: // CH files
+                        break;
+                    case 5: // HCS files
+                        break;
+                    case 6: // BIT files
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImageSimple(out file_bytes, key, image_data[key], image_data[key].Count);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".BIT");
+                                    if (key.EndsWith("BRITISH") || key.EndsWith("TITLE"))
+                                    {
+                                        lzw.Compress(file_bytes, fullPath);
+                                        written = true;
+                                    }
+                                    else
+                                    {
+                                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                                        {
+                                            binWriter.Write(file_bytes);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if(written)
+            {
+                MessageBox.Show("Files written!");
+            }
+        }
+
+        private void CreateBitImages(byte[] file_data, string name, string strImageDir)
+        {
+            int temp_offset = 2;
+            int numImages = (file_data[1] << 8) + file_data[0];
+            int[] offsets = new int[numImages];
+            for (int index = 0; index < numImages; index++)
+            {
+                offsets[index] = (file_data[temp_offset + 1] << 8) + (file_data[temp_offset + 0] << 0);
+                temp_offset += 2;
+            }
+            for (int index = 0; index < numImages; index++)
+            {
+                string fullPath = Path.Combine(strImageDir, name + "_" + index.ToString() + ".png");
+
+                int curPos = offsets[index];
+                int width = (file_data[curPos + 1] << 8) + (file_data[curPos + 0] << 0);
+                curPos += 2;
+                int height = (file_data[curPos + 1] << 8) + (file_data[curPos + 0] << 0);
+                curPos += 2;
+                CreateSimpleBitmapWithOffset(file_data, width, height, fullPath, curPos);
+            }
+        }
+
+        private void CreateSimpleBitmapWithOffset(byte[] file_data, int width, int height, string strBitmap, int offset)
+        {
+            using (Bitmap b = new Bitmap(width, height))
+            {
+                int curPos = 0;
+                for (int indexY = 0; indexY < height; indexY++)
+                {
+                    for (int indexX = 0; indexX < width / 8; indexX++)
+                    {
+                        byte curByte = file_data[curPos + offset];
+
+                        for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                        {
+                            int curX = indexX * 8 + tempIndexX;
+                            int curY = indexY;
+                            int curVal = (curByte >> (7 - tempIndexX)) & 0x1;
+                            if (curVal == 0)
+                            {
+                                b.SetPixel(curX, curY, Color.Black);
+                            }
+                            else
+                            {
+                                b.SetPixel(curX, curY, Color.White);
+                            }
+                        }
+
+                        curPos++;
+                    }
+                }
+                b.Save(strBitmap, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
@@ -185,213 +520,6 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
-        {
-            LzwDecompressor lzw = new LzwDecompressor();
-
-            Dictionary<string, Dictionary<int, Bitmap>> image_data = new Dictionary<string, Dictionary<int, Bitmap>>();
-
-            foreach (string tempimage in images)
-            {
-                string image = Path.Combine(strImageDir, tempimage);
-
-                if(palette == 0) // EGA
-                {
-                    if (tempimage.EndsWith("TILES.png"))
-                    {
-                        byte[]? file_bytes;
-                        MakeLZWU5(out file_bytes, image);
-
-                        if (file_bytes != null)
-                        {
-                            string fullPath = Path.Combine(strDataDir, "TILES.16");
-                            lzw.Compress(file_bytes, fullPath);
-                            MessageBox.Show("File written!");
-                        }
-                    }
-                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 4)
-                    {
-                        try
-                        {
-                            Bitmap b = (Bitmap)Image.FromFile(image);
-                            if (b.Width == 128 && b.Height == 64)
-                            {
-                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
-                                if(value != null)
-                                {
-                                    string fullPath = Path.Combine(strDataDir, value + ".CH");
-                                    ReadSimpleBitmap(b, 8, 8, 16, 8, fullPath);
-                                }
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
-                            return;
-                        }
-                    }
-                    else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 5)
-                    {
-                        try
-                        {
-                            Bitmap b = (Bitmap)Image.FromFile(image);
-                            if(b.Width == 256 && b.Height == 96)
-                            {
-                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
-                                if (value != null)
-                                {
-                                    string fullPath = Path.Combine(strDataDir, value + ".HCS");
-                                    ReadSimpleBitmap(b, 16, 12, 16, 8, fullPath);
-                                }
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
-
-                        if (value != null)
-                        {
-                            string strName;
-                            int picNum = 0;
-                            string[] nameParams = value.Split('_');
-                            if (nameParams.Length == 2)
-                            {
-                                strName = nameParams[0];
-                                if (int.TryParse(nameParams[1], out picNum))
-                                {
-                                    if (DataFiles.Ultima5Pict.Any(x => strName.StartsWith(x)))
-                                    {
-                                        if (!image_data.ContainsKey(strName))
-                                        {
-                                            image_data[strName] = new Dictionary<int, Bitmap>();
-                                        }
-                                        try
-                                        {
-                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
-                                        }
-                                        catch (IOException)
-                                        {
-                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
-                                            return;
-                                        }
-                                    }
-                                    else if (DataFiles.Ultima5Masked.Any(x => strName.StartsWith(x)))
-                                    {
-                                        if (!image_data.ContainsKey(strName))
-                                        {
-                                            image_data[strName] = new Dictionary<int, Bitmap>();
-                                        }
-                                        try
-                                        {
-                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
-                                        }
-                                        catch (IOException)
-                                        {
-                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
-                                            return;
-                                        }
-                                    }
-                                    else if (DataFiles.Ultima5Dng.Any(x => strName.StartsWith(x)))
-                                    {
-                                        if (!image_data.ContainsKey(strName))
-                                        {
-                                            image_data[strName] = new Dictionary<int, Bitmap>();
-                                        }
-                                        try
-                                        {
-                                            image_data[strName][picNum] = (Bitmap)Image.FromFile(image);
-                                        }
-                                        catch (IOException)
-                                        {
-                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else // CGA - Not supported
-                {
-
-                }
-            }
-
-            // Now that the files are loaded, combine them
-            if (palette == 0) // EGA
-            {
-                switch(imageType)
-                {
-                    case 1: // Masked Images
-                        foreach(string key in image_data.Keys)
-                        {
-                            if(ValidateImageArray(key, image_data[key]))
-                            {
-                                byte[]? file_bytes = null;
-                                BuildMaskImage16(out file_bytes, key, image_data[key], image_data[key].Count);
-
-                                if (file_bytes != null)
-                                {
-                                    string fullPath = Path.Combine(strDataDir, key + ".16");
-                                    lzw.Compress(file_bytes, fullPath);
-                                }
-                            }
-                        }
-                        MessageBox.Show("File written!");
-                        break;
-                    case 2: // Dungeon Images
-                        foreach (string key in image_data.Keys)
-                        {
-                            if (ValidateImageArray(key, image_data[key]))
-                            {
-                                byte[]? file_bytes;
-                                BuildImage16(out file_bytes, key, image_data[key], 28, true);
-
-                                if (file_bytes != null)
-                                {
-                                    string fullPath = Path.Combine(strDataDir, key + ".16");
-                                    lzw.Compress(file_bytes, fullPath);
-                                }
-                            }
-                        }
-                        MessageBox.Show("File written!");
-                        break;
-                    case 3: // Regular Images
-                        foreach (string key in image_data.Keys)
-                        {
-                            if (ValidateImageArray(key, image_data[key]))
-                            {
-                                byte[]? file_bytes;
-                                BuildImage16(out file_bytes, key, image_data[key], image_data[key].Count, true);
-
-                                if(file_bytes != null)
-                                {
-                                    string fullPath = Path.Combine(strDataDir, key + ".16");
-                                    lzw.Compress(file_bytes, fullPath);
-                                }
-                            }
-                        }
-                        MessageBox.Show("File written!");
-                        break;
-                    case 4: // CH files
-                        MessageBox.Show("File written!");
-                        break;
-                    case 5: // HCS files
-                        MessageBox.Show("File written!");
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
         private void BuildMaskImage16(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys)
         {
             file_bytes = null;
@@ -460,6 +588,54 @@ namespace UltimaTileEditor
                 outImage.AddRange(maskBuf);
             }
 
+            file_bytes = outImage.ToArray();
+        }
+
+        private void BuildImageSimple(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys)
+        {
+            file_bytes = null;
+            List<byte> outImage = new List<byte>();
+            byte num1 = (byte)((numKeys >> 8) & 0xFF);
+            byte num2 = (byte)(numKeys & 0xFF);
+            outImage.Add(num2);
+            outImage.Add(num1);
+            int curPos = 2 + numKeys * 2;
+            for (int index = 0; index < numKeys; index++)
+            {
+                byte b1 = (byte)((curPos >> 8) & 0xFF);
+                byte b2 = (byte)((curPos >> 0) & 0xFF);
+                outImage.Add(b2);
+                outImage.Add(b1);
+
+                if (value.ContainsKey(index))
+                {
+                    int bufWidth = value[index].Width;
+                    curPos += ((bufWidth / 8) * value[index].Height);
+                    curPos += 4; // Remember to include width & height
+                }
+            }
+            for (int index = 0; index < numKeys; index++)
+            {
+                if (value.ContainsKey(index))
+                {
+                    byte b3 = (byte)((value[index].Width >> 8) & 0xFF);
+                    byte b4 = (byte)((value[index].Width >> 0) & 0xFF);
+                    outImage.Add(b4);
+                    outImage.Add(b3);
+                    b3 = (byte)((value[index].Height >> 8) & 0xFF);
+                    b4 = (byte)((value[index].Height >> 0) & 0xFF);
+                    outImage.Add(b4);
+                    outImage.Add(b3);
+                    byte[] imageBuf;
+                    if (value[index].Width % 8 != 0)
+                    {
+                        return; // Invalid bitmap
+                    }
+
+                    GenerateSimpleImageBytes(out imageBuf, value[index], value[index].Width / 8);
+                    outImage.AddRange(imageBuf);
+                }
+            }
             file_bytes = outImage.ToArray();
         }
 
@@ -570,6 +746,32 @@ namespace UltimaTileEditor
                     }
                     byte outbyte = (byte)(b1 + b2);
                     file_bytes[indexY * bufWidth + (indexX / 2)] = outbyte;
+                }
+            }
+        }
+
+        private void GenerateSimpleImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth)
+        {
+            pngHelper helper = new pngHelper();
+
+            file_bytes = new byte[bufWidth * b.Height];
+            for (int indexY = 0; indexY < b.Height; indexY++)
+            {
+                for (int indexX = 0; indexX < bufWidth; indexX++)
+                {
+                    byte curByte = 0;
+                    for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                    {
+                        int curX = indexX * 8 + tempIndexX;
+                        int curY = indexY;
+
+                        Color tempColor = b.GetPixel(curX, curY);
+                        if (tempColor.R == 255 && tempColor.G == 255 && tempColor.B == 255)
+                        {
+                            curByte |= (byte)(1 << (7 - tempIndexX));
+                        }
+                    }
+                    file_bytes[indexY * bufWidth + indexX] = curByte;
                 }
             }
         }
@@ -773,6 +975,24 @@ namespace UltimaTileEditor
                         return Checkkeys(value, 6, false);
                     }
                     break;
+                case "WD":
+                    if (value.Count == 1)
+                    {
+                        return Checkkeys(value, 1, false);
+                    }
+                    break;
+                case "BRITISH":
+                    if (value.Count == 1)
+                    {
+                        return Checkkeys(value, 1, false);
+                    }
+                    break;
+                case "TITLE":
+                    if (value.Count == 10)
+                    {
+                        return Checkkeys(value, 10, false);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -813,7 +1033,7 @@ namespace UltimaTileEditor
             try
             {
                 byte[] destination = new byte[256 * 256];
-                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                Bitmap image = (Bitmap)System.Drawing.Image.FromFile(strPng);
                 if (image.Height != 256 && image.Width != 512)
                 {
                     Console.WriteLine("Image must be 512x256 pixels!");

@@ -79,6 +79,7 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("Images");
                     cbFileType.Items.Add("CH Files");
                     cbFileType.Items.Add("HCS Files");
+                    cbFileType.Items.Add("BIT Files");
                     cbPalette.Items.Add("EGA");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
@@ -354,6 +355,10 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima5CharFiles;
                             m_ImageFiles = DataFiles.Ultima5CharFiles;
                             break;
+                        case 6: // .BIT Files
+                            m_DataFiles = DataFiles.Ultima5BitFiles;
+                            m_ImageFiles = DataFiles.Ultima5BitImages;
+                            break;
                         default: // .16 Tiles
                             m_DataFiles = DataFiles.Ultima5Tiles;
                             m_ImageFiles = DataFiles.Ultima5Tiles;
@@ -436,6 +441,10 @@ namespace UltimaTileEditor
                             else if (cbFileType.SelectedIndex == 5)
                             {
                                 strExt = ".HCS";
+                            }
+                            else if (cbFileType.SelectedIndex == 6)
+                            {
+                                strExt = ".BIT";
                             }
                             else
                             {

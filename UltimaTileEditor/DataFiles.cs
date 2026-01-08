@@ -6,6 +6,10 @@ namespace UltimaTileEditor
 {
     internal class DataFiles
     {
+        public static readonly List<string> Ultima5BitFiles = [ "WD", "TITLE", "BRITISH" ];
+        public static readonly List<string> Ultima5BitImages = ["WD_0", "BRITISH_0",
+            "TITLE_0", "TITLE_1", "TITLE_2", "TITLE_3", "TITLE_4", "TITLE_5", "TITLE_6", "TITLE_7", "TITLE_8", "TITLE_9" ];
+
         public static readonly List<string> Ultima5CharFiles = [ "IBM", "RUNES" ];
 
         public static readonly List<string> Ultima5Pict = [ "CREATE", "END1", "END2", "ENDSC", "STARTSC",
