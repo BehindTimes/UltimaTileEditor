@@ -50,6 +50,9 @@ Ultima 1:
 Ultima 2
 * The tiles are stored in the executable.  Whereas with upgrades to the other games, this tool could potentially still work, as the files are separate, this will not be true with Ultima 2.
 
+Ultima 3
+* The Lord British Signature can be extracted to a file. Unfortunately, there's no easy way to insert it back in without a lot of extra user input.
+
 Ultima 5
 * The character sets are monochrome. Only white and black are supported colors with those.
 
