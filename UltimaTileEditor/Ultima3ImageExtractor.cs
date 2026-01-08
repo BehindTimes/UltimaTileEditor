@@ -54,6 +54,27 @@ namespace UltimaTileEditor
                         helper.MakeU2Pic(file_bytes, fullPath);
                     }
                 }
+                else if (imageType == 3) // The animation
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 5888;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + ".png");
+                        using (Bitmap b = new Bitmap(92, 256))
+                        {
+                            helper.CreateCGAImage(file_bytes, b, 23, 256);
+                            b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                            Console.WriteLine("Image Created");
+                        }
+                        
+                    }
+                }
             }
         }
 
@@ -117,6 +138,25 @@ namespace UltimaTileEditor
 
                         helper.MakeU2PicData(ref outData, image, fullPath);
                         written = true;
+                    }
+                }
+                else if (imageType == 3)
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        byte[]? file_bytes;
+                        helper.MakeCGAImage(out file_bytes, image, 23, 256);
+
+                        if (file_bytes != null && file_bytes.Length == 5888)
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + ".DAT");
+                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                            {
+                                binWriter.Write(file_bytes);
+                                written = true;
+                            }
+                        }
                     }
                 }
             }

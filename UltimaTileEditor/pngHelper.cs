@@ -194,6 +194,73 @@ namespace UltimaTileEditor
             }
         }
 
+        public void CreateCGAImage(byte[] file_bytes, Bitmap b, int width, int height)
+        {
+            for (int indexY = 0; indexY < height; indexY++)
+            {
+                for (int indexX = 0; indexX < width; indexX++)
+                {
+                    byte curByte = file_bytes[indexY * width + indexX];
+
+                    byte b1 = (byte)((curByte >> 6) & 0b11);
+                    byte b2 = (byte)((curByte >> 4) & 0b11);
+                    byte b3 = (byte)((curByte >> 2) & 0b11);
+                    byte b4 = (byte)((curByte >> 0) & 0b11);
+
+                    Color c1 = GetCGAColor(b1);
+                    Color c2 = GetCGAColor(b2);
+                    Color c3 = GetCGAColor(b3);
+                    Color c4 = GetCGAColor(b4);
+
+                    b.SetPixel(indexX * 4 + 0, indexY, c1);
+                    b.SetPixel(indexX * 4 + 1, indexY, c2);
+                    b.SetPixel(indexX * 4 + 2, indexY, c3);
+                    b.SetPixel(indexX * 4 + 3, indexY, c4);
+                }
+            }
+        }
+
+        public void MakeCGAImage(out byte[]? file_bytes, string strPng, int width, int height)
+        {
+            file_bytes = null;
+            try
+            {
+                int curPos = 0;
+                byte[] destination = new byte[width * height];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Width != width * 4 && image.Height != height)
+                {
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", width * 4, height);
+                    return;
+                }
+                for (int y_index = 0; y_index < height; y_index++)
+                {
+                    for (int x_index = 0; x_index < width; x_index++)
+                    {
+                        Color color1 = image.GetPixel(x_index * 4 + 0, y_index);
+                        Color color2 = image.GetPixel(x_index * 4 + 1, y_index);
+                        Color color3 = image.GetPixel(x_index * 4 + 2, y_index);
+                        Color color4 = image.GetPixel(x_index * 4 + 3, y_index);
+
+                        byte b1 = (byte)(GetCGAByte(color1));
+                        byte b2 = (byte)(GetCGAByte(color2));
+                        byte b3 = (byte)(GetCGAByte(color3));
+                        byte b4 = (byte)(GetCGAByte(color4));
+
+                        byte outByte = (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + b4);
+                        destination[curPos] = outByte;
+                        curPos++;
+                    }
+                }
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
         public void CreateImageWithPalette(byte[] file_bytes, Bitmap b, int width, int height, int palette)
         {
             int curByte = 0;

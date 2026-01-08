@@ -68,6 +68,8 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima3Pictures = ["BLANK", "EXOD"];
 
+        public static readonly List<string> Ultima3Animate = ["ANIMATE"];
+
         public static readonly List<string> Ultima2Files = ["ULTIMAII"];
 
         public static readonly List<string> Ultima2Pictures = ["PICDNG", "PICDRA", "PICMIN", "PICOUT", "PICSPA", "PICTWN"];
