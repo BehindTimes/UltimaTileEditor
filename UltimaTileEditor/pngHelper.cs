@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -211,6 +212,107 @@ namespace UltimaTileEditor
                     file_bytes[curByte] = outbyte;
                     curByte++;
                 }
+            }
+        }
+
+        public void MakeU2Pic(byte[] file_bytes, string strPng)
+        {
+            using (Bitmap b = new Bitmap(320, 200))
+            {
+                const int planeSize = 0x2000;
+                const int rowSize = 80;
+                int curPos = 0;
+                int numRows = 200;
+                for (int planeIndex = 0; planeIndex < 2; planeIndex++)
+                {
+                    curPos = planeSize * planeIndex;
+
+                    for (int indexY = 0; indexY < numRows; indexY += 2)
+                    {
+                        for (int index = 0; index < rowSize; index++)
+                        {
+                            byte curByte = file_bytes[curPos];
+                            byte b1 = (byte)((curByte >> 6) & 0b11);
+                            byte b2 = (byte)((curByte >> 4) & 0b11);
+                            byte b3 = (byte)((curByte >> 2) & 0b11);
+                            byte b4 = (byte)((curByte >> 0) & 0b11);
+
+                            Color c1 = GetCGAColor(b1);
+                            Color c2 = GetCGAColor(b2);
+                            Color c3 = GetCGAColor(b3);
+                            Color c4 = GetCGAColor(b4);
+
+                            b.SetPixel(index * 4 + 0, indexY + planeIndex, c1);
+                            b.SetPixel(index * 4 + 1, indexY + planeIndex, c2);
+                            b.SetPixel(index * 4 + 2, indexY + planeIndex, c3);
+                            b.SetPixel(index * 4 + 3, indexY + planeIndex, c4);
+
+                            curPos++;
+                        }
+                    }
+                }
+
+                b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+                System.Diagnostics.Debug.WriteLine("Image Created");
+            }
+        }
+
+        private void WritePicU2(ref byte[] file_bytes, Bitmap b, string strOutFile)
+        {
+            const int planeSize = 0x2000;
+            const int rowSize = 80;
+            int curPos = 0;
+            int numRows = 200;
+
+            for (int planeIndex = 0; planeIndex < 2; planeIndex++)
+            {
+                curPos = planeSize * planeIndex;
+
+                for (int indexY = 0; indexY < numRows; indexY += 2)
+                {
+                    for (int index = 0; index < rowSize; index++)
+                    {
+                        byte curByte = 0;
+                        Color c1 = b.GetPixel(index * 4 + 0, indexY + planeIndex);
+                        Color c2 = b.GetPixel(index * 4 + 1, indexY + planeIndex);
+                        Color c3 = b.GetPixel(index * 4 + 2, indexY + planeIndex);
+                        Color c4 = b.GetPixel(index * 4 + 3, indexY + planeIndex);
+
+                        byte b1 = GetCGAByte(c1);
+                        byte b2 = GetCGAByte(c2);
+                        byte b3 = GetCGAByte(c3);
+                        byte b4 = GetCGAByte(c4);
+
+                        curByte += (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + b4);
+                        file_bytes[curPos] = curByte;
+
+                        curPos++;
+                    }
+                }
+            }
+
+            using (BinaryWriter binWriter = new BinaryWriter(File.Open(strOutFile, FileMode.Create)))
+            {
+                binWriter.Write(file_bytes);
+            }
+        }
+
+        public void MakeU2PicData(ref byte[] file_bytes, string strPng, string strOutFile)
+        {
+            try
+            {
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 200 && image.Width != 320)
+                {
+                    Debug.WriteLine("Image must be 320x200 pixels!");
+                    return;
+                }
+                WritePicU2(ref file_bytes, image, strOutFile);
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
             }
         }
     }

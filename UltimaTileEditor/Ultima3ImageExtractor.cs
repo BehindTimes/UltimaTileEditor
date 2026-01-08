@@ -39,11 +39,29 @@ namespace UltimaTileEditor
                         }
                     }
                 }
+                else if (imageType == 2)
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 0x4000;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + ".png");
+                        helper.MakeU2Pic(file_bytes, fullPath);
+                    }
+                }
             }
         }
 
         public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
+            pngHelper helper = new pngHelper();
+            bool written = false;
+
             foreach (string tempimage in images)
             {
                 string image = Path.Combine(strImageDir, tempimage);
@@ -58,7 +76,7 @@ namespace UltimaTileEditor
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
-                            MessageBox.Show("File written!");
+                            written = true;
                         }
                     }
                 }
@@ -73,10 +91,38 @@ namespace UltimaTileEditor
                         using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
                         {
                             binWriter.Write(file_bytes);
-                            MessageBox.Show("File written!");
+                            written = true;
                         }
                     }
                 }
+                else if (imageType == 2)
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        byte[] outData;
+                        int fileSize = 0x4000;
+                        bool write0x4000 = false; ;
+                        if (value.EndsWith("PICDRA"))
+                        {
+                            fileSize = 0x4080; // ? Is this an error, or is there a reason for this?
+                            write0x4000 = true;
+                        }
+                        outData = new byte[fileSize];
+                        if (write0x4000)
+                        {
+                            outData[0x4000] = 0x1a; // ? Is this a mistake on thier part, or what is the actual reason for the extra 128 bytes?
+                        }
+                        string fullPath = Path.Combine(strDataDir, value + ".IBM");
+
+                        helper.MakeU2PicData(ref outData, image, fullPath);
+                        written = true;
+                    }
+                }
+            }
+            if (written)
+            {
+                MessageBox.Show("File written!");
             }
         }
 

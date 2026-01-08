@@ -12,6 +12,7 @@ namespace UltimaTileEditor
             int dataStartOffset = 0x7c40;
             int tileSize = 66;
             int numTiles = 64;
+            pngHelper helper = new pngHelper();
 
             foreach (string tempimage in images)
             {
@@ -48,7 +49,7 @@ namespace UltimaTileEditor
                             return;
                         }
                         string fullPath = Path.Combine(strImageDir, value + ".png");
-                        MakeU2Pic(file_bytes, fullPath);
+                        helper.MakeU2Pic(file_bytes, fullPath);
                     }
                 }
             }
@@ -58,6 +59,7 @@ namespace UltimaTileEditor
         {
             int dataStartOffset = 0x7c40;
             bool written = false;
+            pngHelper helper = new pngHelper();
 
             foreach (string tempimage in images)
             {
@@ -105,9 +107,9 @@ namespace UltimaTileEditor
                         {
                             outData[0x4000] = 0x1a; // ? Is this a mistake on thier part, or what is the actual reason for the extra 128 bytes?
                         }
-                        string fullPath = Path.Combine(strDataDir, value );
+                        string fullPath = Path.Combine(strDataDir, value);
 
-                        MakeU2PicData(ref outData, image, fullPath);
+                        helper.MakeU2PicData(ref outData, image, fullPath);
                         written = true;
                     }
                 }
@@ -167,47 +169,6 @@ namespace UltimaTileEditor
             {
                 Console.WriteLine("LZW file does not exist!");
                 return;
-            }
-        }
-
-        private void WritePicU2(ref byte[] file_bytes, Bitmap b, string strOutFile)
-        {
-            pngHelper helper = new pngHelper();
-            const int planeSize = 0x2000;
-            const int rowSize = 80;
-            int curPos = 0;
-            int numRows = 200;
-
-            for (int planeIndex = 0; planeIndex < 2; planeIndex++)
-            {
-                curPos = planeSize * planeIndex;
-
-                for (int indexY = 0; indexY < numRows; indexY += 2)
-                {
-                    for (int index = 0; index < rowSize; index++)
-                    {
-                        byte curByte = 0;
-                        Color c1 = b.GetPixel(index * 4 + 0, indexY + planeIndex);
-                        Color c2 = b.GetPixel(index * 4 + 1, indexY + planeIndex);
-                        Color c3 = b.GetPixel(index * 4 + 2, indexY + planeIndex);
-                        Color c4 = b.GetPixel(index * 4 + 3, indexY + planeIndex);
-
-                        byte b1 = helper.GetCGAByte(c1);
-                        byte b2 = helper.GetCGAByte(c2);
-                        byte b3 = helper.GetCGAByte(c3);
-                        byte b4 = helper.GetCGAByte(c4);
-
-                        curByte += (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + b4);
-                        file_bytes[curPos] = curByte;
-
-                        curPos++;
-                    }
-                }
-            }
-
-            using (BinaryWriter binWriter = new BinaryWriter(File.Open(strOutFile, FileMode.Create)))
-            {
-                binWriter.Write(file_bytes);
             }
         }
 
@@ -271,69 +232,6 @@ namespace UltimaTileEditor
             {
                 Debug.WriteLine("PNG file does not exist!");
                 return;
-            }
-        }
-
-        private void MakeU2PicData(ref byte[] file_bytes, string strPng, string strOutFile)
-        {
-            try
-            {
-                Bitmap image = (Bitmap)Image.FromFile(strPng);
-                if (image.Height != 200 && image.Width != 320)
-                {
-                    Debug.WriteLine("Image must be 320x200 pixels!");
-                    return;
-                }
-                WritePicU2(ref file_bytes, image, strOutFile);
-            }
-            catch (IOException)
-            {
-                Debug.WriteLine("PNG file does not exist!");
-                return;
-            }
-        }
-
-        private void MakeU2Pic(byte[] file_bytes, string strPng)
-        {
-            pngHelper helper = new pngHelper();
-
-            using (Bitmap b = new Bitmap(320, 200))
-            {
-                const int planeSize = 0x2000;
-                const int rowSize = 80;
-                int curPos = 0;
-                int numRows = 200;
-                for(int planeIndex = 0; planeIndex < 2; planeIndex++)
-                {
-                    curPos = planeSize * planeIndex;
-
-                    for (int indexY = 0; indexY < numRows; indexY += 2)
-                    {
-                        for (int index = 0; index < rowSize; index++)
-                        {
-                            byte curByte = file_bytes[curPos];
-                            byte b1 = (byte)((curByte >> 6) & 0b11);
-                            byte b2 = (byte)((curByte >> 4) & 0b11);
-                            byte b3 = (byte)((curByte >> 2) & 0b11);
-                            byte b4 = (byte)((curByte >> 0) & 0b11);
-
-                            Color c1 = helper.GetCGAColor(b1);
-                            Color c2 = helper.GetCGAColor(b2);
-                            Color c3 = helper.GetCGAColor(b3);
-                            Color c4 = helper.GetCGAColor(b4);
-
-                            b.SetPixel(index * 4 + 0, indexY + planeIndex, c1);
-                            b.SetPixel(index * 4 + 1, indexY + planeIndex, c2);
-                            b.SetPixel(index * 4 + 2, indexY + planeIndex, c3);
-                            b.SetPixel(index * 4 + 3, indexY + planeIndex, c4);
-
-                            curPos++;
-                        }
-                    }
-                }
-
-                b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
-                System.Diagnostics.Debug.WriteLine("Image Created");
             }
         }
     }
