@@ -47,6 +47,7 @@ namespace UltimaTileEditor
                     break;
                 case UltimaGame.Ultima2:
                     cbFileType.Items.Add("Tiles");
+                    cbFileType.Items.Add("Pictures");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
@@ -260,8 +261,17 @@ namespace UltimaTileEditor
                     }
                     break;
                 case UltimaGame.Ultima2:
-                    m_DataFiles = DataFiles.Ultima2Files;
-                    m_ImageFiles = DataFiles.Ultima2Files;
+                    switch (cbFileType.SelectedIndex)
+                    {
+                        case 1:
+                            m_DataFiles = DataFiles.Ultima2Pictures;
+                            m_ImageFiles = DataFiles.Ultima2Pictures;
+                            break;
+                        default:
+                            m_DataFiles = DataFiles.Ultima2Files;
+                            m_ImageFiles = DataFiles.Ultima2Files;
+                            break;
+                    }
                     break;
                 case UltimaGame.Ultima3:
                     switch (cbFileType.SelectedIndex)
@@ -362,7 +372,14 @@ namespace UltimaTileEditor
                         }
                         break;
                     case UltimaGame.Ultima2:
-                        strExt = ".EXE";
+                        if (cbFileType.SelectedIndex == 0)
+                        {
+                            strExt = ".EXE";
+                        }
+                        else if(cbFileType.SelectedIndex == 1)
+                        {
+                            strExt = "";
+                        }
                         break;
                     case UltimaGame.Ultima3:
                         strExt = ".ULT";
