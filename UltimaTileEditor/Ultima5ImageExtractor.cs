@@ -5,7 +5,6 @@ using System.Formats.Tar;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UltimaTileEditor
 {
