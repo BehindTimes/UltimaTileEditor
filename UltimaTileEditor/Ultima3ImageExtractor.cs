@@ -75,6 +75,26 @@ namespace UltimaTileEditor
                         
                     }
                 }
+                else if (imageType == 4) // Lord British Signature
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 640;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + ".png");
+                        using (Bitmap b = new Bitmap(256, 256))
+                        {
+                            CreateSignature(file_bytes, b);
+                            b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+
+                    }
+                }
             }
         }
 
@@ -166,7 +186,29 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakePngU3(byte[] lzw, string strPng)
+        private void CreateSignature(byte[] file_bytes, Bitmap b)
+        {
+            Color gray = Color.FromArgb(0xAA, 0xAA, 0xAA);
+
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                // Fill the entire drawing surface with a specific color (e.g., Green)
+                g.Clear(Color.Black);
+            }
+
+            for (int index = 0; index < file_bytes.Length; index += 2)
+            {
+                int x = file_bytes[index];
+                int y = file_bytes[index + 1];
+                if (x > 0 && y > 0 && x < 256 && y < 256)
+                {
+                    b.SetPixel(x, 256 - y, gray);
+                    b.SetPixel(x + 1, 256 - y, gray);
+                }
+            }
+        }
+
+        private void MakePngU3(byte[] lzw, string strPng)
         {
             try
             {

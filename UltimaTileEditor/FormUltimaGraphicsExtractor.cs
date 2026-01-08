@@ -58,6 +58,7 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("Character Set");
                     cbFileType.Items.Add("Pictures");
                     cbFileType.Items.Add("Animation");
+                    cbFileType.Items.Add("Signature");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
@@ -295,6 +296,10 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima3Animate;
                             m_ImageFiles = DataFiles.Ultima3Animate;
                             break;
+                        case 4: // Signature
+                            m_DataFiles = DataFiles.Ultima3Signature;
+                            m_ImageFiles = DataFiles.Ultima3Signature;
+                            break;
                         default:
                             m_DataFiles = DataFiles.Ultima3Files;
                             m_ImageFiles = DataFiles.Ultima3Files;
@@ -402,6 +407,10 @@ namespace UltimaTileEditor
                             strExt = ".IBM";
                         }
                         else if (cbFileType.SelectedIndex == 3)
+                        {
+                            strExt = ".DAT";
+                        }
+                        else if (cbFileType.SelectedIndex == 4)
                         {
                             strExt = ".DAT";
                         }
