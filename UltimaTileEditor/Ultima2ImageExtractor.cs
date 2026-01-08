@@ -105,7 +105,7 @@ namespace UltimaTileEditor
                         {
                             outData[0x4000] = 0x1a; // ? Is this a mistake on thier part, or what is the actual reason for the extra 128 bytes?
                         }
-                        string fullPath = Path.Combine(strDataDir, value);
+                        string fullPath = Path.Combine(strDataDir, value );
 
                         MakeU2PicData(ref outData, image, fullPath);
                         written = true;

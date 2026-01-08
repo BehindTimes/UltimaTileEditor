@@ -39,6 +39,7 @@ namespace UltimaTileEditor
                 case UltimaGame.Ultima1:
                     cbFileType.Items.Add("Tiles");
                     cbFileType.Items.Add("Image");
+                    cbFileType.Items.Add("Ending");
                     cbPalette.Items.Add("EGA");
                     cbPalette.Items.Add("CGA");
                     cbPalette.Items.Add("Tandy");
@@ -240,6 +241,10 @@ namespace UltimaTileEditor
                         case 1: // Castle Image
                             m_DataFiles = DataFiles.Ultima1Image;
                             m_ImageFiles = DataFiles.Ultima1Image;
+                            break;
+                        case 2: // Ending
+                            m_DataFiles = DataFiles.Ultima1Ending;
+                            m_ImageFiles = DataFiles.Ultima1Ending;
                             break;
                         default: // Tiles
                             switch(cbPalette.SelectedIndex)

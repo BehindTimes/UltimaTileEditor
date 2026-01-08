@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace UltimaTileEditor
@@ -20,7 +21,7 @@ namespace UltimaTileEditor
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
-                            switch(palette)
+                            switch (palette)
                             {
                                 case 1: // CGA - Not supported
                                     break;
@@ -29,7 +30,7 @@ namespace UltimaTileEditor
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 13, 4, true);
                                     break;
-                            }   
+                            }
                         }
                     }
                     else if (image.EndsWith("MOND.BIN"))
@@ -84,6 +85,15 @@ namespace UltimaTileEditor
                                     Console.WriteLine("Image Created");
                                 }
                             }
+                        }
+                    }
+                    else if (image.EndsWith("NIF.BIN"))
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length == 6720)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            CreateSimpleBitmap(file_bytes, 320, 168, fullPath);
                         }
                     }
                 }
@@ -164,6 +174,20 @@ namespace UltimaTileEditor
 
                         }
                     }
+                    else if (image.EndsWith("NIF.png"))
+                    {
+                        byte[]? file_bytes;
+                        if (palette == 0) // 16 color
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            MakeSimpleImage(out file_bytes, image, 320, 168);
+                            if (null != file_bytes)
+                            {
+                                WriteU1Image(file_bytes, fullPath);
+                                written = true;
+                            }
+                        }
+                    }
                     else
                     {
                         
@@ -173,6 +197,83 @@ namespace UltimaTileEditor
             if(written)
             {
                 MessageBox.Show("Files written!");
+            }
+        }
+
+        private void MakeSimpleImage(out byte[]? file_bytes, string strPng, int width, int height)
+        {
+            file_bytes = null;
+            try
+            {
+                pngHelper helper = new pngHelper();
+                byte[] destination = new byte[40 * 168];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 168 && image.Width != 320)
+                {
+                    Debug.WriteLine("Image must be 320x168 pixels!");
+                    return;
+                }
+                int curPos = 0;
+                for (int indexY = 0; indexY < height; indexY++)
+                {
+                    for (int indexX = 0; indexX < width / 8; indexX++)
+                    {
+                        byte curByte = 0;
+
+                        for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                        {
+                            int curX = indexX * 8 + tempIndexX;
+                            int curY = indexY;
+
+                            Color tempColor = image.GetPixel(curX, curY);
+                            if (tempColor.R == 255 && tempColor.G == 255 && tempColor.B == 255)
+                            {
+                                curByte |= (byte)(1 << (7 - tempIndexX));
+                            }
+                        }
+                        destination[curPos] = curByte;
+                        curPos++;
+                    }
+                }
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
+        private void CreateSimpleBitmap(byte[] file_data, int width, int height, string strBitmap)
+        {
+            using (Bitmap b = new Bitmap(width, height))
+            {
+                int curPos = 0;
+                for (int indexY = 0; indexY < height; indexY++)
+                {
+                    for (int indexX = 0; indexX < width / 8; indexX++)
+                    {
+                        byte curByte = file_data[curPos];
+
+                        for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                        {
+                            int curX = indexX * 8 + tempIndexX;
+                            int curY = indexY;
+                            int curVal = (curByte >> (7 - tempIndexX)) & 0x1;
+                            if (curVal == 0)
+                            {
+                                b.SetPixel(curX, curY, Color.Black);
+                            }
+                            else
+                            {
+                                b.SetPixel(curX, curY, Color.White);
+                            }
+                        }
+
+                        curPos++;
+                    }
+                }
+                b.Save(strBitmap, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
