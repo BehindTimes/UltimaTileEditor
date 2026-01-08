@@ -68,7 +68,7 @@ namespace UltimaTileEditor
                 if (image.EndsWith("SHAPES.png"))
                 {
                     byte[]? file_bytes;
-                    MakeU3(out file_bytes, image, 16, 16, 40, 2);
+                    MakeU3(out file_bytes, image, 16, 16, 10, 8);
 
                     if (file_bytes != null && file_bytes.Length == 5120)
                     {
@@ -135,9 +135,9 @@ namespace UltimaTileEditor
                 {
                     return;
                 }
-                using (Bitmap b = new Bitmap(640, 32))
+                using (Bitmap b = new Bitmap(160, 128))
                 {
-                    LoadImageU3(file_bytes, b, 16, 16, 40, 2);
+                    LoadImageU3(file_bytes, b, 16, 16, 10, 8);
                     b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
                     Console.WriteLine("Image Created");
                 }
