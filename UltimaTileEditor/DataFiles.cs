@@ -6,11 +6,13 @@ namespace UltimaTileEditor
 {
     internal class DataFiles
     {
-        public static readonly List<string> Ultima5BitFiles = [ "WD", "TITLE", "BRITISH" ];
+        public static readonly List<string> Ultima5PathFiles = ["BRITISH"];
+        public static readonly List<string> Ultima5PathImage = ["BRITISH_PATH"];
+        public static readonly List<string> Ultima5BitFiles = ["WD", "TITLE", "BRITISH"];
         public static readonly List<string> Ultima5BitImages = ["WD_0", "BRITISH_0",
             "TITLE_0", "TITLE_1", "TITLE_2", "TITLE_3", "TITLE_4", "TITLE_5", "TITLE_6", "TITLE_7", "TITLE_8", "TITLE_9" ];
 
-        public static readonly List<string> Ultima5CharFiles = [ "IBM", "RUNES" ];
+        public static readonly List<string> Ultima5CharFiles = ["IBM", "RUNES"];
 
         public static readonly List<string> Ultima5Pict = [ "CREATE", "END1", "END2", "ENDSC", "STARTSC",
             "STORY1", "STORY2", "STORY3", "STORY4", "STORY5", "STORY6", "TEXT", "ULTIMA" ];
@@ -29,7 +31,7 @@ namespace UltimaTileEditor
             "TEXT_0", "TEXT_1", "TEXT_2", "TEXT_3", "TEXT_4", "TEXT_5",
             "ULTIMA_0", "ULTIMA_1", "ULTIMA_2", "ULTIMA_3", "ULTIMA_4" ];
 
-        public static readonly List<string> Ultima5Tiles = [ "TILES" ];
+        public static readonly List<string> Ultima5Tiles = ["TILES"];
 
         public static readonly List<string> Ultima5Masked = ["ITEMS", "MON0", "MON1", "MON2", "MON3", "MON4", "MON5", "MON6", "MON7"];
         public static readonly List<string> Ultima5MaskedImage = ["ITEMS_0", "ITEMS_1", "ITEMS_2", "ITEMS_3",
@@ -44,7 +46,7 @@ namespace UltimaTileEditor
             "MON6_0", "MON6_1", "MON6_2", "MON6_3", "MON6_4", "MON6_5",
             "MON7_0", "MON7_1", "MON7_2", "MON7_3", "MON7_4", "MON7_5" ];
 
-        public static readonly List<string> Ultima5Dng = ["DNG1", "DNG2", "DNG3" ];
+        public static readonly List<string> Ultima5Dng = ["DNG1", "DNG2", "DNG3"];
         public static readonly List<string> Ultima5DngImage = ["DNG1_0", "DNG1_1", "DNG1_2", "DNG1_3", "DNG1_4", "DNG1_5", "DNG1_6", "DNG1_7",
         "DNG1_9","DNG1_10","DNG1_11","DNG1_12","DNG1_13","DNG1_14","DNG1_15","DNG1_16","DNG1_17",
         "DNG1_18","DNG1_19","DNG1_20","DNG1_21","DNG1_22","DNG1_23","DNG1_25","DNG1_26","DNG1_27",
@@ -55,7 +57,7 @@ namespace UltimaTileEditor
         "DNG3_9","DNG3_10","DNG3_11","DNG3_12","DNG3_13","DNG3_14","DNG3_15","DNG3_16","DNG3_17",
         "DNG3_18","DNG3_19","DNG3_20","DNG3_21","DNG3_22","DNG3_23","DNG3_25","DNG3_26","DNG3_27"];
 
-        public static readonly List<string> Ultima4EGATileFiles = [ "SHAPES" ];
+        public static readonly List<string> Ultima4EGATileFiles = ["SHAPES"];
 
         public static readonly List<string> Ultima4Charset = ["CHARSET"];
 

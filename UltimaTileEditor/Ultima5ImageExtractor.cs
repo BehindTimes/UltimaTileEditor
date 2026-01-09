@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Formats.Tar;
 using System.Reflection;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace UltimaTileEditor
@@ -75,6 +77,15 @@ namespace UltimaTileEditor
                     {
                         byte[] file_bytes = File.ReadAllBytes(image);
                         CreateBitImages(file_bytes, value, strImageDir);
+                    }
+                }
+                else if (image.EndsWith("BRITISH.PTH")) // This file is not compressed
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        CreatePathImage(file_bytes, value, strImageDir);
                     }
                 }
                 else
@@ -176,6 +187,10 @@ namespace UltimaTileEditor
                             System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
                             return;
                         }
+                    }
+                    else if(imageType ==7) // Path files, do nothing
+                    {
+                        return;
                     }
                     else
                     {
@@ -363,6 +378,113 @@ namespace UltimaTileEditor
             }
         }
 
+        private void LoadPathImage(byte[] file_data, Bitmap b)
+        {
+            using (Graphics gfx = Graphics.FromImage(b))
+            {
+                // Clear the entire bitmap and fill it with a solid color (e.g., Green)
+                gfx.Clear(Color.Black); //
+            }
+
+            const int offsetX = 44;
+            const int offsetY = 68;
+            const int imageWidth = 320;
+            const int imageHeight = 200;
+
+            int xpos = offsetX;
+            int ypos = offsetY;
+
+            int zerocount = 0;
+
+            b.SetPixel(xpos, ypos, Color.White);
+            for (int index = 0; index < file_data.Length; index++)
+            {
+                byte curByte = file_data[index];
+                if (curByte != 0)
+                {
+                    byte leftright = (byte)((curByte >> 4) & 0xF);
+                    byte updown = (byte)(curByte & 0xF);
+                    if (leftright >= 8)
+                    {
+                        int subval = leftright - 8;
+                        xpos -= subval;
+                    }
+                    else
+                    {
+                        xpos += leftright;
+                    }
+                    if (updown >= 8)
+                    {
+                        int subval = updown - 8;
+                        ypos -= subval;
+                    }
+                    else
+                    {
+                        ypos += updown;
+                    }
+
+                    if ((updown >= 3 && updown < 8) || (updown >= 0x0a) || (leftright >= 3 && leftright < 8) || (leftright >= 0x0a)) // d5
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (xpos >= 0 && xpos < imageWidth && ypos >= 0 && ypos < imageHeight)
+                        {
+                            b.SetPixel(xpos, ypos, Color.White);
+                        }
+                    }
+
+                }
+                else
+                {
+                    zerocount++;
+                    switch (zerocount)
+                    {
+                        case 1:
+                            xpos = offsetX + 20;
+                            ypos = offsetY + 26;
+                            break;
+                        case 2:
+                            xpos = offsetX + 99;
+                            ypos = offsetY + 10;
+                            break;
+                        case 3:
+                            xpos = offsetX + 123;
+                            ypos = offsetY + 37;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    if (xpos >= 0 && xpos < imageWidth && ypos >= 0 && ypos < imageHeight)
+                    {
+                        b.SetPixel(xpos, ypos, Color.White);
+                    }
+                }
+            }
+        }
+
+        private void CreatePathImage(byte[] file_data, string name, string strImageDir)
+        {
+            try
+            {
+                using (Bitmap b = new Bitmap(320, 200))
+                {
+                    string fullPath = Path.Combine(strImageDir, name + "_PATH.png");
+
+                    LoadPathImage(file_data, b);
+                    b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                    Console.WriteLine("Image Created");
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("LZW file does not exist!");
+                return;
+            }
+        }
+
         private void CreateBitImages(byte[] file_data, string name, string strImageDir)
         {
             int temp_offset = 2;
@@ -477,7 +599,7 @@ namespace UltimaTileEditor
             }
             catch (IOException)
             {
-                Console.WriteLine("LZW file does not exist!");
+                Debug.WriteLine("LZW file does not exist!");
                 return;
             }
         }
