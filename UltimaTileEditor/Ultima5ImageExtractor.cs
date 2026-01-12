@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UltimaTileEditor
 {
@@ -27,7 +28,18 @@ namespace UltimaTileEditor
                     if (lzw_out != null)
                     {
                         string fullPath = Path.Combine(strImageDir, "TILES.png");
-                        MakePngU5(lzw_out, fullPath);
+                        MakePngU5(lzw_out, fullPath, 2);
+                    }
+                }
+                else if (image.EndsWith("TILES.4"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    byte[]? lzw_out;
+                    lzw.Extract(file_bytes, out lzw_out);
+                    if (lzw_out != null)
+                    {
+                        string fullPath = Path.Combine(strImageDir, "TILES.png");
+                        MakePngU5(lzw_out, fullPath, 4);
                     }
                 }
                 else if (image.EndsWith("IBM.CH") || image.EndsWith("RUNES.CH"))
@@ -102,18 +114,35 @@ namespace UltimaTileEditor
                             {
                                 if (value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
                                 {
-                                    CreateMaskImages(lzw_out, strImageDir, value);
+                                    CreateMaskImages(lzw_out, strImageDir, value, 2);
                                 }
                                 else
                                 {
-                                    CreateImages(lzw_out, strImageDir, value);
+                                    CreateImages(lzw_out, strImageDir, value, 2);
                                 }
                             }
                         }
                     }
-                    else // CGA - Not Supported
+                    else if (palette == 1) // CGA
                     {
-
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        byte[]? lzw_out;
+                        lzw.Extract(file_bytes, out lzw_out);
+                        if (lzw_out != null)
+                        {
+                            string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                            if (value != null)
+                            {
+                                if (value.ToLower().Contains("mon") || value.ToLower().Contains("items"))
+                                {
+                                    CreateMaskImages(lzw_out, strImageDir, value, 4);
+                                }
+                                else
+                                {
+                                    CreateImages(lzw_out, strImageDir, value, 4);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -135,7 +164,7 @@ namespace UltimaTileEditor
                     if (tempimage.EndsWith("TILES.png"))
                     {
                         byte[]? file_bytes;
-                        MakeLZWU5(out file_bytes, image);
+                        MakeLZWU5(out file_bytes, image, 2);
 
                         if (file_bytes != null)
                         {
@@ -275,9 +304,102 @@ namespace UltimaTileEditor
                         }
                     }
                 }
-                else // CGA - Not supported
+                else // CGA
                 {
+                    if (tempimage.EndsWith("TILES.png"))
+                    {
+                        byte[]? file_bytes;
+                        MakeLZWU5(out file_bytes, image, 4);
 
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strDataDir, "TILES.4");
+                            lzw.Compress(file_bytes, fullPath);
+                            written = true;
+                        }
+                    }
+                    else if (imageType == 1 || imageType == 2 || imageType == 3) // Image and Dungeon files
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+
+                        if (value != null)
+                        {
+                            string strName;
+                            int picNum = 0;
+                            string[] nameParams = value.Split('_');
+                            if (nameParams.Length == 2)
+                            {
+                                strName = nameParams[0];
+                                if (int.TryParse(nameParams[1], out picNum))
+                                {
+                                    if (DataFiles.Ultima5Pict.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Masked.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5Dng.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                    else if (DataFiles.Ultima5BitFiles.Any(x => strName.StartsWith(x)))
+                                    {
+                                        if (!image_data.ContainsKey(strName))
+                                        {
+                                            image_data[strName] = new Dictionary<int, Bitmap>();
+                                        }
+                                        try
+                                        {
+                                            image_data[strName][picNum] = (Bitmap)System.Drawing.Image.FromFile(image);
+                                        }
+                                        catch (IOException)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -292,7 +414,7 @@ namespace UltimaTileEditor
                             if (ValidateImageArray(key, image_data[key]))
                             {
                                 byte[]? file_bytes = null;
-                                BuildMaskImage16(out file_bytes, key, image_data[key], image_data[key].Count);
+                                BuildMaskImage(out file_bytes, key, image_data[key], image_data[key].Count, 2);
 
                                 if (file_bytes != null)
                                 {
@@ -309,7 +431,7 @@ namespace UltimaTileEditor
                             if (ValidateImageArray(key, image_data[key]))
                             {
                                 byte[]? file_bytes;
-                                BuildImage16(out file_bytes, key, image_data[key], 28, true);
+                                BuildImage(out file_bytes, key, image_data[key], 28, true, 2);
 
                                 if (file_bytes != null)
                                 {
@@ -326,7 +448,7 @@ namespace UltimaTileEditor
                             if (ValidateImageArray(key, image_data[key]))
                             {
                                 byte[]? file_bytes;
-                                BuildImage16(out file_bytes, key, image_data[key], image_data[key].Count, true);
+                                BuildImage(out file_bytes, key, image_data[key], image_data[key].Count, false, 2);
 
                                 if (file_bytes != null)
                                 {
@@ -372,7 +494,67 @@ namespace UltimaTileEditor
                         break;
                 }
             }
-            if(written)
+            else if(palette == 1) // CGA
+            {
+                switch (imageType)
+                {
+                    case 1: // Masked Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes = null;
+                                BuildMaskImage(out file_bytes, key, image_data[key], image_data[key].Count, 4);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".4");
+
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        written = true;
+                        break;
+                    case 2: // Dungeon Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage(out file_bytes, key, image_data[key], 28, true, 4);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".4");
+                                    lzw.Compress(file_bytes, fullPath);
+                                }
+                            }
+                        }
+                        written = true;
+                        break;
+                    case 3: // Regular Images
+                        foreach (string key in image_data.Keys)
+                        {
+                            if (ValidateImageArray(key, image_data[key]))
+                            {
+                                byte[]? file_bytes;
+                                BuildImage(out file_bytes, key, image_data[key], image_data[key].Count, false, 4);
+
+                                if (file_bytes != null)
+                                {
+                                    string fullPath = Path.Combine(strDataDir, key + ".4");
+                                    lzw.Compress(file_bytes, fullPath);
+                                    written = true;
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (written)
             {
                 MessageBox.Show("Files written!");
             }
@@ -581,20 +763,20 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakePngU5(byte[] lzw, string strPng)
+        public void MakePngU5(byte[] lzw, string strPng, int numPixelsPerByte)
         {
             try
             {
                 byte[] file_bytes = lzw;
-                if (file_bytes.Length != 65536)
+                if (file_bytes.Length != (512 * 256 / numPixelsPerByte))
                 {
                     return;
                 }
                 using (Bitmap b = new Bitmap(512, 256))
                 {
-                    LoadImageU5(file_bytes, b);
+                    LoadImageU5(file_bytes, b, numPixelsPerByte);
                     b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
-                    Console.WriteLine("Image Created");
+                    Debug.WriteLine("Image Created");
                 }
             }
             catch (IOException)
@@ -641,7 +823,7 @@ namespace UltimaTileEditor
             }
         }
 
-        private void BuildMaskImage16(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys)
+        private void BuildMaskImage(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys, int numPixelsPerByte)
         {
             file_bytes = null;
             List<byte> outImage = new List<byte>();
@@ -650,6 +832,12 @@ namespace UltimaTileEditor
             outImage.Add(num2);
             outImage.Add(num1);
             int curPos = 2 + numKeys * 4;
+
+            if (numPixelsPerByte != 8 && numPixelsPerByte != 4 && numPixelsPerByte != 2)
+            {
+                return; // Error
+            }
+
             for (int index = 0; index < numKeys; index++)
             {
                 byte b3 = (byte)((curPos >> 8) & 0xFF);
@@ -660,11 +848,12 @@ namespace UltimaTileEditor
                 if (value.ContainsKey(index))
                 {
                     int bufWidth = value[index].Width;
-                    int tempBuf = 8 - (bufWidth % 8);
-                    tempBuf %= 8;
+                    int bufNum = (8 / numPixelsPerByte) * 2;
+                    int tempBuf = (bufNum - (value[index].Width % bufNum)) % bufNum;
 
                     bufWidth += tempBuf;
-                    curPos += ((bufWidth / 2) * value[index].Height);
+
+                    curPos += ((bufWidth / numPixelsPerByte) * value[index].Height);
                     curPos += 4; // Remember to include width & height
                     byte b1 = (byte)((curPos >> 8) & 0xFF);
                     byte b2 = (byte)((curPos >> 0) & 0xFF);
@@ -681,8 +870,10 @@ namespace UltimaTileEditor
             for (int index = 0; index < numKeys; index++)
             {
                 int bufWidth = value[index].Width;
-                int tempBuf = 8 - (bufWidth % 8);
-                tempBuf %= 8;
+                int bufNum = (8 / numPixelsPerByte) * 2;
+                int tempBuf = (bufNum - (value[index].Width % bufNum)) % bufNum;
+
+                bufWidth += tempBuf;
 
                 // Write the width & height for the image
                 byte b3 = (byte)((value[index].Width >> 8) & 0xFF);
@@ -695,7 +886,7 @@ namespace UltimaTileEditor
                 outImage.Add(b3);
                 byte[] imageBuf;
                 byte[] maskBuf;
-                GenerateImageMaskBytes(out imageBuf, out maskBuf, value[index], bufWidth / 2);
+                GenerateImageMaskBytes(out imageBuf, out maskBuf, value[index], bufWidth / numPixelsPerByte, numPixelsPerByte);
                 outImage.AddRange(imageBuf);
                 // Write the width & height for the image mask
                 b3 = (byte)((value[index].Width >> 8) & 0xFF);
@@ -760,7 +951,7 @@ namespace UltimaTileEditor
             file_bytes = outImage.ToArray();
         }
 
-        private void BuildImage16(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys, bool excludeDungeonKeys)
+        private void BuildImage(out byte[]? file_bytes, string name, Dictionary<int, Bitmap> value, int numKeys, bool excludeDungeonKeys, int numPixelsPerByte)
         {
             file_bytes = null;
             List<byte> outImage = new List<byte>();
@@ -769,7 +960,13 @@ namespace UltimaTileEditor
             outImage.Add(num2);
             outImage.Add(num1);
             int curPos = 2 + numKeys * 4;
-            for(int index = 0; index < numKeys; index++)
+
+            if (numPixelsPerByte != 8 && numPixelsPerByte != 4 && numPixelsPerByte != 2)
+            {
+                return; // Error
+            }
+
+            for (int index = 0; index < numKeys; index++)
             {
                 byte b1 = (byte)((curPos >> 24) & 0xFF);
                 byte b2 = (byte)((curPos >> 16) & 0xFF);
@@ -792,12 +989,11 @@ namespace UltimaTileEditor
 
                 if (value.ContainsKey(index))
                 {
-                    int bufWidth = value[index].Width;
-                    int tempBuf = 8 - (bufWidth % 8);
-                    tempBuf %= 8;
+                    int bufNum = (8 / numPixelsPerByte) * 2;
+                    int bufWidth = (bufNum - (value[index].Width % bufNum)) % bufNum;
+                    bufWidth += value[index].Width;
 
-                    bufWidth += tempBuf;
-                    curPos += ((bufWidth / 2) * value[index].Height);
+                    curPos += ((bufWidth / numPixelsPerByte) * value[index].Height);
                     curPos += 4; // Remember to include width & height
                 }
             }
@@ -806,12 +1002,10 @@ namespace UltimaTileEditor
                 if (value.ContainsKey(index))
                 {
                     int bufWidth = value[index].Width;
-                    int tempBuf = 8 - (bufWidth % 8);
-                    tempBuf %= 8;
+                    int bufNum = (8 / numPixelsPerByte) * 2;
+                    int tempBuf = (bufNum - (value[index].Width % bufNum)) % bufNum;
 
                     bufWidth += tempBuf;
-                    curPos += ((bufWidth / 2) * value[index].Height);
-                    curPos += 4; // Remember to include width & height
 
                     byte b3 = (byte)((value[index].Width >> 8) & 0xFF);
                     byte b4 = (byte)((value[index].Width >> 0) & 0xFF);
@@ -823,50 +1017,100 @@ namespace UltimaTileEditor
                     outImage.Add(b3);
                     byte[] imageBuf;
 
-                    GenerateImageBytes(out imageBuf, value[index], bufWidth / 2);
+                    GenerateImageBytes(out imageBuf, value[index], bufWidth / numPixelsPerByte, numPixelsPerByte);
                     outImage.AddRange(imageBuf);
                 }
             }
             file_bytes = outImage.ToArray();
         }
 
-        private void GenerateImageMaskBytes(out byte[] file_bytes, out byte[] mask_bytes, Bitmap b, int bufWidth)
+        private void GenerateImageMaskBytes(out byte[] file_bytes, out byte[] mask_bytes, Bitmap b, int bufWidth, int numPixelsPerByte)
         {
             pngHelper helper = new pngHelper();
 
             file_bytes = new byte[bufWidth * b.Height];
-            mask_bytes = new byte[bufWidth / 4 * b.Height];
+            mask_bytes = new byte[bufWidth / (8 / numPixelsPerByte) * b.Height];
             int temp_index = 0;
+            byte outbyte = 0;
 
             for (int indexY = 0; indexY < b.Height; indexY++)
             {
-                temp_index = (indexY * bufWidth) / 4;
+                temp_index = (indexY * bufWidth) / (8 / numPixelsPerByte);
 
-                for (int indexX = 0; indexX < b.Width; indexX += 2)
+                for (int indexX = 0; indexX < b.Width; indexX += numPixelsPerByte)
                 {
                     int offsetByte = indexX / 8;
 
-                    Color color1 = b.GetPixel(indexX, indexY);
-                    byte b1 = (byte)((helper.GetByteIgnoreAlpha(color1) << 4) & 0xF0);
-                    byte b2 = 0;
-                    if (color1.A < 128)
+                    if(numPixelsPerByte == 4)
                     {
-                        int offsetval = (1 << (7 - ((indexX % 8) % 8)));
-                        mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
-                    }
-
-                    if (indexX + 1 < b.Width)
-                    {
-                        Color color2 = b.GetPixel(indexX + 1, indexY);
-                        b2 = (byte)(helper.GetByteIgnoreAlpha(color2) & 0x0F);
-                        if (color2.A < 128)
+                        Color color1 = b.GetPixel(indexX, indexY);
+                        byte b1 = (byte)(((helper.GetCGAByteIgnoreAlpha(color1) & 0b11) << 6));
+                        byte b2 = 0;
+                        byte b3 = 0;
+                        byte b4 = 0;
+                        if (color1.A < 128)
                         {
-                            int offsetval = (1 << (7 - (((indexX + 1) % 8) % 8)));
+                            int offsetval = (1 << (7 - ((indexX % 8) % 8)));
                             mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
                         }
+
+                        if (indexX + 1 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 1, indexY);
+                            b2 = (byte)((helper.GetCGAByteIgnoreAlpha(color2) & 0b11) << 4);
+                            if (color2.A < 128)
+                            {
+                                int offsetval = (1 << (7 - (((indexX + 1) % 8) % 8)));
+                                mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                            }
+                        }
+                        if (indexX + 2 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 2, indexY);
+                            b3 = (byte)((helper.GetCGAByteIgnoreAlpha(color2) & 0b11) << 2);
+                            if (color2.A < 128)
+                            {
+                                int offsetval = (1 << (7 - (((indexX + 2) % 8) % 8)));
+                                mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                            }
+                        }
+                        if (indexX + 3 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 3, indexY);
+                            b4 = (byte)(helper.GetCGAByteIgnoreAlpha(color2) & 0b11);
+                            if (color2.A < 128)
+                            {
+                                int offsetval = (1 << (7 - (((indexX + 3) % 8) % 8)));
+                                mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                            }
+                        }
+                        outbyte = (byte)(b1 + b2 + b3 + b4);
                     }
-                    byte outbyte = (byte)(b1 + b2);
-                    file_bytes[indexY * bufWidth + (indexX / 2)] = outbyte;
+                    else
+                    {
+                        Color color1 = b.GetPixel(indexX, indexY);
+                        byte b1 = (byte)((helper.GetByteIgnoreAlpha(color1) << 4) & 0xF0);
+                        byte b2 = 0;
+                        if (color1.A < 128)
+                        {
+                            int offsetval = (1 << (7 - ((indexX % 8) % 8)));
+                            mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                        }
+
+                        if (indexX + 1 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 1, indexY);
+                            b2 = (byte)(helper.GetByteIgnoreAlpha(color2) & 0x0F);
+                            if (color2.A < 128)
+                            {
+                                int offsetval = (1 << (7 - (((indexX + 1) % 8) % 8)));
+                                mask_bytes[temp_index + offsetByte] |= (byte)offsetval;
+                            }
+                        }
+                        outbyte = (byte)(b1 + b2);
+                    }
+  
+                    file_bytes[indexY * bufWidth + (indexX / numPixelsPerByte)] = outbyte;
                 }
             }
         }
@@ -897,26 +1141,56 @@ namespace UltimaTileEditor
             }
         }
 
-        private void GenerateImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth)
+        private void GenerateImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth, int numPixelsPerByte)
         {
             pngHelper helper = new pngHelper();
 
             file_bytes = new byte[bufWidth * b.Height];
             for (int indexY = 0; indexY < b.Height; indexY++)
             {
-                for (int indexX = 0; indexX < b.Width; indexX += 2)
+                for (int indexX = 0; indexX < b.Width; indexX += numPixelsPerByte)
                 {
-                    Color color1 = b.GetPixel(indexX, indexY);
-                    byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
-                    byte b2 = 0;
-
-                    if(indexX + 1 < b.Width)
+                    byte outbyte = 0;
+                    if (numPixelsPerByte == 4)
                     {
-                        Color color2 = b.GetPixel(indexX + 1, indexY);
-                        b2 = (byte)(helper.GetByte(color2) & 0x0F);
+                        Color color1 = b.GetPixel(indexX, indexY);
+                        byte b1 = (byte)((helper.GetCGAByte(color1) & 0b11) << 6);
+                        byte b2 = 0;
+                        byte b3 = 0;
+                        byte b4 = 0;
+
+                        if (indexX + 1 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 1, indexY);
+                            b2 = (byte)((helper.GetCGAByte(color2) & 0b11) << 4);
+                        }
+                        if (indexX + 2 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 2, indexY);
+                            b3 = (byte)((helper.GetCGAByte(color2) & 0b11) << 2);
+                        }
+                        if (indexX + 3 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 3, indexY);
+                            b4 = (byte)(helper.GetCGAByte(color2) & 0b11);
+                        }
+                        outbyte = (byte)(b1 + b2 + b3 + b4);
                     }
-                    byte outbyte = (byte)(b1 + b2);
-                    file_bytes[indexY * bufWidth + (indexX / 2)] = outbyte;
+                    else
+                    {
+                        Color color1 = b.GetPixel(indexX, indexY);
+                        byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
+                        byte b2 = 0;
+
+                        if (indexX + 1 < b.Width)
+                        {
+                            Color color2 = b.GetPixel(indexX + 1, indexY);
+                            b2 = (byte)(helper.GetByte(color2) & 0x0F);
+                        }
+                        outbyte = (byte)(b1 + b2);
+                    }
+                        
+                    file_bytes[indexY * bufWidth + (indexX / numPixelsPerByte)] = outbyte;
                 }
             }
         }
@@ -1120,47 +1394,72 @@ namespace UltimaTileEditor
             return false;
         }
 
-        public void LoadImageU5(byte[] file_bytes, Bitmap b)
+        public void LoadImageU5(byte[] file_bytes, Bitmap b, int numPixelsPerByte)
         {
+            if(numPixelsPerByte != 2 && numPixelsPerByte != 4)
+            {
+                return; // Invalid pixel depth
+            }
             pngHelper helper = new pngHelper();
 
             for (int y_index = 0; y_index < 16; ++y_index)
             {
                 for (int x_index = 0; x_index < 32; ++x_index)
                 {
-                    long cur_tile = (y_index * 32 + x_index) * 128;
+                    long cur_tile = (y_index * 32 + x_index) * 16 * (16 / numPixelsPerByte);
                     for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
                     {
-                        for (int pix_x_index = 0; pix_x_index < 8; ++pix_x_index)
+                        for (int pix_x_index = 0; pix_x_index < 16 / numPixelsPerByte; ++pix_x_index)
                         {
-                            byte cur_byte = file_bytes[cur_tile + ((pix_y_index * 8) + pix_x_index)];
-                            byte b1 = (byte)((cur_byte >> 4) & 0xF);
-                            byte b2 = (byte)(cur_byte & 0xF);
+                            if(numPixelsPerByte == 4)
+                            {
+                                byte cur_byte = file_bytes[cur_tile + ((pix_y_index * (16 / numPixelsPerByte)) + pix_x_index)];
+                                byte b1 = (byte)((cur_byte >> 6) & 0b11);
+                                byte b2 = (byte)((cur_byte >> 4) & 0b11);
+                                byte b3 = (byte)((cur_byte >> 2) & 0b11);
+                                byte b4 = (byte)(cur_byte & 0b11);
 
-                            Color pixColor1 = helper.GetColor(b1);
-                            Color pixColor2 = helper.GetColor(b2);
+                                Color pixColor1 = helper.GetCGAColor(b1);
+                                Color pixColor2 = helper.GetCGAColor(b2);
+                                Color pixColor3 = helper.GetCGAColor(b3);
+                                Color pixColor4 = helper.GetCGAColor(b4);
 
-                            b.SetPixel((x_index * 16) + pix_x_index * 2, (y_index * 16) + pix_y_index, pixColor1);
-                            b.SetPixel((x_index * 16) + pix_x_index * 2 + 1, (y_index * 16) + pix_y_index, pixColor2);
+                                b.SetPixel((x_index * 16) + pix_x_index * numPixelsPerByte, (y_index * 16) + pix_y_index, pixColor1);
+                                b.SetPixel((x_index * 16) + pix_x_index * numPixelsPerByte + 1, (y_index * 16) + pix_y_index, pixColor2);
+                                b.SetPixel((x_index * 16) + pix_x_index * numPixelsPerByte + 2, (y_index * 16) + pix_y_index, pixColor3);
+                                b.SetPixel((x_index * 16) + pix_x_index * numPixelsPerByte + 3, (y_index * 16) + pix_y_index, pixColor4);
+                            }
+                            else
+                            {
+                                byte cur_byte = file_bytes[cur_tile + ((pix_y_index * 8) + pix_x_index)];
+                                byte b1 = (byte)((cur_byte >> 4) & 0xF);
+                                byte b2 = (byte)(cur_byte & 0xF);
+
+                                Color pixColor1 = helper.GetColor(b1);
+                                Color pixColor2 = helper.GetColor(b2);
+
+                                b.SetPixel((x_index * 16) + pix_x_index * 2, (y_index * 16) + pix_y_index, pixColor1);
+                                b.SetPixel((x_index * 16) + pix_x_index * 2 + 1, (y_index * 16) + pix_y_index, pixColor2);
+                            }       
                         }
                     }
                 }
             }
         }
 
-        public void MakeLZWU5(out byte[]? file_bytes, string strPng)
+        public void MakeLZWU5(out byte[]? file_bytes, string strPng, int numPixelsPerByte)
         {
             file_bytes = null;
             try
             {
-                byte[] destination = new byte[256 * 256];
+                byte[] destination = new byte[256 * (512 / numPixelsPerByte)];
                 Bitmap image = (Bitmap)System.Drawing.Image.FromFile(strPng);
                 if (image.Height != 256 && image.Width != 512)
                 {
                     Console.WriteLine("Image must be 512x256 pixels!");
                     return;
                 }
-                WriteImageU5(destination, image);
+                WriteImageU5(destination, image, numPixelsPerByte);
                 file_bytes = destination;
             }
             catch (IOException)
@@ -1170,110 +1469,54 @@ namespace UltimaTileEditor
             }
         }
 
-        public void WriteImageU5(byte[] file_bytes, Bitmap b)
+        public void WriteImageU5(byte[] file_bytes, Bitmap b, int numPixelsPerByte)
         {
+            if(numPixelsPerByte != 2 && numPixelsPerByte != 4)
+            {
+                return; // Invalid
+            }
             pngHelper helper = new pngHelper();
+            byte outbyte;
 
             for (int y_index = 0; y_index < 16; ++y_index)
             {
                 for (int x_index = 0; x_index < 32; ++x_index)
                 {
-                    long cur_tile = (y_index * 32 + x_index) * 128;
+                    long cur_tile = (y_index * 32 + x_index) * (16 * (16 / numPixelsPerByte));
                     for (int pix_y_index = 0; pix_y_index < 16; ++pix_y_index)
                     {
-                        for (int pix_x_index = 0; pix_x_index < 16; pix_x_index += 2)
+                        for (int pix_x_index = 0; pix_x_index < 16; pix_x_index += numPixelsPerByte)
                         {
-                            Color color1 = b.GetPixel((x_index * 16) + pix_x_index, (y_index * 16) + pix_y_index);
-                            Color color2 = b.GetPixel((x_index * 16) + pix_x_index + 1, (y_index * 16) + pix_y_index);
+                            if(numPixelsPerByte == 4)
+                            {
+                                Color color1 = b.GetPixel((x_index * 16) + pix_x_index, (y_index * 16) + pix_y_index);
+                                Color color2 = b.GetPixel((x_index * 16) + pix_x_index + 1, (y_index * 16) + pix_y_index);
+                                Color color3 = b.GetPixel((x_index * 16) + pix_x_index + 2, (y_index * 16) + pix_y_index);
+                                Color color4 = b.GetPixel((x_index * 16) + pix_x_index + 3, (y_index * 16) + pix_y_index);
 
-                            byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
-                            byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
+                                byte b1 = (byte)(((helper.GetCGAByte(color1) & 0b11) << 6));
+                                byte b2 = (byte)(((helper.GetCGAByte(color2) & 0b11) << 4));
+                                byte b3 = (byte)(((helper.GetCGAByte(color3) & 0b11) << 2));
+                                byte b4 = (byte)(((helper.GetCGAByte(color4) & 0b11) << 0));
 
-                            byte outbyte = (byte)(b1 + b2);
-                            file_bytes[cur_tile + ((pix_y_index * 8) + (pix_x_index / 2))] = outbyte;
+                                outbyte = (byte)(b1 + b2 + b3 + b4);       
+                            }
+                            else
+                            {
+                                Color color1 = b.GetPixel((x_index * 16) + pix_x_index, (y_index * 16) + pix_y_index);
+                                Color color2 = b.GetPixel((x_index * 16) + pix_x_index + 1, (y_index * 16) + pix_y_index);
+
+                                byte b1 = (byte)((helper.GetByte(color1) << 4) & 0xF0);
+                                byte b2 = (byte)(helper.GetByte(color2) & 0x0F);
+
+                                outbyte = (byte)(b1 + b2);
+                            }
+                            file_bytes[cur_tile + ((pix_y_index * (16 / numPixelsPerByte)) + (pix_x_index / numPixelsPerByte))] = outbyte;
                         }
                     }
                 }
             }
-        }
-
-        private void CreateImages(byte[] lzw_out, string strOutDir, string name)
-        {
-            pngHelper helper = new pngHelper();
-
-            int temp_offset = 2;
-            int numImages = (lzw_out[1] << 8) + lzw_out[0];
-            int[] offsets = new int[numImages];
-            for (int index = 0; index < numImages; index++)
-            {
-                offsets[index] = (lzw_out[temp_offset + 3] << 24) + (lzw_out[temp_offset + 2] << 16) + (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
-                temp_offset += 4;
-            }
-            for (int index = 0; index < numImages; index++)
-            {
-                temp_offset = offsets[index];
-                // For dungeons, offsets 8 & 24 are always 0.
-                if(temp_offset == 0)
-                {
-                    continue;
-                }
-                int width = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
-                temp_offset += 2;
-                int height = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
-                temp_offset += 2;
-
-                int bufwid = (8 - (width % 8)) % 8;
-
-                int data_size = (width + bufwid) * height / 2;
-
-                try
-                {
-                    using (Bitmap b = new(width, height))
-                    {
-                        int temp_width = 0;
-                        int temp_height = 0;
-                        for(int temp_index = 0; temp_index < data_size; temp_index++)
-                        {
-                            byte curByte = lzw_out[temp_offset];
-                            byte pixel1 = (byte)((curByte >> 4) & 0x0F);
-                            byte pixel2 = (byte)(curByte & 0x0F);
-                            Color color1 = helper.GetColor(pixel1);
-                            Color color2 = helper.GetColor(pixel2);
-
-                            if (temp_width < width)
-                            {
-                                b.SetPixel(temp_width, temp_height, color1);
-                            }
-                            temp_width++;
-                            if(temp_width >= width + bufwid)
-                            {
-                                temp_width = 0;
-                                temp_height++;
-                            }
-                            if (temp_width < width)
-                            {
-                                b.SetPixel(temp_width, temp_height, color2);
-                            }
-                            temp_width++;
-                            if (temp_width >= width + bufwid)
-                            {
-                                temp_width = 0;
-                                temp_height++;
-                            }
-                            temp_offset++;
-                        }
-
-                        string tempName = name + "_" + index.ToString() + ".png";
-                        string fullPath = Path.Combine(strOutDir, tempName);
-                        b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
-                    }
-                }
-                catch (IOException)
-                {
-                    Console.WriteLine("LZW file does not exist!");
-                    return;
-                }
-            }
+            int j = 9;
         }
 
         private void AddMask(Bitmap b, byte[] lzw_out, int temp_offset, string name, string strOutDir)
@@ -1341,9 +1584,31 @@ namespace UltimaTileEditor
             }
         }
 
-        private void CreateMaskImages(byte[] lzw_out, string strOutDir, string name)
+        private void CreateMaskImages(byte[] lzw_out, string strOutDir, string name, int numPixelsPerByte)
         {
             pngHelper helper = new pngHelper();
+
+            int modnum = 0;
+            int byteInc = 0;
+            if (numPixelsPerByte == 8)
+            {
+                modnum = 0b1;
+                byteInc = 1;
+            }
+            else if (numPixelsPerByte == 4)
+            {
+                modnum = 0b11;
+                byteInc = 2;
+            }
+            else if (numPixelsPerByte == 2)
+            {
+                modnum = 0b1111;
+                byteInc = 4;
+            }
+            else
+            {
+                return; // Invalid pixels per byte
+            }
 
             int temp_offset = 2;
             int numImages = (lzw_out[1] << 8) + lzw_out[0];
@@ -1362,50 +1627,153 @@ namespace UltimaTileEditor
                 int height = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
                 temp_offset += 2;
 
-                int bufwid = (8 - (width % 8)) % 8;
+                int bufNum = (8 / numPixelsPerByte) * 2;
+                int bufWidth = (bufNum - (width % bufNum)) % bufNum;
 
-                int data_size = (width + bufwid) * height / 2;
+                int data_size = (width + bufWidth) * height / numPixelsPerByte;
+
+                if (lzw_out.Length < temp_offset + data_size)
+                {
+                    return; // Invalid file
+                }
 
                 try
                 {
                     using (Bitmap b = new(width, height))
                     {
-                        int temp_width = 0;
-                        int temp_height = 0;
-                        for (int temp_index = 0; temp_index < data_size; temp_index++)
+                        int curPos = temp_offset;
+                        for (int indexY = 0; indexY < height; indexY++)
                         {
-                            byte curByte = lzw_out[temp_offset];
-                            byte pixel1 = (byte)((curByte >> 4) & 0x0F);
-                            byte pixel2 = (byte)(curByte & 0x0F);
-                            Color color1 = helper.GetColor(pixel1);
-                            Color color2 = helper.GetColor(pixel2);
+                            for (int indexX = 0; indexX < data_size / height; indexX++)
+                            {
+                                byte curByte = lzw_out[curPos];
+                                for (int byteIndex = 0; byteIndex < 8; byteIndex += byteInc)
+                                {
+                                    byte curColor = (byte)(((int)(curByte) >> ((8 - byteInc) - byteIndex)) & modnum);
+                                    if (indexX * numPixelsPerByte + (byteIndex / byteInc) < width)
+                                    {
+                                        Color color1;
+                                        if (numPixelsPerByte == 4)
+                                        {
+                                            color1 = helper.GetCGAColor(curColor);
+                                        }
+                                        else
+                                        {
+                                            color1 = helper.GetColor(curColor);
+                                        }
 
-                            if (temp_width < width)
-                            {
-                                b.SetPixel(temp_width, temp_height, color1);
+                                        b.SetPixel(indexX * numPixelsPerByte + (byteIndex / byteInc), indexY, color1);
+                                    }
+                                }
+                                curPos++;
                             }
-                            temp_width++;
-                            if (temp_width >= width + bufwid)
-                            {
-                                temp_width = 0;
-                                temp_height++;
-                            }
-                            if (temp_width < width)
-                            {
-                                b.SetPixel(temp_width, temp_height, color2);
-                            }
-                            temp_width++;
-                            if (temp_width >= width + bufwid)
-                            {
-                                temp_width = 0;
-                                temp_height++;
-                            }
-                            temp_offset++;
                         }
 
                         AddMask(b, lzw_out, offsets[index + 1], name, strOutDir);
 
                         string tempName = name + "_" + (index / 2).ToString() + ".png";
+                        string fullPath = Path.Combine(strOutDir, tempName);
+                        b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+                catch (IOException)
+                {
+                    Console.WriteLine("LZW file does not exist!");
+                    return;
+                }
+            }
+        }
+
+        private void CreateImages(byte[] lzw_out, string strOutDir, string name, int numPixelsPerByte)
+        {
+            pngHelper helper = new pngHelper();
+
+            int modnum = 0;
+            int byteInc = 0;
+            if (numPixelsPerByte == 8)
+            {
+                modnum = 0b1;
+                byteInc = 1;
+            }
+            else if (numPixelsPerByte == 4)
+            {
+                modnum = 0b11;
+                byteInc = 2;
+            }
+            else if (numPixelsPerByte == 2)
+            {
+                modnum = 0b1111;
+                byteInc = 4;
+            }
+            else
+            {
+                return; // Invalid pixels per byte
+            }
+
+            int temp_offset = 2;
+            int numImages = (lzw_out[1] << 8) + lzw_out[0];
+            int[] offsets = new int[numImages];
+            for (int index = 0; index < numImages; index++)
+            {
+                offsets[index] = (lzw_out[temp_offset + 3] << 24) + (lzw_out[temp_offset + 2] << 16) + (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
+                temp_offset += 4;
+            }
+            for (int index = 0; index < numImages; index++)
+            {
+                temp_offset = offsets[index];
+                // For dungeons, offsets 8 & 24 are always 0.
+                if (temp_offset == 0)
+                {
+                    continue;
+                }
+                int width = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
+                temp_offset += 2;
+                int height = (lzw_out[temp_offset + 1] << 8) + (lzw_out[temp_offset + 0] << 0);
+                temp_offset += 2;
+
+                int bufNum = (8 / numPixelsPerByte) * 2;
+                int bufWidth = (bufNum - (width % bufNum)) % bufNum;
+
+                int data_size = (width + bufWidth) * height / numPixelsPerByte;
+
+                if (lzw_out.Length < temp_offset + data_size)
+                {
+                    return; // Invalid file
+                }
+
+                try
+                {
+                    using (Bitmap b = new(width, height))
+                    {
+                        int curPos = temp_offset;
+                        for (int indexY = 0; indexY < height; indexY++)
+                        {
+                            for (int indexX = 0; indexX < data_size / height; indexX++)
+                            {
+                                byte curByte = lzw_out[curPos];
+                                for (int byteIndex = 0; byteIndex < 8; byteIndex += byteInc)
+                                {
+                                    byte curColor = (byte)(((int)(curByte) >> ((8 - byteInc) - byteIndex)) & modnum);
+                                    if (indexX * numPixelsPerByte + (byteIndex / byteInc) < width)
+                                    {
+                                        Color color1;
+                                        if (numPixelsPerByte == 4)
+                                        {
+                                            color1 = helper.GetCGAColor(curColor);
+                                        }
+                                        else
+                                        {
+                                            color1 = helper.GetColor(curColor);
+                                        }
+
+                                        b.SetPixel(indexX * numPixelsPerByte + (byteIndex / byteInc), indexY, color1);
+                                    }
+                                }
+                                curPos++;
+                            }
+                        }
+
+                        string tempName = name + "_" + index.ToString() + ".png";
                         string fullPath = Path.Combine(strOutDir, tempName);
                         b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                     }

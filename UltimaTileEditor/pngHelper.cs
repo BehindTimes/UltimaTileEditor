@@ -120,6 +120,17 @@ namespace UltimaTileEditor
             return (byte)retval;
         }
 
+        public byte GetCGAByteIgnoreAlpha(Color curColor)
+        {
+            Color tempColor = Color.FromArgb(curColor.R, curColor.G, curColor.B);
+            int retval = Array.IndexOf(cga_color_array, tempColor);
+            if (retval < 0)
+            {
+                retval = 0;
+            }
+            return (byte)retval;
+        }
+
         public byte GetByteWithPalette(Color curColor, int palette)
         {
             int retval = 0;
