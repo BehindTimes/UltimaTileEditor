@@ -1516,7 +1516,6 @@ namespace UltimaTileEditor
                     }
                 }
             }
-            int j = 9;
         }
 
         private void AddMask(Bitmap b, byte[] lzw_out, int temp_offset, string name, string strOutDir)
