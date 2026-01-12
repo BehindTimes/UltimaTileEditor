@@ -2,7 +2,7 @@ ALWAYS BACKUP FILES BEFORE USING THIS
 
 This requires .NET 10.0. (https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
-This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  No enhanced or modified versions are currently supported, and this will only use the default tile set.  For example, with Ultima 5, it supports both CGA and EGA, but this currently will only support the EGA tile set.
+This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  No enhanced or modified versions are currently supported, and this will only use the default EGA tile set for Ultima 1 & 4.  For Ultima 5, it will support both EGA & CGA.
 
 Usage:
 
@@ -58,3 +58,5 @@ Ultima 5
 
 Ultima 4: Threat of the Trinity
 * Being a fan game, there are new files here.  Select Ultima 4 from the program, but you might need to rename files (case-sensitive) to valid Ultima 4 files to access the appropriate extractor/compressor (RLE, LZW, etc.).  And after the appropriate extraction and insertion, you can just rename them back to the original name.
+
+Be careful with editing CGA colors.  Take into consideration that many CGA games, including Ultima, used Composite CGA to give the appearance of 16 colors on Composite monitors.  What might look right for RGB (the ugly 4 colors), could appear completely wrong if run in composite mode.
