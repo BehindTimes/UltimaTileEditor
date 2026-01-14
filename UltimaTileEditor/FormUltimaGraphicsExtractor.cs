@@ -81,6 +81,7 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("HCS Files");
                     cbFileType.Items.Add("BIT Files");
                     cbFileType.Items.Add("Path Files");
+                    cbFileType.Items.Add("Intro Font");
                     cbPalette.Items.Add("EGA");
                     cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
@@ -192,7 +193,7 @@ namespace UltimaTileEditor
 
             if (Directory.Exists(strDataDir) && Directory.Exists(strImagesDir))
             {
-                if (lbFiles.Items.Count > 0)
+                if (lbImages.Items.Count > 0)
                 {
                     string[] itemsArray;
 
@@ -364,6 +365,10 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima5PathFiles;
                             m_ImageFiles = DataFiles.Ultima5PathImage;
                             break;
+                        case 8: // .PCS Files
+                            m_DataFiles = DataFiles.Ultima5Proport;
+                            m_ImageFiles = DataFiles.Ultima5Proport;
+                            break;
                         default: // .16 Tiles
                             m_DataFiles = DataFiles.Ultima5Tiles;
                             m_ImageFiles = DataFiles.Ultima5Tiles;
@@ -454,6 +459,10 @@ namespace UltimaTileEditor
                             else if (cbFileType.SelectedIndex == 7)
                             {
                                 strExt = ".PTH";
+                            }
+                            else if (cbFileType.SelectedIndex == 8)
+                            {
+                                strExt = ".PCS";
                             }
                             else
                             {

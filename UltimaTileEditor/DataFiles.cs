@@ -6,6 +6,7 @@ namespace UltimaTileEditor
 {
     internal class DataFiles
     {
+        public static readonly List<string> Ultima5Proport = ["PROPORT"];
         public static readonly List<string> Ultima5PathFiles = ["BRITISH"];
         public static readonly List<string> Ultima5PathImage = ["BRITISH_PATH"];
         public static readonly List<string> Ultima5BitFiles = ["WD", "TITLE", "BRITISH"];

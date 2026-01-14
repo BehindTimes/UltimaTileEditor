@@ -100,6 +100,21 @@ namespace UltimaTileEditor
                         CreatePathImage(file_bytes, value, strImageDir);
                     }
                 }
+                else if (image.EndsWith("PROPORT.PCS")) // This file is not compressed
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        //CreatePathImage(file_bytes, value, strImageDir);
+                        byte[]? lzw_out;
+                        lzw.Extract(file_bytes, out lzw_out);
+                        if (lzw_out != null)
+                        {
+                            CreateProportionalFont(lzw_out, value, strImageDir);
+                        }
+                    }
+                }
                 else
                 {
                     if (palette == 0) // EGA
@@ -171,6 +186,33 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strDataDir, "TILES.16");
                             lzw.Compress(file_bytes, fullPath);
                             written = true;
+                        }
+                    }
+                    if (tempimage.EndsWith("PROPORT.png"))
+                    {
+                        try
+                        {
+                            Bitmap b = (Bitmap)System.Drawing.Image.FromFile(image);
+                            if (b.Width == 104 && b.Height == 56)
+                            {
+                                string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                                if (value != null)
+                                {
+                                    byte[]? file_bytes;
+                                    ReadPCS(b, out file_bytes);
+                                    if(file_bytes != null)
+                                    {
+                                        string fullPath = Path.Combine(strDataDir, value + ".PCS");
+                                        lzw.Compress(file_bytes, fullPath);
+                                        written = true;
+                                    }
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PNG file does not exist!");
+                            return;
                         }
                     }
                     else if ((image.EndsWith("IBM.png") || image.EndsWith("RUNES.png")) && imageType == 4)
@@ -647,6 +689,85 @@ namespace UltimaTileEditor
             }
         }
 
+        private void LoadPCSImage(byte[] file_data, Bitmap b)
+        {
+            //const int ROW_COUNT = 7;
+            const int COL_COUNT = 13;
+            const int NUM_CHARS = 91;
+            int num1 = ((file_data[0] << 8) & 0xFF);
+            int num2 = (file_data[0] & 0xFF);
+            int numImages = num1 + num2;
+            if(numImages != NUM_CHARS)
+            {
+                return; // Basic error checking
+            }
+            if(file_data.Length != 2 + numImages * 8 + numImages * 6)
+            {
+                return;  // Basic error checking
+            }
+            int[] offsets = new int[numImages];
+            for (int i = 0; i < numImages; i++)
+            {
+                num1 = (((file_data[i * 2 + 3] & 0xFF) << 8) );
+                num2 = (file_data[i * 2 + 2] & 0xFF);
+                int curOffset = num1 + num2;
+                
+                if(curOffset + 12 > file_data.Length)
+                {
+                    return;  // Basic error checking
+                }
+
+                offsets[i] = curOffset;
+            }
+            for (int i = 0; i < numImages; i++)
+            {
+                int curOffset = offsets[i];
+                num1 = file_data[curOffset + 1];
+                num2 = file_data[curOffset];
+                int width = (num1 << 8) + num2;
+                curOffset += 2;
+                num1 = file_data[curOffset + 1];
+                num2 = file_data[curOffset];
+                int height = (num1 << 8) + num2;
+                curOffset += 2;
+                int curPos = curOffset;
+
+                // Since all the characters are 8x8 on the IBM PC, I'm not going to make a super compliant version of this.
+                for (int indexY = 0; indexY < height; indexY++)
+                {
+                    byte curByte = file_data[curPos + indexY];
+                    for (int indexX = 0; indexX < 8; indexX++)
+                    {
+                        byte tempByte = (byte)((curByte >> ((7 - indexX)) & 0x01));
+                        int curCol = i % COL_COUNT;
+                        int curRow = i / COL_COUNT;
+
+                        b.SetPixel(curCol * 8 + indexX, curRow * 8 + indexY, tempByte == 1 ? Color.White : Color.Black);
+                    }
+                }
+            }
+        }
+
+        private void CreateProportionalFont(byte[] file_data, string name, string strImageDir)
+        {
+            try
+            {
+                using (Bitmap b = new Bitmap(104, 56))
+                {
+                    string fullPath = Path.Combine(strImageDir, name + ".png");
+
+                    LoadPCSImage(file_data, b);
+                    b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                    Console.WriteLine("Image Created");
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("LZW file does not exist!");
+                return;
+            }
+        }
+
         private void CreatePathImage(byte[] file_data, string name, string strImageDir)
         {
             try
@@ -786,7 +907,63 @@ namespace UltimaTileEditor
             }
         }
 
-        public void ReadSimpleBitmap(Bitmap b, int tile_width, int tile_height, int numX, int numY, string strOutFile)
+        // PCS is a 2 byte count for number of images followed by 4 bytes for the image offset
+        // followed by 2 bytes for the width, 2 bytes for the height, and 8 bytes for pixel data
+        private void ReadPCS(Bitmap b, out byte[]? file_bytes)
+        {
+            const int ROW_COUNT = 7;
+            const int COL_COUNT = 13;
+            const int NUM_IMAGES = 91;
+            const int NI_OFFSET = 2;
+            const int DATA_OFFSET = 2 + (91 * 2);
+            const int IMAGE_SIZE = 12;
+            const int PARAM_OFFSET = 4;
+            file_bytes = null;
+            byte[] destination = new byte[NUM_IMAGES * 14 + 2];
+            destination[0] = 91;
+            for(int index = 0; index < NUM_IMAGES; index++)
+            {
+                int curOffset = NI_OFFSET + (NUM_IMAGES * 2) + (index * 4) + (index * 8);
+                byte num1 = (byte)(curOffset & 0xFF);
+                byte num2 = (byte)((curOffset >> 8) & 0xFF);
+                destination[NI_OFFSET + (index * 2)] = num1;
+                destination[NI_OFFSET + (index * 2) + 1] = num2;
+            }
+
+            int tempOffset = DATA_OFFSET;
+            for (int indexY = 0; indexY < ROW_COUNT; indexY++)
+            {
+                for (int indexX = 0; indexX < COL_COUNT; indexX++)
+                {
+                    int curOffset = tempOffset + PARAM_OFFSET;
+                    byte curWidth = 0;
+                    for (int y = 0; y < 8; y++)
+                    {
+                        byte curByte = 0;
+                        for(int x = 0; x < 8; x++)
+                        {
+                            Color curColor = b.GetPixel(x + (indexX * 8), y + (indexY * 8));
+                            if(curColor.R > 128 && curColor.G > 128 && curColor.B > 128)
+                            {
+                                if(curWidth < x + 1)
+                                {
+                                    curWidth = (byte)(x + 1);
+                                }
+                                curByte += (byte)(1 << (7 - x));
+                            }
+                        }
+                        destination[curOffset + y] = curByte;
+                    }
+                    // Calculate and write the image width and height now
+                    destination[tempOffset] = curWidth; // Width
+                    destination[tempOffset + 2] = 8; // Height is always 8
+                    tempOffset += IMAGE_SIZE;
+                }
+            }
+            file_bytes = destination;
+        }
+
+        private void ReadSimpleBitmap(Bitmap b, int tile_width, int tile_height, int numX, int numY, string strOutFile)
         {
             byte[] file_data = new byte[(tile_width / 8) * tile_height * numY * numX];
             int curPos = 0;
