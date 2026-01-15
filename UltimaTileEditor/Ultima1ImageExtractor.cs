@@ -89,7 +89,8 @@ namespace UltimaTileEditor
                                 case 2: // Tandy
                                     MakePngU1Linear(file_bytes, fullPath, 7, 2, 24, 19, 2);
                                     break;
-                                default: // EGA - Not supported
+                                default: // EGA
+                                    MakePngU1Linear(file_bytes, fullPath, 8, 7, 24, 19, 8);
                                     break;
                             }
                         }
@@ -108,7 +109,8 @@ namespace UltimaTileEditor
                                 case 2: // Tandy
                                     MakePngU1Linear(file_bytes, fullPath, 4, 6, 32, 19, 2);
                                     break;
-                                default: // EGA - Not supported
+                                default: // EGA
+                                    MakePngU1Linear(file_bytes, fullPath, 8, 12, 32, 19, 8);
                                     break;
                             }
                         }
@@ -260,12 +262,13 @@ namespace UltimaTileEditor
                                 MakeU1Linear(out file_bytes, image, 7, 2, 24, 19, 2);
                                 break;
                             default: // EGA - Not supported
+                                MakeU1Linear(out file_bytes, image, 8, 7, 24, 19, 8);
                                 break;
                         }
 
                         if (file_bytes != null)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + "_test.BIN");
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
                             using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
                             binWriter.Write(file_bytes);
                             written = true;
@@ -282,13 +285,14 @@ namespace UltimaTileEditor
                             case 2: // Tandy
                                 MakeU1Linear(out file_bytes, image, 4, 6, 32, 19, 2);
                                 break;
-                            default: // EGA - Not supported
+                            default: // EGA
+                                MakeU1Linear(out file_bytes, image, 8, 12, 32, 19, 8);
                                 break;
                         }
 
                         if (file_bytes != null)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + "_test.BIN");
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
                             using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
                             binWriter.Write(file_bytes);
                             written = true;
@@ -697,7 +701,16 @@ namespace UltimaTileEditor
                                     byte color4 = helper.GetCGAByte(c4);
                                     color = (byte)((color1 << 6) + (color2 << 4) + (color3 << 2) + color4);
                                 }
-                                else // EGA
+                                else if (numPixelsPerTile == 8) // EGA Monochromatic?
+                                {
+                                    for (int bitIndex = 0; bitIndex < 8; bitIndex++)
+                                    {
+                                        Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + bitIndex, tileYindex * tile_height + indexY);
+                                        byte tempByte = helper.GetByte(c1);
+                                        color += (byte)(((tempByte != 0) ? 1 : 0) << (7 - bitIndex));
+                                    }
+                                }
+                                else // Tandy
                                 {
                                     Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile), tileYindex * tile_height + indexY);
                                     Color c2 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 1, tileYindex * tile_height + indexY);
@@ -791,7 +804,16 @@ namespace UltimaTileEditor
                                 b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 2, tileYindex * tileheight + indexY, c3);
                                 b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 3, tileYindex * tileheight + indexY, c4);
                             }
-                            else // EGA
+                            else if (numPixelsPerTile == 8) // EGA, monochromatic?
+                            {
+                                for(int bitIndex = 0; bitIndex < 8; bitIndex++)
+                                {
+                                    byte color1 = (byte)((curByte >> (7 - bitIndex)) & 0b1);
+                                    Color c1 = color1 == 1 ? helper.GetColor(15) : helper.GetColor(0);
+                                    b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + bitIndex, tileYindex * tileheight + indexY, c1);
+                                }
+                            }
+                            else // Tandy
                             {
                                 byte color1 = (byte)((curByte >> 4) & 0xF);
                                 byte color2 = (byte)(curByte & 0xF);
