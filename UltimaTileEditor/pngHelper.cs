@@ -94,8 +94,11 @@ namespace UltimaTileEditor
             {
                 switch (palette)
                 {
-                    case 1: // Ultima 1
+                    case 1: // Ultima 1 EGA
                         pixColor = color_array_u1_ega[curByte];
+                        break;
+                    case 2: // Ultima 1 Tandy
+                        pixColor = color_array_u1_tandy[curByte];
                         break;
                     default: // EGA
                         pixColor = color_array[curByte];
@@ -155,8 +158,15 @@ namespace UltimaTileEditor
             int retval = 0;
             switch (palette)
             {
-                case 1: // Ultima 1
+                case 1: // Ultima 1 EGA
                     retval = Array.IndexOf(color_array_u1_ega, curColor);
+                    if (retval < 0)
+                    {
+                        retval = 0;
+                    }
+                    break;
+                case 2: // Ultima 1 Tandy
+                    retval = Array.IndexOf(color_array_u1_tandy, curColor);
                     if (retval < 0)
                     {
                         retval = 0;

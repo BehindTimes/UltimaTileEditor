@@ -92,51 +92,47 @@ namespace UltimaTileEditor
             }
         }
 
-        private void btnGameDataBrowse_Click(object sender, EventArgs e)
+        private void BtnGameDataBrowse_Click(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using var fbd = new FolderBrowserDialog();
+            // Optional: Set the initial folder that appears in the dialog
+            fbd.RootFolder = Environment.SpecialFolder.Desktop;
+            // Optional: Add a description at the top of the dialog
+            fbd.Description = "Select the Ultima Data File Folder";
+            // Optional: Allow or prevent the creation of new folders
+            fbd.ShowNewFolderButton = true;
+
+            DialogResult result = fbd.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
             {
-                // Optional: Set the initial folder that appears in the dialog
-                fbd.RootFolder = Environment.SpecialFolder.Desktop;
-                // Optional: Add a description at the top of the dialog
-                fbd.Description = "Select the Ultima Data File Folder";
-                // Optional: Allow or prevent the creation of new folders
-                fbd.ShowNewFolderButton = true;
-
-                DialogResult result = fbd.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                {
-                    string selectedFolderPath = fbd.SelectedPath;
-                    tbGameDataDir.Text = selectedFolderPath;
-                    DisplayDataFiles();
-                }
+                string selectedFolderPath = fbd.SelectedPath;
+                tbGameDataDir.Text = selectedFolderPath;
+                DisplayDataFiles();
             }
         }
 
-        private void btnImageBrowse_Click(object sender, EventArgs e)
+        private void BtnImageBrowse_Click(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using var fbd = new FolderBrowserDialog();
+            // Optional: Set the initial folder that appears in the dialog
+            fbd.RootFolder = Environment.SpecialFolder.Desktop;
+            // Optional: Add a description at the top of the dialog
+            fbd.Description = "Select the Ultima Extracted Images Folder";
+            // Optional: Allow or prevent the creation of new folders
+            fbd.ShowNewFolderButton = true;
+
+            DialogResult result = fbd.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
             {
-                // Optional: Set the initial folder that appears in the dialog
-                fbd.RootFolder = Environment.SpecialFolder.Desktop;
-                // Optional: Add a description at the top of the dialog
-                fbd.Description = "Select the Ultima Extracted Images Folder";
-                // Optional: Allow or prevent the creation of new folders
-                fbd.ShowNewFolderButton = true;
-
-                DialogResult result = fbd.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                {
-                    string selectedFolderPath = fbd.SelectedPath;
-                    tbImagesDir.Text = selectedFolderPath;
-                    DisplayImageFiles();
-                }
+                string selectedFolderPath = fbd.SelectedPath;
+                tbImagesDir.Text = selectedFolderPath;
+                DisplayImageFiles();
             }
         }
 
-        private void btnExtract_Click(object sender, EventArgs e)
+        private void BtnExtract_Click(object sender, EventArgs e)
         {
             string strDataDir = tbGameDataDir.Text;
             string strImagesDir = tbImagesDir.Text;
@@ -150,27 +146,27 @@ namespace UltimaTileEditor
                     switch (m_curGame)
                     {
                         case UltimaGame.Ultima1:
-                            Ultima1ImageExtractor ie1 = new Ultima1ImageExtractor();
+                            Ultima1ImageExtractor ie1 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             Ultima1ImageExtractor.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima2:
-                            Ultima2ImageExtractor ie2 = new Ultima2ImageExtractor();
+                            Ultima2ImageExtractor ie2 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             ie2.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima3:
-                            Ultima3ImageExtractor ie3 = new Ultima3ImageExtractor();
+                            Ultima3ImageExtractor ie3 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             ie3.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima4:
-                            Ultima4ImageExtractor ie4 = new Ultima4ImageExtractor();
+                            Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             ie4.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
-                            Ultima5ImageExtractor ie5 = new Ultima5ImageExtractor();
+                            Ultima5ImageExtractor ie5 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
                             ie5.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
@@ -186,7 +182,7 @@ namespace UltimaTileEditor
             System.GC.Collect();
         }
 
-        private void btnCompress_Click(object sender, EventArgs e)
+        private void BtnCompress_Click(object sender, EventArgs e)
         {
             string strDataDir = tbGameDataDir.Text;
             string strImagesDir = tbImagesDir.Text;
@@ -200,27 +196,27 @@ namespace UltimaTileEditor
                     switch (m_curGame)
                     {
                         case UltimaGame.Ultima1:
-                            Ultima1ImageExtractor ie1 = new Ultima1ImageExtractor();
+                            Ultima1ImageExtractor ie1 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             Ultima1ImageExtractor.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima2:
-                            Ultima2ImageExtractor ie2 = new Ultima2ImageExtractor();
+                            Ultima2ImageExtractor ie2 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             ie2.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima3:
-                            Ultima3ImageExtractor ie3 = new Ultima3ImageExtractor();
+                            Ultima3ImageExtractor ie3 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             ie3.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima4:
-                            Ultima4ImageExtractor ie4 = new Ultima4ImageExtractor();
+                            Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             ie4.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
-                            Ultima5ImageExtractor ie5 = new Ultima5ImageExtractor();
+                            Ultima5ImageExtractor ie5 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
                             ie5.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
@@ -246,7 +242,18 @@ namespace UltimaTileEditor
                     {
                         case 1: // Castle Image
                             m_DataFiles = DataFiles.Ultima1Image;
-                            m_ImageFiles = DataFiles.Ultima1Image;
+                            switch(cbPalette.SelectedIndex)
+                            {
+                                case 1: // CGA
+                                    m_ImageFiles = DataFiles.Ultima1ImageCGA;
+                                    break;
+                                case 2: // Tandy
+                                    m_ImageFiles = DataFiles.Ultima1ImageTandy;
+                                    break;
+                                default:
+                                    m_ImageFiles = DataFiles.Ultima1ImageEGA;
+                                    break;
+                            }
                             break;
                         case 2: // Ending
                             m_DataFiles = DataFiles.Ultima1Ending;
@@ -401,6 +408,10 @@ namespace UltimaTileEditor
                         {
                             strExt = ".4";
                         }
+                        else if (cbFileType.SelectedIndex == 1 && cbPalette.SelectedIndex == 2)
+                        {
+                            strExt = ".16";
+                        }
                         else
                         {
                             strExt = ".BIN";
@@ -542,37 +553,37 @@ namespace UltimaTileEditor
             }
         }
 
-        private void rbUltima1_CheckedChanged(object sender, EventArgs e)
+        private void RbUltima1_CheckedChanged(object sender, EventArgs e)
         {
             ChangeGame(UltimaGame.Ultima1);
         }
 
-        private void rbUltima2_CheckedChanged(object sender, EventArgs e)
+        private void RbUltima2_CheckedChanged(object sender, EventArgs e)
         {
             ChangeGame(UltimaGame.Ultima2);
         }
 
-        private void rbUltima3_CheckedChanged(object sender, EventArgs e)
+        private void RbUltima3_CheckedChanged(object sender, EventArgs e)
         {
             ChangeGame(UltimaGame.Ultima3);
         }
 
-        private void rbUltima4_CheckedChanged(object sender, EventArgs e)
+        private void RbUltima4_CheckedChanged(object sender, EventArgs e)
         {
             ChangeGame(UltimaGame.Ultima4);
         }
 
-        private void rbUltima5_CheckedChanged(object sender, EventArgs e)
+        private void RbUltima5_CheckedChanged(object sender, EventArgs e)
         {
             ChangeGame(UltimaGame.Ultima5);
         }
 
-        private void cbFileType_SelectedIndexChanged(object sender, EventArgs e)
+        private void CbFileType_SelectedIndexChanged(object sender, EventArgs e)
         {
             ChangeDataFiles();
         }
 
-        private void cbPalette_SelectedIndexChanged(object sender, EventArgs e)
+        private void CbPalette_SelectedIndexChanged(object sender, EventArgs e)
         {
             ChangeDataFiles();
         }

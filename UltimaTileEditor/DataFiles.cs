@@ -90,6 +90,9 @@ namespace UltimaTileEditor
         public static readonly List<string> Ultima1T1KFiles = ["T1KMOND", "T1KTILES", "T1KTOWN", "T1KFIGHT", "T1KSPACE"];
 
         public static readonly List<string> Ultima1Image = ["CASTLE"];
+        public static readonly List<string> Ultima1ImageEGA = ["CASTLE_EGA"];
+        public static readonly List<string> Ultima1ImageCGA = ["CASTLE_CGA"];
+        public static readonly List<string> Ultima1ImageTandy = ["CASTLE_Tandy"];
 
         public static readonly List<string> Ultima1Ending = ["NIF"];
     }

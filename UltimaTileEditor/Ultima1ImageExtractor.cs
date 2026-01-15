@@ -23,10 +23,11 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             switch (palette)
                             {
-                                case 1: // CGA - Not supported
+                                case 1: // CGA
+                                    MakePngU1Linear(file_bytes, fullPath, 13, 4, 16, 16, 4);
                                     break;
-                                case 2: // Tandy - Not supported
-                                    MakePngU1Tandy(file_bytes, fullPath, 13, 4, 16, 16);
+                                case 2: // Tandy
+                                    MakePngU1Linear(file_bytes, fullPath, 13, 4, 16, 16, 2);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 13, 4, true);
@@ -42,10 +43,11 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             switch (palette)
                             {
-                                case 1: // CGA - Not supported
+                                case 1: // CGA
+                                    MakePngU1Linear(file_bytes, fullPath, 19, 1, 16, 16, 4);
                                     break;
-                                case 2: // Tandy - Not supported
-                                    MakePngU1Tandy(file_bytes, fullPath, 19, 1, 16, 16);
+                                case 2: // Tandy
+                                    MakePngU1Linear(file_bytes, fullPath, 19, 1, 16, 16, 2);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 19, 1, true);
@@ -61,10 +63,11 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             switch (palette)
                             {
-                                case 1: // CGA - Not supported
+                                case 1: // CGA
+                                    MakePngU1Linear(file_bytes, fullPath, 17, 3, 8, 8, 4);
                                     break;
-                                case 2: // Tandy - Not supported
-                                    MakePngU1Tandy(file_bytes, fullPath, 17, 3, 8, 8);
+                                case 2: // Tandy
+                                    MakePngU1Linear(file_bytes, fullPath, 17, 3, 8, 8, 2);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 17, 3, false);
@@ -82,8 +85,8 @@ namespace UltimaTileEditor
                             {
                                 case 1: // CGA - Not supported
                                     break;
-                                case 2: // Tandy - Not supported
-                                    MakePngU1Tandy(file_bytes, fullPath, 7, 2, 24, 19);
+                                case 2: // Tandy
+                                    MakePngU1Linear(file_bytes, fullPath, 7, 2, 24, 19, 2);
                                     break;
                                 default: // EGA - Not supported
                                     break;
@@ -100,8 +103,8 @@ namespace UltimaTileEditor
                             {
                                 case 1: // CGA - Not supported
                                     break;
-                                case 2: // Tandy - Not supported
-                                    MakePngU1Tandy(file_bytes, fullPath, 6, 4, 32, 19);
+                                case 2: // Tandy
+                                    MakePngU1Linear(file_bytes, fullPath, 6, 4, 32, 19, 2);
                                     break;
                                 default: // EGA - Not supported
                                     break;
@@ -113,12 +116,39 @@ namespace UltimaTileEditor
                         byte[] file_bytes = File.ReadAllBytes(image);
                         if (file_bytes != null)
                         {
-                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            string fullPath;
+                            int temppalette = 1;
+                            if(palette == 2)
+                            {
+                                fullPath = Path.Combine(strImageDir, value + "_Tandy.png");
+                                temppalette = 2;
+                            }
+                            else
+                            {
+                                fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                            }
+                                
                             if (file_bytes.Length == 32000)
                             {
                                 using Bitmap b = new(320, 200);
                                 PngHelper helper = new();
-                                helper.LoadImage320x200(file_bytes, b, 1);
+                                helper.LoadImage320x200(file_bytes, b, temppalette);
+                                b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                                Console.WriteLine("Image Created");
+                            }
+                        }
+                    }
+                    else if (image.EndsWith("CASTLE.4"))
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_CGA.png");
+                            if (file_bytes.Length == 16384)
+                            {
+                                using Bitmap b = new(320, 200);
+                                PngHelper helper = new();
+                                CreateCGACastle(ref file_bytes, b);
                                 b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                                 Console.WriteLine("Image Created");
                             }
@@ -151,10 +181,11 @@ namespace UltimaTileEditor
                         byte[]? file_bytes = null;
                         switch (palette)
                         {
-                            case 1: // CGA - Not supported
+                            case 1: // CGA
+                                MakeU1Linear(out file_bytes, image, 13, 4, 16, 16, 4);
                                 break;
-                            case 2: // Tandy - Not supported
-                                MakeU1Tandy(out file_bytes, image, 13, 4, 16, 16);
+                            case 2: // Tandy
+                                MakeU1Linear(out file_bytes, image, 13, 4, 16, 16, 2);
                                 break;
                             default: // EGA
                                 MakeU1(out file_bytes, image, 13, 4, true);
@@ -173,10 +204,11 @@ namespace UltimaTileEditor
                         byte[]? file_bytes = null;
                         switch (palette)
                         {
-                            case 1: // CGA - Not supported
+                            case 1: // CGA
+                                MakeU1Linear(out file_bytes, image, 19, 1, 16, 16, 4);
                                 break;
-                            case 2: // Tandy - Not supported
-                                MakeU1Tandy(out file_bytes, image, 19, 1, 16, 16);
+                            case 2: // Tandy
+                                MakeU1Linear(out file_bytes, image, 19, 1, 16, 16, 2);
                                 break;
                             default: // EGA
                                 MakeU1(out file_bytes, image, 19, 1, true);
@@ -195,15 +227,16 @@ namespace UltimaTileEditor
                         byte[]? file_bytes = null;
                         switch (palette)
                         {
-                            case 1: // CGA - Not supported
+                            case 1: // CGA
+                                MakeU1Linear(out file_bytes, image, 17, 3, 8, 8, 4);
                                 break;
-                            case 2: // Tandy - Not supported
-                                MakeU1Tandy(out file_bytes, image, 17, 3, 8, 8);
+                            case 2: // Tandy
+                                MakeU1Linear(out file_bytes, image, 17, 3, 8, 8, 2);
                                 break;
                             default: // EGA
                                 MakeU1(out file_bytes, image, 17, 3, false);
                                 break;
-                        } 
+                        }
 
                         if (file_bytes != null)
                         {
@@ -220,8 +253,8 @@ namespace UltimaTileEditor
                         {
                             case 1: // CGA - Not supported
                                 break;
-                            case 2: // Tandy - Not supported
-                                MakeU1Tandy(out file_bytes, image, 7, 2, 24, 19);
+                            case 2: // Tandy
+                                MakeU1Linear(out file_bytes, image, 7, 2, 24, 19, 2);
                                 break;
                             default: // EGA - Not supported
                                 break;
@@ -242,8 +275,8 @@ namespace UltimaTileEditor
                         {
                             case 1: // CGA - Not supported
                                 break;
-                            case 2: // Tandy - Not supported
-                                MakeU1Tandy(out file_bytes, image, 6, 4, 32, 19);
+                            case 2: // Tandy
+                                MakeU1Linear(out file_bytes, image, 6, 4, 32, 19, 2);
                                 break;
                             default: // EGA - Not supported
                                 break;
@@ -257,25 +290,34 @@ namespace UltimaTileEditor
                             written = true;
                         }
                     }
-                    else if (image.EndsWith("CASTLE.png"))
+                    else if (image.EndsWith("CASTLE_EGA.png"))
                     {
-                        if (palette == 0) // 16 color
+                        string fullPath = Path.Combine(strDataDir, value + "_test.16");
+                        MakeU1Image(out byte[]? file_bytes, image, 1);
+                        if (null != file_bytes)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + "_test.16");
-                            MakeU1Image(out byte[]? file_bytes, image);
-                            if (null != file_bytes)
-                            {
-                                WriteU1Image(file_bytes, fullPath);
-                                written = true;
-                            }
+                            WriteU1Image(file_bytes, fullPath);
+                            written = true;
                         }
-                        else if (palette == 1) // 4 color - Not Supported
+                    }
+                    else if (image.EndsWith("CASTLE_CGA.png"))
+                    {
+                        string fullPath = Path.Combine(strDataDir, value + "_test.4");
+                        MakeU1ImageCGA(out byte[]? file_bytes, image);
+                        if (null != file_bytes)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + "_test.4");
+                            WriteU1Image(file_bytes, fullPath);
+                            written = true;
                         }
-                        else // Tandy - Not Supported
+                    }
+                    else if (image.EndsWith("CASTLE_Tandy.png"))
+                    {
+                        string fullPath = Path.Combine(strDataDir, value + "_test.16");
+                        MakeU1Image(out byte[]? file_bytes, image, 2);
+                        if (null != file_bytes)
                         {
-
+                            WriteU1Image(file_bytes, fullPath);
+                            written = true;
                         }
                     }
                     else if (image.EndsWith("NIF.png"))
@@ -293,7 +335,7 @@ namespace UltimaTileEditor
                     }
                     else
                     {
-                        
+
                     }
                 }
             }
@@ -384,7 +426,7 @@ namespace UltimaTileEditor
             binWriter.Write(file_bytes);
         }
 
-        private static void MakeU1Image(out byte[]? file_bytes, string strPng)
+        private static void MakeU1Image(out byte[]? file_bytes, string strPng, int u1palette)
         {
             file_bytes = null;
             try
@@ -399,7 +441,7 @@ namespace UltimaTileEditor
                 }
                 // Because of the custom palette which shares the same colors,
                 // a perfect replication of the original file cannot be accomplished
-                helper.CreateImageWithPalette(destination, image, 320, 200, 1);
+                helper.CreateImageWithPalette(destination, image, 320, 200, u1palette);
                 file_bytes = destination;
             }
             catch (IOException)
@@ -615,10 +657,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public static void MakeU1Tandy(out byte[]? file_bytes, string strPng, int numXtiles, int numYtiles, int tile_width, int tile_height)
+        public static void MakeU1Linear(out byte[]? file_bytes, string strPng, int numXtiles, int numYtiles, int tile_width, int tile_height, int numPixelsPerTile)
         {
             PngHelper helper = new();
-            const int numPixelsPerTile = 2;
             file_bytes = null;
             try
             {
@@ -639,13 +680,29 @@ namespace UltimaTileEditor
                         {
                             for (int indexX = 0; indexX < (tile_width / numPixelsPerTile); indexX++)
                             {
-                                Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile), tileYindex * tile_height + indexY);
-                                Color c2 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 1, tileYindex * tile_height + indexY);
-                                byte color1 = helper.GetByte(c1);
-                                byte color2 = helper.GetByte(c2);
-                                byte color = (byte)((color1 << 4) + color2);
+                                byte color = 0;
+                                if (numPixelsPerTile == 4) // CGA
+                                {
+                                    Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile), tileYindex * tile_height + indexY);
+                                    Color c2 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 1, tileYindex * tile_height + indexY);
+                                    Color c3 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 2, tileYindex * tile_height + indexY);
+                                    Color c4 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 3, tileYindex * tile_height + indexY);
+                                    byte color1 = helper.GetCGAByte(c1);
+                                    byte color2 = helper.GetCGAByte(c2);
+                                    byte color3 = helper.GetCGAByte(c3);
+                                    byte color4 = helper.GetCGAByte(c4);
+                                    color = (byte)((color1 << 6) + (color2 << 4) + (color3 << 2) + color4);
+                                }
+                                else // EGA
+                                {
+                                    Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile), tileYindex * tile_height + indexY);
+                                    Color c2 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 1, tileYindex * tile_height + indexY);
+                                    byte color1 = helper.GetByte(c1);
+                                    byte color2 = helper.GetByte(c2);
+                                    color = (byte)((color1 << 4) + color2);
+                                }
+                                    
                                 destination[(tileSize * curTile) + indexY * (tile_width / numPixelsPerTile) + indexX] = color;
-
                             }
                         }
                         curTile++;
@@ -697,11 +754,10 @@ namespace UltimaTileEditor
             }
         }
 
-        static void MakePngU1Tandy(byte[] file_data, string strPng, int numXtiles, int numYtiles, int tilewidth, int tileheight)
+        static void MakePngU1Linear(byte[] file_data, string strPng, int numXtiles, int numYtiles, int tilewidth, int tileheight, int numPixelsPerTile)
         {
             PngHelper helper = new();
             using Bitmap b = new(numXtiles * tilewidth, numYtiles * tileheight);
-            const int numPixelsPerTile = 2;
             int curTile = 0;
             int tileSize = (tilewidth / numPixelsPerTile) * tileheight;
             for (int tileYindex = 0; tileYindex < numYtiles; tileYindex++)
@@ -713,15 +769,35 @@ namespace UltimaTileEditor
                         for (int indexX = 0; indexX < (tilewidth / numPixelsPerTile); indexX++)
                         {
                             byte curByte = file_data[(tileSize * curTile) + indexY * (tilewidth / numPixelsPerTile) + indexX];
-                            byte color1 = (byte)((curByte >> 4) & 0xF);
-                            byte color2 = (byte)(curByte & 0xF);
 
-                            Color c1 = helper.GetColor(color1);
-                            Color c2 = helper.GetColor(color2);
+                            if(numPixelsPerTile == 4) // CGA
+                            {
+                                byte color1 = (byte)((curByte >> 6) & 0b11);
+                                byte color2 = (byte)((curByte >> 4) & 0b11);
+                                byte color3 = (byte)((curByte >> 2) & 0b11);
+                                byte color4 = (byte)((curByte >> 0) & 0b11);
 
-                            b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile), tileYindex * tileheight + indexY, c1);
-                            b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 1, tileYindex * tileheight + indexY, c2);
+                                Color c1 = helper.GetCGAColor(color1);
+                                Color c2 = helper.GetCGAColor(color2);
+                                Color c3 = helper.GetCGAColor(color3);
+                                Color c4 = helper.GetCGAColor(color4);
 
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile), tileYindex * tileheight + indexY, c1);
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 1, tileYindex * tileheight + indexY, c2);
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 2, tileYindex * tileheight + indexY, c3);
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 3, tileYindex * tileheight + indexY, c4);
+                            }
+                            else // EGA
+                            {
+                                byte color1 = (byte)((curByte >> 4) & 0xF);
+                                byte color2 = (byte)(curByte & 0xF);
+
+                                Color c1 = helper.GetColor(color1);
+                                Color c2 = helper.GetColor(color2);
+
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile), tileYindex * tileheight + indexY, c1);
+                                b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 1, tileYindex * tileheight + indexY, c2);
+                            }
                         }
                     }
                     curTile++;
@@ -729,6 +805,90 @@ namespace UltimaTileEditor
             }
             b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
             Console.WriteLine("Image Created");
+        }
+
+        private static void CreateCGACastle(ref byte[] file_bytes, Bitmap b)
+        {
+            PngHelper helper = new();
+            const int numPixelPerByte = 4;
+            const int NUMROWS = 200;
+            const int NUMCOLUMNS = 320;
+            const int NUMPLANE = 2;
+            const int PLANE_OFFSET = 8192;
+            for(int indexplane = 0; indexplane< NUMPLANE; ++indexplane)
+            {
+                for(int indexY = 0; indexY< NUMROWS; indexY += 2)
+                {
+                    for (int indexX = 0; indexX < (NUMCOLUMNS / numPixelPerByte); ++indexX)
+                    {
+                        byte curByte = file_bytes[((indexY / NUMPLANE) * (NUMCOLUMNS / numPixelPerByte)) + indexX + (PLANE_OFFSET * indexplane)];
+
+                        byte color1 = (byte)((curByte >> 6) & 0b11);
+                        byte color2 = (byte)((curByte >> 4) & 0b11);
+                        byte color3 = (byte)((curByte >> 2) & 0b11);
+                        byte color4 = (byte)((curByte >> 0) & 0b11);
+
+                        Color c1 = helper.GetCGAColor(color1);
+                        Color c2 = helper.GetCGAColor(color2);
+                        Color c3 = helper.GetCGAColor(color3);
+                        Color c4 = helper.GetCGAColor(color4);
+
+                        b.SetPixel((indexX * numPixelPerByte), indexY + indexplane, c1);
+                        b.SetPixel((indexX * numPixelPerByte) + 1, indexY + indexplane, c2);
+                        b.SetPixel((indexX * numPixelPerByte) + 2, indexY + indexplane, c3);
+                        b.SetPixel((indexX * numPixelPerByte) + 3, indexY + indexplane, c4);
+                    }
+                }
+            }
+        }
+
+        private static void MakeU1ImageCGA(out byte[]? file_bytes, string strPng)
+        {
+            PngHelper helper = new();
+            const int numPixelPerByte = 4;
+            const int NUMROWS = 200;
+            const int NUMCOLUMNS = 320;
+            const int NUMPLANE = 2;
+            const int PLANE_OFFSET = 8192;
+
+            file_bytes = null;
+            try
+            {
+                byte[] destination = new byte[PLANE_OFFSET * 2];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 200 && image.Width != 320)
+                {
+                    Debug.WriteLine("Image must be 320x200 pixels!");
+                    return;
+                }
+                for (int indexplane = 0; indexplane < NUMPLANE; ++indexplane)
+                {
+                    for (int indexY = 0; indexY < NUMROWS; indexY += 2)
+                    {
+                        for (int indexX = 0; indexX < (NUMCOLUMNS / numPixelPerByte); ++indexX)
+                        {
+                            Color c1 = image.GetPixel((indexX * numPixelPerByte), indexY + indexplane);
+                            Color c2 = image.GetPixel((indexX * numPixelPerByte) + 1, indexY + indexplane);
+                            Color c3 = image.GetPixel((indexX * numPixelPerByte) + 2, indexY + indexplane);
+                            Color c4 = image.GetPixel((indexX * numPixelPerByte) + 3, indexY + indexplane);
+
+                            byte b1 = helper.GetCGAByte(c1);
+                            byte b2 = helper.GetCGAByte(c2);
+                            byte b3 = helper.GetCGAByte(c3);
+                            byte b4 = helper.GetCGAByte(c4);
+
+                            byte outByte = (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + b4);
+                            destination[((indexY / NUMPLANE) * (NUMCOLUMNS / numPixelPerByte)) + indexX + (PLANE_OFFSET * indexplane)] = outByte;
+                        }
+                    }
+                }
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("PNG file does not exist!");
+                return;
+            }
         }
     }
 }

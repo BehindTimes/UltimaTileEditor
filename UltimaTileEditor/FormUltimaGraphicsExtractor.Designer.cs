@@ -96,7 +96,7 @@
             rbUltima2.TabIndex = 5;
             rbUltima2.Text = "Ultima 2";
             rbUltima2.UseVisualStyleBackColor = true;
-            rbUltima2.CheckedChanged += rbUltima2_CheckedChanged;
+            rbUltima2.CheckedChanged += RbUltima2_CheckedChanged;
             // 
             // rbUltima3
             // 
@@ -107,7 +107,7 @@
             rbUltima3.TabIndex = 4;
             rbUltima3.Text = "Ultima 3";
             rbUltima3.UseVisualStyleBackColor = true;
-            rbUltima3.CheckedChanged += rbUltima3_CheckedChanged;
+            rbUltima3.CheckedChanged += RbUltima3_CheckedChanged;
             // 
             // rbUltima4
             // 
@@ -120,7 +120,7 @@
             rbUltima4.TabStop = true;
             rbUltima4.Text = "Ultima 4";
             rbUltima4.UseVisualStyleBackColor = true;
-            rbUltima4.CheckedChanged += rbUltima4_CheckedChanged;
+            rbUltima4.CheckedChanged += RbUltima4_CheckedChanged;
             // 
             // rbUltima5
             // 
@@ -131,7 +131,7 @@
             rbUltima5.TabIndex = 2;
             rbUltima5.Text = "Ultima 5";
             rbUltima5.UseVisualStyleBackColor = true;
-            rbUltima5.CheckedChanged += rbUltima5_CheckedChanged;
+            rbUltima5.CheckedChanged += RbUltima5_CheckedChanged;
             // 
             // rbUltima1
             // 
@@ -142,7 +142,7 @@
             rbUltima1.TabIndex = 0;
             rbUltima1.Text = "Ultima 1";
             rbUltima1.UseVisualStyleBackColor = true;
-            rbUltima1.CheckedChanged += rbUltima1_CheckedChanged;
+            rbUltima1.CheckedChanged += RbUltima1_CheckedChanged;
             // 
             // gbGameLocation
             // 
@@ -165,7 +165,7 @@
             btnGameDataBrowse.TabIndex = 2;
             btnGameDataBrowse.Text = "Browse";
             btnGameDataBrowse.UseVisualStyleBackColor = true;
-            btnGameDataBrowse.Click += btnGameDataBrowse_Click;
+            btnGameDataBrowse.Click += BtnGameDataBrowse_Click;
             // 
             // lblGameData
             // 
@@ -205,7 +205,7 @@
             btnImageBrowse.TabIndex = 3;
             btnImageBrowse.Text = "Browse";
             btnImageBrowse.UseVisualStyleBackColor = true;
-            btnImageBrowse.Click += btnImageBrowse_Click;
+            btnImageBrowse.Click += BtnImageBrowse_Click;
             // 
             // tbImagesDir
             // 
@@ -272,7 +272,7 @@
             btnExtract.TabIndex = 5;
             btnExtract.Text = "Extract";
             btnExtract.UseVisualStyleBackColor = true;
-            btnExtract.Click += btnExtract_Click;
+            btnExtract.Click += BtnExtract_Click;
             // 
             // btnCompress
             // 
@@ -282,7 +282,7 @@
             btnCompress.TabIndex = 6;
             btnCompress.Text = "Compress";
             btnCompress.UseVisualStyleBackColor = true;
-            btnCompress.Click += btnCompress_Click;
+            btnCompress.Click += BtnCompress_Click;
             // 
             // pnlGame
             // 
@@ -315,7 +315,7 @@
             cbPalette.Name = "cbPalette";
             cbPalette.Size = new Size(122, 23);
             cbPalette.TabIndex = 1;
-            cbPalette.SelectedIndexChanged += cbPalette_SelectedIndexChanged;
+            cbPalette.SelectedIndexChanged += CbPalette_SelectedIndexChanged;
             // 
             // gbFileType
             // 
@@ -337,7 +337,7 @@
             cbFileType.Name = "cbFileType";
             cbFileType.Size = new Size(122, 23);
             cbFileType.TabIndex = 0;
-            cbFileType.SelectedIndexChanged += cbFileType_SelectedIndexChanged;
+            cbFileType.SelectedIndexChanged += CbFileType_SelectedIndexChanged;
             // 
             // pnlLoc
             // 
