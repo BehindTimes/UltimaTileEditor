@@ -85,7 +85,7 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima1EGAFiles = ["EGAMOND", "EGATILES", "EGATOWN"];
 
-        public static readonly List<string> Ultima1CGAFiles = ["CGAMOND", "CGATILES", "CGATOWN"];
+        public static readonly List<string> Ultima1CGAFiles = ["CGAMOND", "CGATILES", "CGATOWN", "CGAFIGHT", "CGASPACE"];
 
         public static readonly List<string> Ultima1T1KFiles = ["T1KMOND", "T1KTILES", "T1KTOWN", "T1KFIGHT", "T1KSPACE"];
 

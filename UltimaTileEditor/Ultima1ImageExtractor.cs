@@ -83,7 +83,8 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             switch (palette)
                             {
-                                case 1: // CGA - Not supported
+                                case 1: // CGA
+                                    MakePngU1Linear(file_bytes, fullPath, 4, 7, 24, 19, 4);
                                     break;
                                 case 2: // Tandy
                                     MakePngU1Linear(file_bytes, fullPath, 7, 2, 24, 19, 2);
@@ -101,10 +102,11 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             switch (palette)
                             {
-                                case 1: // CGA - Not supported
+                                case 1: // CGA
+                                    MakePngU1Linear(file_bytes, fullPath, 12, 4, 32, 19, 4);
                                     break;
                                 case 2: // Tandy
-                                    MakePngU1Linear(file_bytes, fullPath, 6, 4, 32, 19, 2);
+                                    MakePngU1Linear(file_bytes, fullPath, 4, 6, 32, 19, 2);
                                     break;
                                 default: // EGA - Not supported
                                     break;
@@ -251,7 +253,8 @@ namespace UltimaTileEditor
                         byte[]? file_bytes = null;
                         switch (palette)
                         {
-                            case 1: // CGA - Not supported
+                            case 1: // CGA
+                                MakeU1Linear(out file_bytes, image, 4, 7, 24, 19, 4);
                                 break;
                             case 2: // Tandy
                                 MakeU1Linear(out file_bytes, image, 7, 2, 24, 19, 2);
@@ -262,7 +265,7 @@ namespace UltimaTileEditor
 
                         if (file_bytes != null)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            string fullPath = Path.Combine(strDataDir, value + "_test.BIN");
                             using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
                             binWriter.Write(file_bytes);
                             written = true;
@@ -273,10 +276,11 @@ namespace UltimaTileEditor
                         byte[]? file_bytes = null;
                         switch (palette)
                         {
-                            case 1: // CGA - Not supported
+                            case 1: // CGA
+                                MakeU1Linear(out file_bytes, image, 12, 4, 32, 19, 4);
                                 break;
                             case 2: // Tandy
-                                MakeU1Linear(out file_bytes, image, 6, 4, 32, 19, 2);
+                                MakeU1Linear(out file_bytes, image, 4, 6, 32, 19, 2);
                                 break;
                             default: // EGA - Not supported
                                 break;
@@ -284,7 +288,7 @@ namespace UltimaTileEditor
 
                         if (file_bytes != null)
                         {
-                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            string fullPath = Path.Combine(strDataDir, value + "_test.BIN");
                             using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
                             binWriter.Write(file_bytes);
                             written = true;
