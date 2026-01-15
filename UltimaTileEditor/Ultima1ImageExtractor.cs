@@ -7,7 +7,7 @@ namespace UltimaTileEditor
 {
     internal class Ultima1ImageExtractor
     {
-        public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        public static void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             foreach (string tempimage in images)
             {
@@ -26,6 +26,7 @@ namespace UltimaTileEditor
                                 case 1: // CGA - Not supported
                                     break;
                                 case 2: // Tandy - Not supported
+                                    MakePngU1Tandy(file_bytes, fullPath, 13, 4, 16, 16);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 13, 4, true);
@@ -44,6 +45,7 @@ namespace UltimaTileEditor
                                 case 1: // CGA - Not supported
                                     break;
                                 case 2: // Tandy - Not supported
+                                    MakePngU1Tandy(file_bytes, fullPath, 19, 1, 16, 16);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 19, 1, true);
@@ -62,9 +64,46 @@ namespace UltimaTileEditor
                                 case 1: // CGA - Not supported
                                     break;
                                 case 2: // Tandy - Not supported
+                                    MakePngU1Tandy(file_bytes, fullPath, 17, 3, 8, 8);
                                     break;
                                 default: // EGA
                                     MakePngU1EGA(file_bytes, fullPath, 17, 3, false);
+                                    break;
+                            }
+                        }
+                    }
+                    else if (image.EndsWith("FIGHT.BIN"))
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            switch (palette)
+                            {
+                                case 1: // CGA - Not supported
+                                    break;
+                                case 2: // Tandy - Not supported
+                                    MakePngU1Tandy(file_bytes, fullPath, 7, 2, 24, 19);
+                                    break;
+                                default: // EGA - Not supported
+                                    break;
+                            }
+                        }
+                    }
+                    else if (image.EndsWith("SPACE.BIN"))
+                    {
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            switch (palette)
+                            {
+                                case 1: // CGA - Not supported
+                                    break;
+                                case 2: // Tandy - Not supported
+                                    MakePngU1Tandy(file_bytes, fullPath, 6, 4, 32, 19);
+                                    break;
+                                default: // EGA - Not supported
                                     break;
                             }
                         }
@@ -77,13 +116,11 @@ namespace UltimaTileEditor
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             if (file_bytes.Length == 32000)
                             {
-                                using (Bitmap b = new Bitmap(320, 200))
-                                {
-                                    pngHelper helper = new pngHelper();
-                                    helper.LoadImage320x200(file_bytes, b, 1);
-                                    b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
-                                    Console.WriteLine("Image Created");
-                                }
+                                using Bitmap b = new(320, 200);
+                                PngHelper helper = new();
+                                helper.LoadImage320x200(file_bytes, b, 1);
+                                b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                                Console.WriteLine("Image Created");
                             }
                         }
                     }
@@ -100,7 +137,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        public static void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             bool written = false;
             foreach (string tempimage in images)
@@ -111,55 +148,122 @@ namespace UltimaTileEditor
                 {
                     if (image.EndsWith("TILES.png"))
                     {
-                        byte[]? file_bytes;
-                        MakeU1(out file_bytes, image, 13, 4, true);
+                        byte[]? file_bytes = null;
+                        switch (palette)
+                        {
+                            case 1: // CGA - Not supported
+                                break;
+                            case 2: // Tandy - Not supported
+                                MakeU1Tandy(out file_bytes, image, 13, 4, 16, 16);
+                                break;
+                            default: // EGA
+                                MakeU1(out file_bytes, image, 13, 4, true);
+                                break;
+                        }
 
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strDataDir, value + ".BIN");
-                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
-                            {
-                                binWriter.Write(file_bytes);
-                            }
+                            using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                            binWriter.Write(file_bytes);
                         }
                     }
                     else if (image.EndsWith("MOND.png"))
                     {
-                        byte[]? file_bytes;
-                        MakeU1(out file_bytes, image, 19, 1, true);
+                        byte[]? file_bytes = null;
+                        switch (palette)
+                        {
+                            case 1: // CGA - Not supported
+                                break;
+                            case 2: // Tandy - Not supported
+                                MakeU1Tandy(out file_bytes, image, 19, 1, 16, 16);
+                                break;
+                            default: // EGA
+                                MakeU1(out file_bytes, image, 19, 1, true);
+                                break;
+                        }
 
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strDataDir, value + ".BIN");
-                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
-                            {
-                                binWriter.Write(file_bytes);
-                            }
+                            using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                            binWriter.Write(file_bytes);
                         }
                     }
                     else if (image.EndsWith("TOWN.png"))
                     {
-                        byte[]? file_bytes;
-                        MakeU1(out file_bytes, image, 17, 3, false);
+                        byte[]? file_bytes = null;
+                        switch (palette)
+                        {
+                            case 1: // CGA - Not supported
+                                break;
+                            case 2: // Tandy - Not supported
+                                MakeU1Tandy(out file_bytes, image, 17, 3, 8, 8);
+                                break;
+                            default: // EGA
+                                MakeU1(out file_bytes, image, 17, 3, false);
+                                break;
+                        } 
 
                         if (file_bytes != null)
                         {
                             string fullPath = Path.Combine(strDataDir, value + ".BIN");
-                            using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
-                            {
-                                binWriter.Write(file_bytes);
-                                written = true;
-                            }
+                            using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                    else if (image.EndsWith("FIGHT.png"))
+                    {
+                        byte[]? file_bytes = null;
+                        switch (palette)
+                        {
+                            case 1: // CGA - Not supported
+                                break;
+                            case 2: // Tandy - Not supported
+                                MakeU1Tandy(out file_bytes, image, 7, 2, 24, 19);
+                                break;
+                            default: // EGA - Not supported
+                                break;
+                        }
+
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                    else if (image.EndsWith("SPACE.png"))
+                    {
+                        byte[]? file_bytes = null;
+                        switch (palette)
+                        {
+                            case 1: // CGA - Not supported
+                                break;
+                            case 2: // Tandy - Not supported
+                                MakeU1Tandy(out file_bytes, image, 6, 4, 32, 19);
+                                break;
+                            default: // EGA - Not supported
+                                break;
+                        }
+
+                        if (file_bytes != null)
+                        {
+                            string fullPath = Path.Combine(strDataDir, value + ".BIN");
+                            using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                            binWriter.Write(file_bytes);
+                            written = true;
                         }
                     }
                     else if (image.EndsWith("CASTLE.png"))
                     {
-                        byte[]? file_bytes;
                         if (palette == 0) // 16 color
                         {
                             string fullPath = Path.Combine(strDataDir, value + "_test.16");
-                            MakeU1Image(out file_bytes, image);
-                            if(null != file_bytes)
+                            MakeU1Image(out byte[]? file_bytes, image);
+                            if (null != file_bytes)
                             {
                                 WriteU1Image(file_bytes, fullPath);
                                 written = true;
@@ -176,11 +280,10 @@ namespace UltimaTileEditor
                     }
                     else if (image.EndsWith("NIF.png"))
                     {
-                        byte[]? file_bytes;
                         if (palette == 0) // 16 color
                         {
                             string fullPath = Path.Combine(strDataDir, value + ".BIN");
-                            MakeSimpleImage(out file_bytes, image, 320, 168);
+                            MakeSimpleImage(out byte[]? file_bytes, image, 320, 168);
                             if (null != file_bytes)
                             {
                                 WriteU1Image(file_bytes, fullPath);
@@ -200,12 +303,12 @@ namespace UltimaTileEditor
             }
         }
 
-        private void MakeSimpleImage(out byte[]? file_bytes, string strPng, int width, int height)
+        private static void MakeSimpleImage(out byte[]? file_bytes, string strPng, int width, int height)
         {
             file_bytes = null;
             try
             {
-                pngHelper helper = new pngHelper();
+                PngHelper helper = new();
                 byte[] destination = new byte[40 * 168];
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != 168 && image.Width != 320)
@@ -244,53 +347,49 @@ namespace UltimaTileEditor
             }
         }
 
-        private void CreateSimpleBitmap(byte[] file_data, int width, int height, string strBitmap)
+        private static void CreateSimpleBitmap(byte[] file_data, int width, int height, string strBitmap)
         {
-            using (Bitmap b = new Bitmap(width, height))
+            using Bitmap b = new(width, height);
+            int curPos = 0;
+            for (int indexY = 0; indexY < height; indexY++)
             {
-                int curPos = 0;
-                for (int indexY = 0; indexY < height; indexY++)
+                for (int indexX = 0; indexX < width / 8; indexX++)
                 {
-                    for (int indexX = 0; indexX < width / 8; indexX++)
+                    byte curByte = file_data[curPos];
+
+                    for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
                     {
-                        byte curByte = file_data[curPos];
-
-                        for (int tempIndexX = 0; tempIndexX < 8; tempIndexX++)
+                        int curX = indexX * 8 + tempIndexX;
+                        int curY = indexY;
+                        int curVal = (curByte >> (7 - tempIndexX)) & 0x1;
+                        if (curVal == 0)
                         {
-                            int curX = indexX * 8 + tempIndexX;
-                            int curY = indexY;
-                            int curVal = (curByte >> (7 - tempIndexX)) & 0x1;
-                            if (curVal == 0)
-                            {
-                                b.SetPixel(curX, curY, Color.Black);
-                            }
-                            else
-                            {
-                                b.SetPixel(curX, curY, Color.White);
-                            }
+                            b.SetPixel(curX, curY, Color.Black);
                         }
-
-                        curPos++;
+                        else
+                        {
+                            b.SetPixel(curX, curY, Color.White);
+                        }
                     }
+
+                    curPos++;
                 }
-                b.Save(strBitmap, System.Drawing.Imaging.ImageFormat.Png);
             }
+            b.Save(strBitmap, System.Drawing.Imaging.ImageFormat.Png);
         }
 
-        private void WriteU1Image(byte[] file_bytes, string strOut)
+        private static void WriteU1Image(byte[] file_bytes, string strOut)
         {
-            using (BinaryWriter binWriter = new BinaryWriter(File.Open(strOut, FileMode.Create)))
-            {
-                binWriter.Write(file_bytes);
-            }
+            using BinaryWriter binWriter = new(File.Open(strOut, FileMode.Create));
+            binWriter.Write(file_bytes);
         }
 
-        private void MakeU1Image(out byte[]? file_bytes, string strPng)
+        private static void MakeU1Image(out byte[]? file_bytes, string strPng)
         {
             file_bytes = null;
             try
             {
-                pngHelper helper = new pngHelper();
+                PngHelper helper = new();
                 byte[] destination = new byte[200 * 160];
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != 200 && image.Width != 320)
@@ -310,9 +409,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public void LoadImageU1_8(byte[] file_bytes, Bitmap b, int width, int height)
+        public static void LoadImageU1_8(byte[] file_bytes, Bitmap b, int width, int height)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new();
             int pos = 0;
             for (int indexY = 0; indexY < height; indexY++)
             {
@@ -344,9 +443,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public void LoadImageU1(byte[] file_bytes, Bitmap b, int width, int height)
+        public static void LoadImageU1(byte[] file_bytes, Bitmap b, int width, int height)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new();
             int pos = 0;
             for (int indexY = 0; indexY < height; indexY++)
             {
@@ -378,7 +477,7 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakePngU1EGA(byte[] lzw, string strPng, int width, int height, bool is16)
+        public static void MakePngU1EGA(byte[] lzw, string strPng, int width, int height, bool is16)
         {
             try
             {
@@ -394,20 +493,18 @@ namespace UltimaTileEditor
                 {
                     return;
                 }
-                using (Bitmap b = new Bitmap(width * tilesize, height * tilesize))
+                using Bitmap b = new(width * tilesize, height * tilesize);
+                if (is16)
                 {
-                    if (is16)
-                    {
-                        LoadImageU1(file_bytes, b, width, height);
-                    }
-                    else
-                    {
-                        LoadImageU1_8(file_bytes, b, width, height);
-                    }
-
-                    b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
-                    Console.WriteLine("Image Created");
+                    LoadImageU1(file_bytes, b, width, height);
                 }
+                else
+                {
+                    LoadImageU1_8(file_bytes, b, width, height);
+                }
+
+                b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+                Console.WriteLine("Image Created");
             }
             catch (IOException)
             {
@@ -416,9 +513,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public void WriteImageU1_8(byte[] file_bytes, Bitmap b, int width, int height)
+        public static void WriteImageU1_8(byte[] file_bytes, Bitmap b, int width, int height)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new();
             int pos = 0;
             for (int indexY = 0; indexY < height; indexY++)
             {
@@ -426,7 +523,6 @@ namespace UltimaTileEditor
                 {
                     for (int row = 0; row < 8; row++)
                     {
-                        byte[] rowval = new byte[8];
                         byte[] colorvals = new byte[8];
 
                         for (int i = 0; i < 8; i++)
@@ -466,9 +562,9 @@ namespace UltimaTileEditor
             }
         }
 
-        public void WriteImageU1(byte[] file_bytes, Bitmap b, int width, int height)
+        public static void WriteImageU1(byte[] file_bytes, Bitmap b, int width, int height)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new();
             int pos = 0;
             for (int indexY = 0; indexY < height; indexY++)
             {
@@ -476,7 +572,6 @@ namespace UltimaTileEditor
                 {
                     for (int row = 0; row < 16; row++)
                     {
-                        byte[] rowval = new byte[16];
                         byte[] colorvals = new byte[16];
 
                         for (int i = 0; i < 16; i++)
@@ -520,7 +615,52 @@ namespace UltimaTileEditor
             }
         }
 
-        public void MakeU1(out byte[]? file_bytes, string strPng, int width, int height, bool is16)
+        public static void MakeU1Tandy(out byte[]? file_bytes, string strPng, int numXtiles, int numYtiles, int tile_width, int tile_height)
+        {
+            PngHelper helper = new();
+            const int numPixelsPerTile = 2;
+            file_bytes = null;
+            try
+            {
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if(image.Width != numXtiles * tile_width && image.Height != numYtiles * tile_height)
+                {
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", numXtiles * tile_width, numYtiles * tile_height);
+                    return;
+                }
+                byte[] destination = new byte[((numXtiles * tile_width) / numPixelsPerTile) * (numYtiles * tile_height)];
+                int curTile = 0;
+                int tileSize = (tile_width / numPixelsPerTile) * tile_height;
+                for (int tileYindex = 0; tileYindex < numYtiles; tileYindex++)
+                {
+                    for (int tileXindex = 0; tileXindex < numXtiles; tileXindex++)
+                    {
+                        for (int indexY = 0; indexY < tile_height; ++indexY)
+                        {
+                            for (int indexX = 0; indexX < (tile_width / numPixelsPerTile); indexX++)
+                            {
+                                Color c1 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile), tileYindex * tile_height + indexY);
+                                Color c2 = image.GetPixel((tileXindex * tile_width) + (indexX * numPixelsPerTile) + 1, tileYindex * tile_height + indexY);
+                                byte color1 = helper.GetByte(c1);
+                                byte color2 = helper.GetByte(c2);
+                                byte color = (byte)((color1 << 4) + color2);
+                                destination[(tileSize * curTile) + indexY * (tile_width / numPixelsPerTile) + indexX] = color;
+
+                            }
+                        }
+                        curTile++;
+                    }
+                }
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
+        public static void MakeU1(out byte[]? file_bytes, string strPng, int width, int height, bool is16)
         {
             int tilesize = 16;
             int file_mult = 128;
@@ -537,7 +677,7 @@ namespace UltimaTileEditor
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != height * tilesize && image.Width != width * tilesize)
                 {
-                    Console.WriteLine("Image must be {0}x{1} pixels!", width * tilesize, height * tilesize);
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", width * tilesize, height * tilesize);
                     return;
                 }
                 if (is16)
@@ -552,9 +692,43 @@ namespace UltimaTileEditor
             }
             catch (IOException)
             {
-                Console.WriteLine("PNG file does not exist!");
+                Debug.WriteLine("PNG file does not exist!");
                 return;
             }
+        }
+
+        static void MakePngU1Tandy(byte[] file_data, string strPng, int numXtiles, int numYtiles, int tilewidth, int tileheight)
+        {
+            PngHelper helper = new();
+            using Bitmap b = new(numXtiles * tilewidth, numYtiles * tileheight);
+            const int numPixelsPerTile = 2;
+            int curTile = 0;
+            int tileSize = (tilewidth / numPixelsPerTile) * tileheight;
+            for (int tileYindex = 0; tileYindex < numYtiles; tileYindex++)
+            {
+                for (int tileXindex = 0; tileXindex < numXtiles; tileXindex++)
+                {
+                    for (int indexY = 0; indexY < tileheight; ++indexY)
+                    {
+                        for (int indexX = 0; indexX < (tilewidth / numPixelsPerTile); indexX++)
+                        {
+                            byte curByte = file_data[(tileSize * curTile) + indexY * (tilewidth / numPixelsPerTile) + indexX];
+                            byte color1 = (byte)((curByte >> 4) & 0xF);
+                            byte color2 = (byte)(curByte & 0xF);
+
+                            Color c1 = helper.GetColor(color1);
+                            Color c2 = helper.GetColor(color2);
+
+                            b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile), tileYindex * tileheight + indexY, c1);
+                            b.SetPixel((tileXindex * tilewidth) + (indexX * numPixelsPerTile) + 1, tileYindex * tileheight + indexY, c2);
+
+                        }
+                    }
+                    curTile++;
+                }
+            }
+            b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+            Console.WriteLine("Image Created");
         }
     }
 }

@@ -152,7 +152,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima1:
                             Ultima1ImageExtractor ie1 = new Ultima1ImageExtractor();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
-                            ie1.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            Ultima1ImageExtractor.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima2:
                             Ultima2ImageExtractor ie2 = new Ultima2ImageExtractor();
@@ -202,7 +202,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima1:
                             Ultima1ImageExtractor ie1 = new Ultima1ImageExtractor();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
-                            ie1.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            Ultima1ImageExtractor.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima2:
                             Ultima2ImageExtractor ie2 = new Ultima2ImageExtractor();

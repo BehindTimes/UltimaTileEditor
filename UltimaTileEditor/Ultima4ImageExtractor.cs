@@ -53,7 +53,7 @@ namespace UltimaTileEditor
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
-                                    pngHelper helper = new pngHelper();
+                                    PngHelper helper = new PngHelper();
                                     helper.LoadImage320x200(lzw_out, b, 0);
                                     b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                                     Console.WriteLine("Image Created");
@@ -73,7 +73,7 @@ namespace UltimaTileEditor
 
                                 using (Bitmap b = new Bitmap(320, 200))
                                 {
-                                    pngHelper helper = new pngHelper();
+                                    PngHelper helper = new PngHelper();
                                     helper.LoadImage320x200(rle_out, b, 0);
                                     b.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
                                     Console.WriteLine("Image Created");
@@ -264,7 +264,7 @@ namespace UltimaTileEditor
             file_bytes = null;
             try
             {
-                pngHelper helper = new pngHelper();
+                PngHelper helper = new PngHelper();
                 byte[] destination = new byte[200 * 160];
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != 200 && image.Width != 320)
@@ -284,7 +284,7 @@ namespace UltimaTileEditor
 
         private void LoadImageU4(byte[] file_bytes, Bitmap b, int mult)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             for (int y_index = 0; y_index < 16; ++y_index)
             {
@@ -335,7 +335,7 @@ namespace UltimaTileEditor
 
         private void WriteTilesU4(byte[] file_bytes, Bitmap b, int mult)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             for (int y_index = 0; y_index < 16; ++y_index)
             {

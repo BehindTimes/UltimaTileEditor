@@ -7,9 +7,9 @@ using System.Windows.Forms;
 
 namespace UltimaTileEditor
 {
-    internal class pngHelper
+    internal class PngHelper
     {
-        Color[] color_array = {
+        readonly Color[] color_array = [
             Color.FromArgb(0, 0, 0),            //black
             Color.FromArgb(0, 0, 0xAA),         //blue
             Color.FromArgb(0, 0xAA, 0),         //green
@@ -26,10 +26,10 @@ namespace UltimaTileEditor
             Color.FromArgb(0xFF, 0x55, 0xFF),   //bright magenta
             Color.FromArgb(0xFF, 0xFF, 0x55),   //bright yellow
             Color.FromArgb(0xFF, 0xFF, 0xFF)    //white
-        };
+        ];
 
         // https://moddingwiki.shikadi.net/wiki/Ultima_I_Full_Screen_Graphic_Format
-        Color[] color_array_u1 = {
+        readonly Color[] color_array_u1_ega = [
             Color.FromArgb(0, 0, 0),            //black
             Color.FromArgb(0x55, 0x55, 0x55),   //dark gray
             Color.FromArgb(0xAA, 0xAA, 0xAA),   //light gray
@@ -46,14 +46,33 @@ namespace UltimaTileEditor
             Color.FromArgb(0x55, 0x55, 0xFF),   //bright blue
             Color.FromArgb(0xAA, 0xAA, 0xAA),   //light gray
             Color.FromArgb(0xFF, 0xFF, 0xFF)    //white
-        };
+        ];
 
-        Color[] cga_color_array = {
+        readonly Color[] color_array_u1_tandy = [
+            Color.FromArgb(0, 0, 0),            //black
+            Color.FromArgb(0x55, 0x55, 0x55),   //dark gray
+            Color.FromArgb(0xAA, 0xAA, 0xAA),   //light gray
+            Color.FromArgb(0xFF, 0xFF, 0xFF),   //white
+            Color.FromArgb(0xFF, 0xFF, 0xFF),   //white
+            Color.FromArgb(0, 0xAA, 0),         //green
+            Color.FromArgb(0x55, 0xFF, 0x55),   //bright green
+            Color.FromArgb(0xFF, 0xFF, 0x55),   //bright yellow
+            Color.FromArgb(0xAA, 0, 0),         //red
+            Color.FromArgb(0xAA, 0xAA, 0xAA),   //light gray
+            Color.FromArgb(0xFF, 0x55, 0xFF),   //bright magenta
+            Color.FromArgb(0, 0xAA, 0xAA),      //cyan
+            Color.FromArgb(0, 0, 0xAA),         //blue
+            Color.FromArgb(0x55, 0x55, 0xFF),   //bright blue
+            Color.FromArgb(0xAA, 0xAA, 0xAA),   //light gray
+            Color.FromArgb(0xFF, 0xFF, 0xFF)    //white
+        ];
+
+        readonly Color[] cga_color_array = [
             Color.FromArgb(0, 0, 0),            //black
             Color.FromArgb(0, 0xAA, 0xAA),      //cyan
             Color.FromArgb(0xAA, 0, 0xAA),      //magenta
             Color.FromArgb(0xAA, 0xAA, 0xAA)    //light gray
-        };
+        ];
 
         public Color GetCGAColor(byte curByte)
         {
@@ -73,10 +92,10 @@ namespace UltimaTileEditor
 
             if (curByte < 16)
             {
-                switch(palette)
+                switch (palette)
                 {
                     case 1: // Ultima 1
-                        pixColor = color_array_u1[curByte];
+                        pixColor = color_array_u1_ega[curByte];
                         break;
                     default: // EGA
                         pixColor = color_array[curByte];
@@ -137,7 +156,7 @@ namespace UltimaTileEditor
             switch (palette)
             {
                 case 1: // Ultima 1
-                    retval = Array.IndexOf(color_array_u1, curColor);
+                    retval = Array.IndexOf(color_array_u1_ega, curColor);
                     if (retval < 0)
                     {
                         retval = 0;
@@ -295,56 +314,53 @@ namespace UltimaTileEditor
 
         public void MakeU2Pic(byte[] file_bytes, string strPng)
         {
-            using (Bitmap b = new Bitmap(320, 200))
+            using Bitmap b = new(320, 200);
+            const int planeSize = 0x2000;
+            const int rowSize = 80;
+            int curPos = 0;
+            int numRows = 200;
+            for (int planeIndex = 0; planeIndex < 2; planeIndex++)
             {
-                const int planeSize = 0x2000;
-                const int rowSize = 80;
-                int curPos = 0;
-                int numRows = 200;
-                for (int planeIndex = 0; planeIndex < 2; planeIndex++)
+                curPos = planeSize * planeIndex;
+
+                for (int indexY = 0; indexY < numRows; indexY += 2)
                 {
-                    curPos = planeSize * planeIndex;
-
-                    for (int indexY = 0; indexY < numRows; indexY += 2)
+                    for (int index = 0; index < rowSize; index++)
                     {
-                        for (int index = 0; index < rowSize; index++)
-                        {
-                            byte curByte = file_bytes[curPos];
-                            byte b1 = (byte)((curByte >> 6) & 0b11);
-                            byte b2 = (byte)((curByte >> 4) & 0b11);
-                            byte b3 = (byte)((curByte >> 2) & 0b11);
-                            byte b4 = (byte)((curByte >> 0) & 0b11);
+                        byte curByte = file_bytes[curPos];
+                        byte b1 = (byte)((curByte >> 6) & 0b11);
+                        byte b2 = (byte)((curByte >> 4) & 0b11);
+                        byte b3 = (byte)((curByte >> 2) & 0b11);
+                        byte b4 = (byte)((curByte >> 0) & 0b11);
 
-                            Color c1 = GetCGAColor(b1);
-                            Color c2 = GetCGAColor(b2);
-                            Color c3 = GetCGAColor(b3);
-                            Color c4 = GetCGAColor(b4);
+                        Color c1 = GetCGAColor(b1);
+                        Color c2 = GetCGAColor(b2);
+                        Color c3 = GetCGAColor(b3);
+                        Color c4 = GetCGAColor(b4);
 
-                            b.SetPixel(index * 4 + 0, indexY + planeIndex, c1);
-                            b.SetPixel(index * 4 + 1, indexY + planeIndex, c2);
-                            b.SetPixel(index * 4 + 2, indexY + planeIndex, c3);
-                            b.SetPixel(index * 4 + 3, indexY + planeIndex, c4);
+                        b.SetPixel(index * 4 + 0, indexY + planeIndex, c1);
+                        b.SetPixel(index * 4 + 1, indexY + planeIndex, c2);
+                        b.SetPixel(index * 4 + 2, indexY + planeIndex, c3);
+                        b.SetPixel(index * 4 + 3, indexY + planeIndex, c4);
 
-                            curPos++;
-                        }
+                        curPos++;
                     }
                 }
-
-                b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
-                System.Diagnostics.Debug.WriteLine("Image Created");
             }
+
+            b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+            System.Diagnostics.Debug.WriteLine("Image Created");
         }
 
         private void WritePicU2(ref byte[] file_bytes, Bitmap b, string strOutFile)
         {
             const int planeSize = 0x2000;
             const int rowSize = 80;
-            int curPos = 0;
             int numRows = 200;
 
             for (int planeIndex = 0; planeIndex < 2; planeIndex++)
             {
-                curPos = planeSize * planeIndex;
+                int curPos = planeSize * planeIndex;
 
                 for (int indexY = 0; indexY < numRows; indexY += 2)
                 {
@@ -369,10 +385,8 @@ namespace UltimaTileEditor
                 }
             }
 
-            using (BinaryWriter binWriter = new BinaryWriter(File.Open(strOutFile, FileMode.Create)))
-            {
-                binWriter.Write(file_bytes);
-            }
+            using BinaryWriter binWriter = new(File.Open(strOutFile, FileMode.Create));
+            binWriter.Write(file_bytes);
         }
 
         public void MakeU2PicData(ref byte[] file_bytes, string strPng, string strOutFile)

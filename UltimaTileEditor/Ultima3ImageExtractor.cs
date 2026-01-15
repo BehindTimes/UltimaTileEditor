@@ -9,7 +9,7 @@ namespace UltimaTileEditor
     {
         public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             foreach (string tempimage in images)
             {
                 string image = Path.Combine(strDataDir, tempimage);
@@ -100,7 +100,7 @@ namespace UltimaTileEditor
 
         public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             bool written = false;
 
             foreach (string tempimage in images)
@@ -258,7 +258,7 @@ namespace UltimaTileEditor
         {
             int tilesize = tilewidth * tileheight / 4;
 
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             int x_offset = 0;
             int y_offset = 0;
 
@@ -304,7 +304,7 @@ namespace UltimaTileEditor
 
         public void WriteImageU3(byte[] file_bytes, Bitmap b, int twidth, int theight, int numcolumns, int numrows)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             int datasize = twidth * theight / 4;
             int planesize = datasize / 2;
             int filepos = 0;

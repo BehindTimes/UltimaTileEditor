@@ -1203,7 +1203,7 @@ namespace UltimaTileEditor
 
         private void GenerateImageMaskBytes(out byte[] file_bytes, out byte[] mask_bytes, Bitmap b, int bufWidth, int numPixelsPerByte)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             file_bytes = new byte[bufWidth * b.Height];
             mask_bytes = new byte[bufWidth / (8 / numPixelsPerByte) * b.Height];
@@ -1294,7 +1294,7 @@ namespace UltimaTileEditor
 
         private void GenerateSimpleImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             file_bytes = new byte[bufWidth * b.Height];
             for (int indexY = 0; indexY < b.Height; indexY++)
@@ -1320,7 +1320,7 @@ namespace UltimaTileEditor
 
         private void GenerateImageBytes(out byte[] file_bytes, Bitmap b, int bufWidth, int numPixelsPerByte)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             file_bytes = new byte[bufWidth * b.Height];
             for (int indexY = 0; indexY < b.Height; indexY++)
@@ -1577,7 +1577,7 @@ namespace UltimaTileEditor
             {
                 return; // Invalid pixel depth
             }
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             for (int y_index = 0; y_index < 16; ++y_index)
             {
@@ -1652,7 +1652,7 @@ namespace UltimaTileEditor
             {
                 return; // Invalid
             }
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             byte outbyte;
 
             for (int y_index = 0; y_index < 16; ++y_index)
@@ -1762,7 +1762,7 @@ namespace UltimaTileEditor
 
         private void CreateMaskImages(byte[] lzw_out, string strOutDir, string name, int numPixelsPerByte)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             int modnum = 0;
             int byteInc = 0;
@@ -1862,7 +1862,7 @@ namespace UltimaTileEditor
 
         private void CreateImages(byte[] lzw_out, string strOutDir, string name, int numPixelsPerByte)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             int modnum = 0;
             int byteInc = 0;

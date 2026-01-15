@@ -12,7 +12,7 @@ namespace UltimaTileEditor
             int dataStartOffset = 0x7c40;
             int tileSize = 66;
             int numTiles = 64;
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             foreach (string tempimage in images)
             {
@@ -59,7 +59,7 @@ namespace UltimaTileEditor
         {
             int dataStartOffset = 0x7c40;
             bool written = false;
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
 
             foreach (string tempimage in images)
             {
@@ -122,7 +122,7 @@ namespace UltimaTileEditor
 
         private void LoadImageU2(byte[] file_bytes, Bitmap b)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             int offset = 0;
             for (int tile_indexY = 0; tile_indexY < 8; tile_indexY++)
             {
@@ -174,7 +174,7 @@ namespace UltimaTileEditor
 
         private void WriteImageU2(byte[] file_bytes, Bitmap b)
         {
-            pngHelper helper = new pngHelper();
+            PngHelper helper = new PngHelper();
             int tile_size = 66;
             byte NUM_COL = 0x04;
             byte NUM_ROW = 0x10;
