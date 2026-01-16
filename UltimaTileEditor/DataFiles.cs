@@ -66,6 +66,10 @@ namespace UltimaTileEditor
             "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
             "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE"];
 
+        public static readonly List<string> Ultima4CGARLE = ["START_CGA", "KEY7_CGA", "RUNE_0_CGA", "RUNE_1_CGA", "RUNE_2_CGA", "RUNE_3_CGA", "RUNE_4_CGA", "RUNE_5_CGA",
+            "STONCRCL_CGA", "HONESTY_CGA", "COMPASSN_CGA", "VALOR_CGA", "JUSTICE_CGA", "SACRIFIC_CGA", "HONOR_CGA",
+            "SPIRIT_CGA", "HUMILITY_CGA", "TRUTH_CGA", "LOVE_CGA", "COURAGE_CGA"];
+
         public static readonly List<string> Ultima4LZW = ["ABACUS", "ANIMATE", "GYPSY", "INSIDE", "OUTSIDE",
             "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE"];
 

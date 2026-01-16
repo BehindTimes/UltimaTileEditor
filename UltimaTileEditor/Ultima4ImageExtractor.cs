@@ -98,7 +98,8 @@ namespace UltimaTileEditor
 
                             if (palette == 1) // CGA - Not supported
                             {
-                                //ReadCGACompressed(file_bytes, out byte[]? rle_out);
+                                string fullPath = Path.Combine(strImageDir, value + "_CGA.png");
+                                ReadCGARLE(fullPath, file_bytes);
                             }
                             else // EGA
                             {
@@ -206,7 +207,12 @@ namespace UltimaTileEditor
                             "PORTAL", "SACHONOR", "SPIRHUM", "TITLE", "TREE", "VALJUS", "WAGON" ];
                             string[] rle_files = [ "START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
                             "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",
-                            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE" ];
+                            "SPIRIT", "HUMILITY", "TRUTH", "LOVE", "COURAGE",
+
+                            "START_CGA", "KEY7_CGA", "RUNE_0_CGA", "RUNE_1_CGA", "RUNE_2_CGA", "RUNE_3_CGA", "RUNE_4_CGA", "RUNE_5_CGA",
+                            "STONCRCL_CGA", "HONESTY_CGA", "COMPASSN_CGA", "VALOR_CGA", "JUSTICE_CGA", "SACRIFIC_CGA", "HONOR_CGA",
+                            "SPIRIT_CGA", "HUMILITY_CGA", "TRUTH_CGA", "LOVE_CGA", "COURAGE_CGA"
+                            ];
                             if (compressed_files.Contains(value))
                             {
                                 byte[]? file_bytes;
@@ -239,6 +245,17 @@ namespace UltimaTileEditor
                             {
                                 if (palette == 1) // CGA
                                 {
+                                    string tempValue = value;
+                                    tempValue = tempValue.Replace("_CGA", "");
+
+                                    string fullPath = Path.Combine(strDataDir, tempValue + ".PIC");
+                                    CompressCGARLE(out byte[]? file_bytes, image);
+                                    if ((null != file_bytes))
+                                    {
+                                        using BinaryWriter binWriter = new(File.Open(fullPath, FileMode.Create));
+                                        binWriter.Write(file_bytes);
+                                        written = true;
+                                    }
                                 }
                                 else
                                 {
@@ -318,20 +335,110 @@ namespace UltimaTileEditor
             }
         }
 
-        private static void ReadCGACompressed(byte[] file_bytes, out byte[]? out_bytes)
+        private static void DrawCGARLE(string strOutFile, byte[] file_data)
         {
-            out_bytes = null;
+            PngHelper helper = new();
 
-            int b1 = (file_bytes[2]);
+            using (Bitmap b = new Bitmap(320, 200))
+            {
+                for (int index = 0; index < file_data.Length; index++)
+                {
+                    byte curbyte = file_data[index];
+                    int row = index / 0x50;
+                    int col = index % 0x50;
+                    if (row >= 200 || col >= 320)
+                    {
+                        Debug.WriteLine("Exceeds image size");
+                        return;
+                    }
+
+                    //GetCGAColor
+                    byte b1 = (byte)((curbyte >> 6) & 0b11);
+                    byte b2 = (byte)((curbyte >> 4) & 0b11);
+                    byte b3 = (byte)((curbyte >> 2) & 0b11);
+                    byte b4 = (byte)((curbyte >> 0) & 0b11);
+
+                    Color c1 = helper.GetCGAColor(b1);
+                    Color c2 = helper.GetCGAColor(b2);
+                    Color c3 = helper.GetCGAColor(b3);
+                    Color c4 = helper.GetCGAColor(b4);
+
+                    b.SetPixel(col * 4 + 0, 199 - row, c1);
+                    b.SetPixel(col * 4 + 1, 199 - row, c2);
+                    b.SetPixel(col * 4 + 2, 199 - row, c3);
+                    b.SetPixel(col * 4 + 3, 199 - row, c4);
+                }
+
+                b.Save(strOutFile, System.Drawing.Imaging.ImageFormat.Png);
+                Console.WriteLine("Image Created");
+            }
+        }
+
+        private static void ReadCGARLE(string strOutFile, byte[] file_bytes)
+        {
+            /*int b1 = (file_bytes[2]);
             int b2 = (file_bytes[3] << 8);
             int width = b1 + b2;
             b1 = (file_bytes[4]);
             b2 = (file_bytes[5] << 8);
-            int height = b1 + b2;
+            int height = b1 + b2;*/
 
-            byte[] destination = new byte[width * height];
+            //byte[] destination = new byte[width * height];
 
-            int j = 9;
+            int startoffset = 0x15;
+            List<byte> testlist = new List<byte>();
+            int segment_length = 5;
+
+            for (int segmentindex = 0; segmentindex < 2; segmentindex++)
+            {
+                startoffset += segment_length - 5;
+                segment_length = file_bytes[startoffset] + (file_bytes[startoffset + 1] << 8);
+
+                startoffset += 5;
+
+                for (int index = startoffset; index < (startoffset - 5) + segment_length; index++)
+                {
+                    byte curbyte = file_bytes[index];
+                    int numbytes = 0;
+                    int curoffset = 0;
+                    if (curbyte == 0x01) // RLE flag
+                    {
+                        if (index + 1 >= file_bytes.Length)
+                        {
+                            Debug.WriteLine("ERROR 1");
+                            return;
+                        }
+                        if (file_bytes[index + 1] == 0) // going to take the next two bytes
+                        {
+                            numbytes = file_bytes[index + 2] + (file_bytes[index + 3] << 8);
+                            curoffset = 4;
+                        }
+                        else
+                        {
+                            numbytes = file_bytes[index + 1];
+                            curoffset = 2;
+                        }
+                        if (numbytes > 0)
+                        {
+                            for (int rleindex = 0; rleindex < numbytes; rleindex++)
+                            {
+                                testlist.Add(file_bytes[index + curoffset]);
+                            }
+                        }
+                        index += curoffset;
+                    }
+                    else
+                    {
+                        testlist.Add(file_bytes[index]);
+                    }
+                }
+            }
+            byte[] out_bytes = testlist.ToArray();
+            if(out_bytes.Length != 16000)
+            {
+                return;
+            }
+            DrawCGARLE(strOutFile, out_bytes);
         }
 
         private static void ReadRLEFile(byte[] file_bytes, out byte[]? rle_bytes)
@@ -370,6 +477,173 @@ namespace UltimaTileEditor
             rle_bytes = destination;
         }
 
+        private static void ConvertImageToByteArray(ref Bitmap image, out byte[] outbytes)
+        {
+            PngHelper helper = new();
+
+            // 320x200 CGA, 4 pixels per byte
+            outbytes = new byte[16000];
+            int curPos = 0;
+            for (int indexY = 0; indexY < image.Height; indexY++)
+            {
+                for (int indexX = 0; indexX < image.Width; indexX += 4)
+                {
+                    byte curByte = 0;
+                    for(int indexZ = 0; indexZ < 4; indexZ++)
+                    {
+                        Color curColor = image.GetPixel(indexX + indexZ, indexY);
+                        byte tempByte = helper.GetCGAByte(curColor);
+                        curByte <<= 2;
+                        curByte |= (byte)(tempByte & 0b11);
+                    }
+                    outbytes[curPos] = curByte;
+                    curPos++;
+                }
+            }
+        }
+
+        private static void CompressPlane(ref byte[] plane, out byte[]? compressed_bytes)
+        {
+            compressed_bytes = null;
+            List<byte> plane_data = new List<byte>();
+            for (int index = 0; index < plane.Length; index++)
+            {
+                int count = 1;
+                byte curByte = plane[index];
+                for(int tempIndex = index + 1; tempIndex < plane.Length; tempIndex++)
+                {
+                    if (plane[tempIndex] == curByte)
+                    {
+                        count++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if(count == 1 && curByte != 1)
+                {
+                    plane_data.Add(curByte);
+                }
+                else if (count == 2 && curByte != 1)
+                {
+                    plane_data.Add(curByte);
+                    plane_data.Add(curByte);
+
+                    index++;
+                }
+                else if (count == 3 && curByte != 3)
+                {
+                    plane_data.Add(curByte);
+                    plane_data.Add(curByte);
+                    plane_data.Add(curByte);
+
+                    index += 2;
+                }
+                else
+                {
+                    if (count > 0xFF)
+                    {
+                        plane_data.Add(0x01);
+                        plane_data.Add(0x00);
+
+                        if (count > 0xFFFF)
+                        {
+                            // This shouldn't happen, especially since the maxamum size of the image is 16000 bytes long
+                            return;
+                        }
+                        plane_data.Add((byte)(count & 0xFF));
+                        plane_data.Add((byte)((count >> 8) & 0xFF));
+                        plane_data.Add(curByte);
+                    }
+                    else
+                    {
+                        plane_data.Add(0x01);
+                        plane_data.Add((byte)count);
+                        plane_data.Add(curByte);
+                    }
+                    index += (count - 1);
+                }
+            }
+            compressed_bytes = plane_data.ToArray();
+        }
+
+        private static void CompressCGARLE(out byte[]? file_bytes, string strPng)
+        {
+            file_bytes = null;
+            try
+            {
+                List<byte> list_data = new List<byte>();
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != 200 && image.Width != 320)
+                {
+                    Debug.WriteLine("Image must be 320x200 pixels!");
+                    return;
+                }
+
+                // We display bottom to top, so flip it to make writing easier
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+                // PC Paint PIC format
+                // Id           - size 2    0x1234 (4660)
+                // Width        - size 2    0x0140 (320)
+                // Height       - size 2    0x00c8 (200)
+                // X Offset     - size 2    0x0000 (0)
+                // Y Offset     - size 2    0x0035 (53)
+                // Plane Info   - size 1    0x02 (2)
+                // Palette Flag - size 1    0xff (255)
+                // Video Mode   - size 1    0x41 (65) CGAx320x200x4
+                // Palette Type - size 2    0x0001 (1)
+                // Palette Size - size 2    0x0002 (2)
+                // Palette Data - size 2    0x0300 (3, 0) - stored per byte
+                // Block count  - size 2    0x0002 (2)
+
+                list_data.AddRange([0x34, 0x12, 0x40, 0x01, 0xc8, 0x00, 0x00, 0x00, 0x35, 0x00, 0x02, 0xff, 0x41, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x02, 0x00]);
+                byte[] image_bytes;
+                ConvertImageToByteArray(ref image, out image_bytes);
+
+                byte[] plane_1 = new byte[8192];
+                byte[] plane_2 = new byte[7808];
+                Array.Copy(image_bytes, plane_1, 8192);
+                Array.Copy(image_bytes, 8192, plane_2, 0, 7808);
+
+                byte[]? compressed_1;
+                byte[]? compressed_2;
+
+                CompressPlane(ref plane_1, out compressed_1);
+                CompressPlane(ref plane_2, out compressed_2);
+
+                // Sanity check
+                if(compressed_1  != null && compressed_2 != null)
+                {
+                    int tempSize = compressed_1.Length + 5;
+                    byte size_1 = (byte)((tempSize >> 8) & 0xff);
+                    byte size_2 = (byte)((tempSize) & 0xff);
+                    list_data.Add(size_2);
+                    list_data.Add(size_1);
+                    list_data.AddRange([0, 32, 1]);
+
+                    list_data.AddRange(compressed_1);
+
+                    tempSize = compressed_2.Length + 5;
+                    size_1 = (byte)((tempSize >> 8) & 0xff);
+                    size_2 = (byte)((tempSize) & 0xff);
+                    list_data.Add(size_2);
+                    list_data.Add(size_1);
+                    list_data.AddRange([128, 30, 1]);
+
+                    list_data.AddRange(compressed_2);
+
+                    file_bytes = list_data.ToArray();
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
         private static void MakeU4Lzw(out byte[]? file_bytes, string strPng)
         {
             file_bytes = null;
@@ -380,7 +654,7 @@ namespace UltimaTileEditor
                 Bitmap image = (Bitmap)Image.FromFile(strPng);
                 if (image.Height != 200 && image.Width != 320)
                 {
-                    Console.WriteLine("Image must be 320x200 pixels!");
+                    Debug.WriteLine("Image must be 320x200 pixels!");
                     return;
                 }
                 helper.CreateImage(destination, image, 320, 200);
@@ -388,7 +662,7 @@ namespace UltimaTileEditor
             }
             catch (IOException)
             {
-                Console.WriteLine("PNG file does not exist!");
+                Debug.WriteLine("PNG file does not exist!");
                 return;
             }
         }

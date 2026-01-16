@@ -325,9 +325,17 @@ namespace UltimaTileEditor
                             m_DataFiles = DataFiles.Ultima4Charset;
                             m_ImageFiles = DataFiles.Ultima4Charset;
                             break;
-                        case 2: // EGA RLE Images
+                        case 2: // RLE Images
                             m_DataFiles = DataFiles.Ultima4RLE;
-                            m_ImageFiles = DataFiles.Ultima4RLE;
+                            if(cbPalette.SelectedIndex == 1) // CGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima4CGARLE;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima4RLE;
+                            }
+                                
                             break;
                         case 3: // EGA LZW Images
                             m_DataFiles = DataFiles.Ultima4LZW;
