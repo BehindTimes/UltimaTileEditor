@@ -25,8 +25,9 @@ namespace UltimaTileEditor
 
         private void FormUltimaEditor_Load(object sender, EventArgs e)
         {
-            rbUltima5.Checked = true;
-            ChangeGame(UltimaGame.Ultima5);
+            //rbUltima5.Checked = true;
+            rbUltima4.Checked = true;
+            ChangeGame(UltimaGame.Ultima4);
         }
 
         private void ChangeGame(UltimaGame game)
@@ -69,6 +70,7 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("RLE Images");
                     cbFileType.Items.Add("LZW Images");
                     cbPalette.Items.Add("EGA");
+                    cbPalette.Items.Add("CGA");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
                     break;
@@ -163,7 +165,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima4:
                             Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
-                            ie4.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            Ultima4ImageExtractor.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
                             Ultima5ImageExtractor ie5 = new();
@@ -213,7 +215,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima4:
                             Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
-                            ie4.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            Ultima4ImageExtractor.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
                             Ultima5ImageExtractor ie5 = new();
@@ -446,7 +448,29 @@ namespace UltimaTileEditor
                         } 
                         break;
                     case UltimaGame.Ultima4:
-                        strExt = ".EGA";
+                        if (cbPalette.SelectedIndex == 1)
+                        {
+                            if (cbFileType.SelectedIndex == 0)
+                            {
+                                strExt = ".CGA";
+                            }
+                            else if (cbFileType.SelectedIndex == 1)
+                            {
+                                strExt = ".CGA";
+                            }
+                            else if (cbFileType.SelectedIndex == 2)
+                            {
+                                strExt = ".PIC";
+                            }
+                            else if (cbFileType.SelectedIndex == 3)
+                            {
+                                strExt = ".PIC";
+                            }
+                        }
+                        else
+                        {
+                            strExt = ".EGA";
+                        } 
                         break;
                     case UltimaGame.Ultima5:
                         if (cbPalette.SelectedIndex == 1)
