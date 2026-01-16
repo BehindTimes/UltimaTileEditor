@@ -2,7 +2,13 @@ ALWAYS BACKUP FILES BEFORE USING THIS
 
 This requires .NET 10.0. (https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
-This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  No enhanced or modified versions are currently supported, and this will only use the default EGA tile set for Ultima 1 & 4.  For Ultima 5, it will support both EGA & CGA.
+This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  No enhanced versions are currently supported.  But it will support all graphics modes for the base version of Ultima 1-5.
+
+* Ultima 1: Tandy, CGA, EGA
+* Ultima 2: CGA
+* Ultima 3: CGA
+* Ultima 4: CGA, EGA
+* Ultima 5: CGA, EGA
 
 Usage:
 
@@ -46,14 +52,16 @@ Notes:
 
 Ultima 1:
 * EGA Title Screen has a weird palette.  It does not support Cyan, Magenta, Red, nor Yellow.
+* Tandy also uses a different palette.  It does not support Brown, Cyan, and Light Red.
 
 Ultima 2
 * The tiles are stored in the executable.  Whereas with upgrades to the other games, this tool could potentially still work, as the files are separate, this will not be true with Ultima 2.
 
 Ultima 3
-* The Lord British Signature can be extracted to a file. Unfortunately, there's no easy way to insert it back in without a lot of extra user input.
+* The Lord British Signature can be extracted to an image. Unfortunately, there's no easy way to insert it back in without a lot of extra user input.
 
 Ultima 5
+* The Lord British Signature can be extracted to an image. Unfortunately, there's no easy way to insert it back in without a lot of extra user input.
 * The character sets are monochrome. Only white and black are supported colors with those.
 * Be careful when editing the Story Font (PROPORT.PCS).  The game's story expects certain screen coordinates, and while the font will work, if you change these coordinates without updating the story appropriately, weird things can happen.
 
