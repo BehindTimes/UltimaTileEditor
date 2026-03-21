@@ -85,6 +85,14 @@ namespace UltimaTileEditor
 
         public static readonly List<string> Ultima2Files = ["ULTIMAII"];
 
+        public static readonly List<string> Ultima2UpgradeFiles = ["EGATILES"];
+
+        public static readonly List<string> Ultima2UpgradeFilesCGA = ["CGATILES"];
+
+        public static readonly List<string> Ultima2UpgradePictures = ["PICDNG", "PICDRA", "PICSPA"];
+
+        public static readonly List<string> Ultima2UpgradePicturesCGA = ["PICCAS", "PICDNG", "PICDRA", "PICMIN", "PICOUT", "PICSPA", "PICTWN"];
+
         public static readonly List<string> Ultima2Pictures = ["PICDNG", "PICDRA", "PICMIN", "PICOUT", "PICSPA", "PICTWN"];
 
         public static readonly List<string> Ultima1EGAFiles = ["EGAMOND", "EGATILES", "EGATOWN", "EGAFIGHT", "EGASPACE"];

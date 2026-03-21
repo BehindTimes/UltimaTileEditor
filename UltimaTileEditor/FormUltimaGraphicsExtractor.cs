@@ -26,8 +26,8 @@ namespace UltimaTileEditor
         private void FormUltimaEditor_Load(object sender, EventArgs e)
         {
             //rbUltima5.Checked = true;
-            rbUltima4.Checked = true;
-            ChangeGame(UltimaGame.Ultima4);
+            rbUltima2.Checked = true;
+            ChangeGame(UltimaGame.Ultima2);
         }
 
         private void ChangeGame(UltimaGame game)
@@ -51,6 +51,8 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("Tiles");
                     cbFileType.Items.Add("Pictures");
                     cbPalette.Items.Add("CGA");
+                    cbPalette.Items.Add("EGA Upgrade");
+                    cbPalette.Items.Add("CGA Upgrade");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
                     break;
@@ -284,12 +286,38 @@ namespace UltimaTileEditor
                     switch (cbFileType.SelectedIndex)
                     {
                         case 1:
-                            m_DataFiles = DataFiles.Ultima2Pictures;
-                            m_ImageFiles = DataFiles.Ultima2Pictures;
+                            switch (cbPalette.SelectedIndex)
+                            {
+                                case 1:
+                                    m_DataFiles = DataFiles.Ultima2UpgradePictures;
+                                    m_ImageFiles = DataFiles.Ultima2UpgradePictures;
+                                    break;
+                                case 2:
+                                    m_DataFiles = DataFiles.Ultima2UpgradePicturesCGA;
+                                    m_ImageFiles = DataFiles.Ultima2UpgradePicturesCGA;
+                                    break;
+                                default:
+                                    m_DataFiles = DataFiles.Ultima2Pictures;
+                                    m_ImageFiles = DataFiles.Ultima2Pictures;
+                                    break;
+                            }
                             break;
                         default:
-                            m_DataFiles = DataFiles.Ultima2Files;
-                            m_ImageFiles = DataFiles.Ultima2Files;
+                            switch(cbPalette.SelectedIndex)
+                            {
+                                case 1:
+                                    m_DataFiles = DataFiles.Ultima2UpgradeFiles;
+                                    m_ImageFiles = DataFiles.Ultima2UpgradeFiles;
+                                    break;
+                                case 2:
+                                    m_DataFiles = DataFiles.Ultima2UpgradeFilesCGA;
+                                    m_ImageFiles = DataFiles.Ultima2UpgradeFilesCGA;
+                                    break;
+                                default:
+                                    m_DataFiles = DataFiles.Ultima2Files;
+                                    m_ImageFiles = DataFiles.Ultima2Files;
+                                    break;
+                            }
                             break;
                     }
                     break;
@@ -430,11 +458,30 @@ namespace UltimaTileEditor
                     case UltimaGame.Ultima2:
                         if (cbFileType.SelectedIndex == 0)
                         {
-                            strExt = ".EXE";
+                            if (cbPalette.SelectedIndex == 1)
+                            {
+                                strExt = "";
+                            }
+                            else if (cbPalette.SelectedIndex == 2)
+                            {
+                                strExt = "";
+                            }
+                            else
+                            {
+                                strExt = ".EXE";
+                            }
+                                
                         }
                         else if(cbFileType.SelectedIndex == 1)
                         {
-                            strExt = "";
+                            if (cbPalette.SelectedIndex == 1)
+                            {
+                                strExt = ".EGA";
+                            }
+                            else
+                            {
+                                strExt = "";
+                            }
                         }
                         break;
                     case UltimaGame.Ultima3:
