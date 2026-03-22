@@ -471,6 +471,21 @@ namespace UltimaTileEditor
                         }
                     }
                 }
+                else if (image.EndsWith("MOONS.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3Moons(out file_bytes, image, 4, 2, 8, 8);
+
+                    if (file_bytes != null && file_bytes.Length == 128)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "MOONS_Test.ULT");
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
                 else if (imageType == 2)
                 {
                     string? value = System.IO.Path.GetFileNameWithoutExtension(image);
@@ -612,25 +627,28 @@ namespace UltimaTileEditor
             {
                 for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
                 {
-                    for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                    for (int scanline_index = 0; scanline_index < 2; scanline_index++)
                     {
-                        for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                        for (int pix_indexY = 0; pix_indexY < height; pix_indexY += 2)
                         {
-                            int curByte = file_bytes[byte_counter];
-                            byte b1 = (byte)((curByte >> 6) & 0x3);
-                            byte b2 = (byte)((curByte >> 4) & 0x3);
-                            byte b3 = (byte)((curByte >> 2) & 0x3);
-                            byte b4 = (byte)((curByte >> 0) & 0x3);
-                            Color c1 = helper.GetCGAColor(b1);
-                            Color c2 = helper.GetCGAColor(b2);
-                            Color c3 = helper.GetCGAColor(b3);
-                            Color c4 = helper.GetCGAColor(b4);
+                            for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                            {
+                                int curByte = file_bytes[byte_counter];
+                                byte b1 = (byte)((curByte >> 6) & 0x3);
+                                byte b2 = (byte)((curByte >> 4) & 0x3);
+                                byte b3 = (byte)((curByte >> 2) & 0x3);
+                                byte b4 = (byte)((curByte >> 0) & 0x3);
+                                Color c1 = helper.GetCGAColor(b1);
+                                Color c2 = helper.GetCGAColor(b2);
+                                Color c3 = helper.GetCGAColor(b3);
+                                Color c4 = helper.GetCGAColor(b4);
 
-                            b.SetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY, c1);
-                            b.SetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY, c2);
-                            b.SetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY, c3);
-                            b.SetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY, c4);
-                            byte_counter++;
+                                b.SetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY + scanline_index, c1);
+                                b.SetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY + scanline_index, c2);
+                                b.SetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY + scanline_index, c3);
+                                b.SetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY + scanline_index, c4);
+                                byte_counter++;
+                            }
                         }
                     }
                 }
@@ -771,6 +789,64 @@ namespace UltimaTileEditor
                     }
                     filepos += datasize;
                 }
+            }
+        }
+
+        public void MakeU3Moons(out byte[]? file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)
+        {
+            file_bytes = null;
+            try
+            {
+                byte[] destination = new byte[NUM_X * (width / 4) * NUM_Y * height];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != NUM_Y * height && image.Width != NUM_X * width)
+                {
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", NUM_X * width, NUM_Y * height);
+                    return;
+                }
+
+                PngHelper helper = new PngHelper();
+
+                int byte_counter = 0;
+
+                for (int tile_indexY = 0; tile_indexY < NUM_Y; tile_indexY++)
+                {
+                    for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
+                    {
+                        for (int scanline_index = 0; scanline_index < 2; scanline_index++)
+                        {
+                            for (int pix_indexY = 0; pix_indexY < height; pix_indexY += 2)
+                            {
+                                for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                                {
+
+                                    Color c1 = image.GetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY + scanline_index);
+                                    Color c2 = image.GetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY + scanline_index);
+                                    Color c3 = image.GetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY + scanline_index);
+                                    Color c4 = image.GetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY + scanline_index);
+
+                                    byte b1 = helper.GetCGAByte(c1);
+                                    byte b2 = helper.GetCGAByte(c2);
+                                    byte b3 = helper.GetCGAByte(c3);
+                                    byte b4 = helper.GetCGAByte(c4);
+
+                                    byte finalbyte = (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + (b4 << 0));
+
+                                    destination[byte_counter] = finalbyte;
+
+                                    byte_counter++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                file_bytes = destination;
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
             }
         }
 
