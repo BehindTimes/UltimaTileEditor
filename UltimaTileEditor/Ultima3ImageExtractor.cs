@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UltimaTileEditor
 {
     internal class Ultima3ImageExtractor
     {
+        private Color[] color_array_VGA = new Color[256];
+
         public void ExtractUpgradeImagesEGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
             PngHelper helper = new PngHelper();
@@ -87,9 +92,120 @@ namespace UltimaTileEditor
             }
         }
 
-        public void ExtractUpgradeImagesVGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        private bool LoadU3VGAPalette(string strDataDir)
         {
 
+            Array.Fill(color_array_VGA, Color.Black);
+            string fullPath = Path.Combine(strDataDir, "U3VGA.PAL");
+            try
+            {
+                byte[] file_bytes = File.ReadAllBytes(fullPath);
+                if(file_bytes.Length != 768)
+                {
+                    return false; 
+                }
+                for(int index = 0; index < 256; index++)
+                {
+                    byte[] rgb = new byte[3];
+                    rgb[0] = (byte)(file_bytes[(index * 3) + 0] * 4);
+                    rgb[1] = (byte)(file_bytes[(index * 3) + 1] * 4);
+                    rgb[2] = (byte)(file_bytes[(index * 3) + 2] * 4);
+                    color_array_VGA[index] = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("U3VGA.PAL file does not exist!");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ExtractUpgradeImagesVGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+            // Load the colors in
+            if(!LoadU3VGAPalette(strDataDir))
+            {
+                return; 
+            }
+
+            PngHelper helper = new PngHelper();
+            foreach (string tempimage in images)
+            {
+                string image = Path.Combine(strDataDir, tempimage);
+                if (image.EndsWith("SHAPES.VGA"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes != null && file_bytes.Length == 20480)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_VGA.png");
+                            MakePngU3VGA(file_bytes, fullPath, 10, 8, 16, 16);
+                        }
+                    }
+                }
+                else if (image.EndsWith("CHARSET.VGA"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes.Length == 8192)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_VGA.png");
+                            MakePngU3VGA(file_bytes, fullPath, 16, 8, 8, 8);
+                        }
+                    }
+                }
+                else if (imageType == 2)
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 64000;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+
+                        if (file_bytes.Length == fileSize)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_VGA.png");
+                            MakePngU3VGA(file_bytes, fullPath, 1, 1, 320, 200);
+                        }
+                    }
+                }
+                else if (imageType == 3) // The animation
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 23552;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + "_VGA.png");
+                        MakePngU3VGA(file_bytes, fullPath, 1, 16, 92, 16);
+                    }
+                }
+                else if (imageType == 5) // The moons
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 512;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + "_VGA.png");
+                        MakePngU3VGA(file_bytes, fullPath, 4, 2, 8, 8);
+                    }
+                }
+            }
         }
 
         public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
@@ -320,45 +436,178 @@ namespace UltimaTileEditor
 
         public void CompressImagesUpgradeVGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
+            // Load the colors in
+            if (!LoadU3VGAPalette(strDataDir))
+            {
+                return;
+            }
+
+            PngHelper helper = new PngHelper();
+            bool written = false;
+
+            foreach (string tempimage in images)
+            {
+                string image = Path.Combine(strImageDir, tempimage);
+                if (image.EndsWith("SHAPES_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 10, 8, 16, 16);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "SHAPES.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("ANIMATE_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 1, 16, 92, 16);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "ANIMATE.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("BLANK_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 1, 1, 320, 200);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "BLANK.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("CHARSET_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 16, 8, 8, 8);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "CHARSET.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("EXOD_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 1, 1, 320, 200);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "EXOD.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("MOONS_VGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeVGATiles(out file_bytes, image, 4, 2, 8, 8);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "MOONS.VGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+            }
+
+            if (written)
+            {
+                MessageBox.Show("File written!");
+            }
         }
 
-        private void MakeU3UpgradeCGATiles(out byte[]? file_bytes, string strPng, int columns, int rows, int width, int height)
+        private void MakeU3UpgradeVGATiles(out byte[]? file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)
         {
             PngHelper helper = new PngHelper();
             file_bytes = null;
+            Bitmap image;
 
             try
             {
-                byte[] destination = new byte[(columns * rows * width * height) / 4];
-                Bitmap image = (Bitmap)Image.FromFile(strPng);
-                if (image.Height != (rows * height) && image.Width != (columns * width))
+                image = (Bitmap)Image.FromFile(strPng);
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                               ImageLockMode.ReadOnly, image.PixelFormat);
+
+            try
+            {
+                byte[] destination = new byte[(NUM_X * NUM_Y * width * height)];
+
+                if (image.Height != (NUM_Y * height) && image.Width != (NUM_X * width))
                 {
-                    Debug.WriteLine("Image must be {0}x{1} pixels!", (columns * width), (rows * height));
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", (NUM_X * width), (NUM_Y * height));
                     return;
                 }
 
-                int byte_counter = 0;
-                for (int tile_indexY = 0; tile_indexY < rows; tile_indexY++)
+                if(image.PixelFormat != PixelFormat.Format8bppIndexed)
                 {
-                    for (int tile_indexX = 0; tile_indexX < columns; tile_indexX++)
+                    Debug.WriteLine("Image must be of 8bpp index color in order to properly write!");
+                    return;
+                }
+
+                // Get the address of the first line
+                IntPtr ptr = data.Scan0;
+                int stride = data.Stride;
+
+                // Marshal data to a byte array
+                byte[] pixels = new byte[stride * image.Height];
+                Marshal.Copy(ptr, pixels, 0, pixels.Length);
+
+                int byte_counter = 0;
+                for (int tile_indexY = 0; tile_indexY < NUM_Y; tile_indexY++)
+                {
+                    for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
                     {
                         for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
                         {
-                            for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                            for (int pix_indexX = 0; pix_indexX < width; pix_indexX++)
                             {
-                                Color c1 = image.GetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY);
-                                Color c2 = image.GetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY);
-                                Color c3 = image.GetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY);
-                                Color c4 = image.GetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY);
+                                int temppos = (tile_indexY * height + pix_indexY) * stride;
+                                temppos += (tile_indexX * width) + pix_indexX;
+                                destination[byte_counter] = pixels[temppos];
 
-                                byte b1 = helper.GetCGAByte(c1);
-                                byte b2 = helper.GetCGAByte(c2);
-                                byte b3 = helper.GetCGAByte(c3);
-                                byte b4 = helper.GetCGAByte(c4);
-
-                                byte finalbyte = (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + (b4 << 0));
-
-                                destination[byte_counter] = finalbyte;
                                 byte_counter++;
                             }
                         }
@@ -371,6 +620,10 @@ namespace UltimaTileEditor
             {
                 Debug.WriteLine("PNG file does not exist!");
                 return;
+            }
+            finally
+            {
+                image.UnlockBits(data);
             }
         }
 
@@ -579,6 +832,57 @@ namespace UltimaTileEditor
                 Console.WriteLine("LZW file does not exist!");
                 return;
             }
+        }
+
+        public void MakePngU3VGA(byte[] file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)
+        {
+            using Bitmap b = new(NUM_X * width, NUM_Y * height, PixelFormat.Format8bppIndexed);
+
+            // 2.Define and set the color palette
+            ColorPalette palette = b.Palette;
+            for (int i = 0; i < color_array_VGA.Length && i < 256; i++)
+            {
+                palette.Entries[i] = color_array_VGA[i];
+            }
+            b.Palette = palette; // Set the modified palette back to the bitmap
+
+            // 3. Populate pixel data (example with simple grayscale indices)
+            BitmapData data = b.LockBits(new Rectangle(0, 0, NUM_X * width, NUM_Y * height), ImageLockMode.WriteOnly, b.PixelFormat);
+
+            // Create a byte array for the pixel indices (one byte per pixel for 8bpp)
+            byte[] pixels = new byte[NUM_X * width * NUM_Y * height];
+
+            PngHelper helper = new PngHelper();
+
+            int byte_counter = 0;
+
+            for (int tile_indexY = 0; tile_indexY < NUM_Y; tile_indexY++)
+            {
+                for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
+                {
+                    for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                    {
+                        for (int pix_indexX = 0; pix_indexX < width; pix_indexX++)
+                        {
+                            int curByte = file_bytes[byte_counter];
+                            Color c1 = color_array_VGA[curByte];
+
+                            int temppos = (tile_indexY * height + pix_indexY) * (NUM_X * width);
+                            temppos += (tile_indexX * width) + pix_indexX;
+                            pixels[temppos] = file_bytes[byte_counter];
+                            //b.SetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY, c1);
+                            byte_counter++;
+                        }
+                    }
+                }
+            }
+
+            // Copy the pixel data to the unmanaged memory of the bitmap
+            Marshal.Copy(pixels, 0, data.Scan0, pixels.Length);
+            b.UnlockBits(data);
+
+            b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+            System.Diagnostics.Debug.WriteLine("Image Created");
         }
 
         public void MakePngU3EGA(byte[] file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)

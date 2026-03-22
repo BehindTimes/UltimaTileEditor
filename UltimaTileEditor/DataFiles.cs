@@ -82,8 +82,8 @@ namespace UltimaTileEditor
         public static readonly List<string> Ultima3VGACharset = ["CHARSET_VGA"];
 
         public static readonly List<string> Ultima3Pictures = ["BLANK", "EXOD",];
-        public static readonly List<string> Ultima3EGAPictures = ["BLANK_EGA", "EXOD_EGA", "MOONS_EGA"];
-        public static readonly List<string> Ultima3VGAPictures = ["BLANK_VGA", "EXOD_VGA", "MOONS_VGA"];
+        public static readonly List<string> Ultima3EGAPictures = ["BLANK_EGA", "EXOD_EGA"];
+        public static readonly List<string> Ultima3VGAPictures = ["BLANK_VGA", "EXOD_VGA"];
 
         public static readonly List<string> Ultima3Moons = ["MOONS"];
         public static readonly List<string> Ultima3EGAMoons = ["MOONS_EGA"];
