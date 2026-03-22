@@ -7,8 +7,103 @@ namespace UltimaTileEditor
 {
     internal class Ultima3ImageExtractor
     {
+        public void ExtractUpgradeImagesEGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+            PngHelper helper = new PngHelper();
+            foreach (string tempimage in images)
+            {
+                string image = Path.Combine(strDataDir, tempimage);
+                if (image.EndsWith("SHAPES.EGA"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes != null && file_bytes.Length == 10240)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                            MakePngU3EGA(file_bytes, fullPath, 10, 8, 16, 16);
+                        }
+                    }
+                }
+                else if (image.EndsWith("CHARSET.EGA"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes.Length == 4096)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                            MakePngU3EGA(file_bytes, fullPath, 16, 8, 8, 8);
+                        }
+                    }
+                }
+                else if (imageType == 2)
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 32000;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+
+                        if(file_bytes.Length == fileSize)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                            MakePngU3EGA(file_bytes, fullPath, 1, 1, 320, 200);
+                        }
+                    }
+                }
+                else if (imageType == 3) // The animation
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 11776;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                        MakePngU3EGA(file_bytes, fullPath, 1, 16, 92, 16);
+                    }
+                }
+                else if (imageType == 5) // The moons
+                {
+                    string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                    if (value != null)
+                    {
+                        int fileSize = 256;
+                        byte[] file_bytes = File.ReadAllBytes(image);
+                        if (file_bytes.Length != fileSize)
+                        {
+                            return;
+                        }
+                        string fullPath = Path.Combine(strImageDir, value + "_EGA.png");
+                        MakePngU3EGA(file_bytes, fullPath, 4, 2, 8, 8);
+                    }
+                }
+            }
+        }
+
+        public void ExtractUpgradeImagesVGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+
+        }
+
         public void ExtractImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
+            if (palette == 1)
+            {
+                ExtractUpgradeImagesEGA(images, strDataDir, strImageDir, imageType, palette);
+                return;
+            }
+            else if (palette == 2)
+            {
+                ExtractUpgradeImagesVGA(images, strDataDir, strImageDir, imageType, palette);
+                return;
+            }
             PngHelper helper = new PngHelper();
             foreach (string tempimage in images)
             {
@@ -36,6 +131,19 @@ namespace UltimaTileEditor
                         {
                             string fullPath = Path.Combine(strImageDir, value + ".png");
                             MakeCharsetPngU3(file_bytes, fullPath);
+                        }
+                    }
+                }
+                else if (image.EndsWith("MOONS.ULT"))
+                {
+                    byte[] file_bytes = File.ReadAllBytes(image);
+                    if (file_bytes.Length == 0x80)
+                    {
+                        string? value = System.IO.Path.GetFileNameWithoutExtension(image);
+                        if (value != null)
+                        {
+                            string fullPath = Path.Combine(strImageDir, value + ".png");
+                            MakeMoonsPngU3(file_bytes, fullPath);
                         }
                     }
                 }
@@ -98,8 +206,235 @@ namespace UltimaTileEditor
             }
         }
 
+        public void CompressImagesUpgradeEGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+            PngHelper helper = new PngHelper();
+            bool written = false;
+
+            foreach (string tempimage in images)
+            {
+                string image = Path.Combine(strImageDir, tempimage);
+                if (image.EndsWith("SHAPES_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 10, 8, 16, 16);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "SHAPES.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("ANIMATE_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 1, 16, 92, 16);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "ANIMATE.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("BLANK_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 1, 1, 320, 200);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "BLANK.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("CHARSET_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 16, 8, 8, 8);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "CHARSET.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("EXOD_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 1, 1, 320, 200);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "EXOD.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+                else if (image.EndsWith("MOONS_EGA.png"))
+                {
+                    byte[]? file_bytes;
+                    MakeU3UpgradeEGATiles(out file_bytes, image, 4, 2, 8, 8);
+
+                    if (file_bytes != null)
+                    {
+                        string fullPath = Path.Combine(strDataDir, "MOONS.EGA");
+
+                        using (BinaryWriter binWriter = new BinaryWriter(File.Open(fullPath, FileMode.Create)))
+                        {
+                            binWriter.Write(file_bytes);
+                            written = true;
+                        }
+                    }
+                }
+            }
+
+            if (written)
+            {
+                MessageBox.Show("File written!");
+            }
+        }
+
+        public void CompressImagesUpgradeVGA(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
+        {
+        }
+
+        private void MakeU3UpgradeCGATiles(out byte[]? file_bytes, string strPng, int columns, int rows, int width, int height)
+        {
+            PngHelper helper = new PngHelper();
+            file_bytes = null;
+
+            try
+            {
+                byte[] destination = new byte[(columns * rows * width * height) / 4];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != (rows * height) && image.Width != (columns * width))
+                {
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", (columns * width), (rows * height));
+                    return;
+                }
+
+                int byte_counter = 0;
+                for (int tile_indexY = 0; tile_indexY < rows; tile_indexY++)
+                {
+                    for (int tile_indexX = 0; tile_indexX < columns; tile_indexX++)
+                    {
+                        for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                        {
+                            for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                            {
+                                Color c1 = image.GetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY);
+                                Color c2 = image.GetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY);
+                                Color c3 = image.GetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY);
+                                Color c4 = image.GetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY);
+
+                                byte b1 = helper.GetCGAByte(c1);
+                                byte b2 = helper.GetCGAByte(c2);
+                                byte b3 = helper.GetCGAByte(c3);
+                                byte b4 = helper.GetCGAByte(c4);
+
+                                byte finalbyte = (byte)((b1 << 6) + (b2 << 4) + (b3 << 2) + (b4 << 0));
+
+                                destination[byte_counter] = finalbyte;
+                                byte_counter++;
+                            }
+                        }
+                    }
+
+                    file_bytes = destination;
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
+        private void MakeU3UpgradeEGATiles(out byte[]? file_bytes, string strPng, int columns, int rows, int width, int height)
+        {
+            PngHelper helper = new PngHelper();
+            file_bytes = null;
+
+            try
+            {
+                byte[] destination = new byte[(columns * rows * width * height) / 2];
+                Bitmap image = (Bitmap)Image.FromFile(strPng);
+                if (image.Height != (rows * height) && image.Width != (columns * width))
+                {
+                    Debug.WriteLine("Image must be {0}x{1} pixels!", (columns * width), (rows * height));
+                    return;
+                }
+
+                int byte_counter = 0;
+                for (int tile_indexY = 0; tile_indexY < rows; tile_indexY++)
+                {
+                    for (int tile_indexX = 0; tile_indexX < columns; tile_indexX++)
+                    {
+                        for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                        {
+                            for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 2)
+                            {
+
+                                Color c1 = image.GetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY);
+                                Color c2 = image.GetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY);
+
+                                byte b1 = helper.GetByte(c1);
+                                byte b2 = helper.GetByte(c2);
+
+                                byte finalbyte = (byte)((b1 << 4) + (b2 << 0));
+
+                                destination[byte_counter] = finalbyte;
+                                byte_counter++;
+                            }
+                        }
+                    }
+
+                    file_bytes = destination;
+                }
+            }
+            catch (IOException)
+            {
+                Debug.WriteLine("PNG file does not exist!");
+                return;
+            }
+        }
+
         public void CompressImages(string[] images, string strDataDir, string strImageDir, int imageType, int palette)
         {
+            if (palette == 1) // EGA Upgrade
+            {
+                CompressImagesUpgradeEGA(images, strDataDir, strImageDir, imageType, palette);
+                return;
+            }
+            else if (palette == 2) // VGA Upgrade
+            {
+                CompressImagesUpgradeVGA(images, strDataDir, strImageDir, imageType, palette);
+                return;
+            }
             PngHelper helper = new PngHelper();
             bool written = false;
 
@@ -223,6 +558,99 @@ namespace UltimaTileEditor
                     b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
                     Console.WriteLine("Image Created");
                 }
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("LZW file does not exist!");
+                return;
+            }
+        }
+
+        public void MakePngU3EGA(byte[] file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)
+        {
+            using Bitmap b = new(NUM_X * width, NUM_Y * height);
+
+            PngHelper helper = new PngHelper();
+
+            int byte_counter = 0;
+
+            for (int tile_indexY = 0; tile_indexY < NUM_Y; tile_indexY++)
+            {
+                for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
+                {
+                    for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                    {
+                        for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 2)
+                        {
+                            int curByte = file_bytes[byte_counter];
+                            byte b1 = (byte)((curByte >> 4) & 0xf);
+                            byte b2 = (byte)((curByte >> 0) & 0xf);
+                            Color c1 = helper.GetColor(b1);
+                            Color c2 = helper.GetColor(b2);
+
+                            b.SetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY, c1);
+                            b.SetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY, c2);
+                            byte_counter++;
+                        }
+                    }
+                }
+            }
+
+            b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+            System.Diagnostics.Debug.WriteLine("Image Created");
+        }
+
+        public void MakePngU3CGA(byte[] file_bytes, string strPng, int NUM_X, int NUM_Y, int width, int height)
+        {
+            using Bitmap b = new(NUM_X * width, NUM_Y * height);
+
+            PngHelper helper = new PngHelper();
+
+            int byte_counter = 0;
+
+            for (int tile_indexY = 0; tile_indexY < NUM_Y; tile_indexY++)
+            {
+                for (int tile_indexX = 0; tile_indexX < NUM_X; tile_indexX++)
+                {
+                    for (int pix_indexY = 0; pix_indexY < height; pix_indexY++)
+                    {
+                        for (int pix_indexX = 0; pix_indexX < width; pix_indexX += 4)
+                        {
+                            int curByte = file_bytes[byte_counter];
+                            byte b1 = (byte)((curByte >> 6) & 0x3);
+                            byte b2 = (byte)((curByte >> 4) & 0x3);
+                            byte b3 = (byte)((curByte >> 2) & 0x3);
+                            byte b4 = (byte)((curByte >> 0) & 0x3);
+                            Color c1 = helper.GetCGAColor(b1);
+                            Color c2 = helper.GetCGAColor(b2);
+                            Color c3 = helper.GetCGAColor(b3);
+                            Color c4 = helper.GetCGAColor(b4);
+
+                            b.SetPixel(tile_indexX * width + pix_indexX, tile_indexY * height + pix_indexY, c1);
+                            b.SetPixel(tile_indexX * width + pix_indexX + 1, tile_indexY * height + pix_indexY, c2);
+                            b.SetPixel(tile_indexX * width + pix_indexX + 2, tile_indexY * height + pix_indexY, c3);
+                            b.SetPixel(tile_indexX * width + pix_indexX + 3, tile_indexY * height + pix_indexY, c4);
+                            byte_counter++;
+                        }
+                    }
+                }
+            }
+
+            b.Save(strPng, System.Drawing.Imaging.ImageFormat.Png);
+            System.Diagnostics.Debug.WriteLine("Image Created");
+        }
+
+        public void MakeMoonsPngU3(byte[] lzw, string strPng)
+        {
+            try
+            {
+                byte[] file_bytes = lzw;
+                if (file_bytes.Length != 128)
+                {
+                    return;
+                }
+                MakePngU3CGA(file_bytes, strPng, 4, 2, 8, 8);
+
             }
             catch (IOException)
             {

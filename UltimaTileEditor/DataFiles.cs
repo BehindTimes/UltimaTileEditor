@@ -74,14 +74,26 @@ namespace UltimaTileEditor
             "PORTAL", "TREE", "WAGON", "HONCOM", "SACHONOR", "SPIRHUM", "VALJUS", "TITLE"];
 
         public static readonly List<string> Ultima3Files = ["SHAPES"];
+        public static readonly List<string> Ultima3EGAFiles = ["SHAPES_EGA"];
+        public static readonly List<string> Ultima3VGAFiles = ["SHAPES_VGA"];
 
         public static readonly List<string> Ultima3Charset = ["CHARSET"];
+        public static readonly List<string> Ultima3EGACharset = ["CHARSET_EGA"];
+        public static readonly List<string> Ultima3VGACharset = ["CHARSET_VGA"];
 
-        public static readonly List<string> Ultima3Pictures = ["BLANK", "EXOD"];
+        public static readonly List<string> Ultima3Pictures = ["BLANK", "EXOD",];
+        public static readonly List<string> Ultima3EGAPictures = ["BLANK_EGA", "EXOD_EGA", "MOONS_EGA"];
+        public static readonly List<string> Ultima3VGAPictures = ["BLANK_VGA", "EXOD_VGA", "MOONS_VGA"];
+
+        public static readonly List<string> Ultima3Moons = ["MOONS"];
+        public static readonly List<string> Ultima3EGAMoons = ["MOONS_EGA"];
+        public static readonly List<string> Ultima3VGAMoons = ["MOONS_VGA"];
 
         public static readonly List<string> Ultima3Signature = ["NAME"];
 
         public static readonly List<string> Ultima3Animate = ["ANIMATE"];
+        public static readonly List<string> Ultima3EGAAnimate = ["ANIMATE_EGA"];
+        public static readonly List<string> Ultima3VGAAnimate = ["ANIMATE_VGA"];
 
         public static readonly List<string> Ultima2Files = ["ULTIMAII"];
 

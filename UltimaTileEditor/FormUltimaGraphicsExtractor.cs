@@ -26,8 +26,8 @@ namespace UltimaTileEditor
         private void FormUltimaEditor_Load(object sender, EventArgs e)
         {
             //rbUltima5.Checked = true;
-            rbUltima2.Checked = true;
-            ChangeGame(UltimaGame.Ultima2);
+            rbUltima3.Checked = true;
+            ChangeGame(UltimaGame.Ultima3);
         }
 
         private void ChangeGame(UltimaGame game)
@@ -62,7 +62,10 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("Pictures");
                     cbFileType.Items.Add("Animation");
                     cbFileType.Items.Add("Signature");
+                    cbFileType.Items.Add("Moons (Upgrade)");
                     cbPalette.Items.Add("CGA");
+                    cbPalette.Items.Add("EGA Upgrade");
+                    cbPalette.Items.Add("VGA Upgrade");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
                     break;
@@ -326,23 +329,84 @@ namespace UltimaTileEditor
                     {
                         case 1: // Character Set
                             m_DataFiles = DataFiles.Ultima3Charset;
-                            m_ImageFiles = DataFiles.Ultima3Charset;
+                            
+                            if (cbPalette.SelectedIndex == 1) // EGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3EGACharset;
+                            }
+                            else if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3VGACharset;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima3Charset;
+                            }
                             break;
                         case 2: // Pictures
                             m_DataFiles = DataFiles.Ultima3Pictures;
-                            m_ImageFiles = DataFiles.Ultima3Pictures;
+                            if (cbPalette.SelectedIndex == 1) // EGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3EGAPictures;
+                            }
+                            else if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3VGAPictures;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima3Pictures;
+                            }
                             break;
                         case 3: // Animation
                             m_DataFiles = DataFiles.Ultima3Animate;
                             m_ImageFiles = DataFiles.Ultima3Animate;
+                            if (cbPalette.SelectedIndex == 1) // EGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3EGAAnimate;
+                            }
+                            else if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3VGAAnimate;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima3Animate;
+                            }
                             break;
                         case 4: // Signature
                             m_DataFiles = DataFiles.Ultima3Signature;
                             m_ImageFiles = DataFiles.Ultima3Signature;
                             break;
+                        case 5: // Moons
+                            m_DataFiles = DataFiles.Ultima3Moons;
+                            if (cbPalette.SelectedIndex == 1) // EGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3EGAMoons;
+                            }
+                            else if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3VGAMoons;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima3Moons;
+                            }
+                            break;
                         default:
                             m_DataFiles = DataFiles.Ultima3Files;
-                            m_ImageFiles = DataFiles.Ultima3Files;
+                            if (cbPalette.SelectedIndex == 1) // EGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3EGAFiles;
+                            }
+                            else if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_ImageFiles = DataFiles.Ultima3VGAFiles;
+                            }
+                            else
+                            {
+                                m_ImageFiles = DataFiles.Ultima3Files;
+                            }
                             break;
                     }
                     break;
@@ -487,11 +551,33 @@ namespace UltimaTileEditor
                     case UltimaGame.Ultima3:
                         if (cbFileType.SelectedIndex == 2)
                         {
-                            strExt = ".IBM";
+                            if (cbPalette.SelectedIndex == 1)
+                            {
+                                strExt = ".EGA";
+                            }
+                            else if (cbPalette.SelectedIndex == 2)
+                            {
+                                strExt = ".VGA";
+                            }
+                            else
+                            {
+                                strExt = ".IBM";
+                            } 
                         }
                         else if (cbFileType.SelectedIndex == 3)
                         {
-                            strExt = ".DAT";
+                            if (cbPalette.SelectedIndex == 1)
+                            {
+                                strExt = ".EGA";
+                            }
+                            else if (cbPalette.SelectedIndex == 2)
+                            {
+                                strExt = ".VGA";
+                            }
+                            else
+                            {
+                                strExt = ".DAT";
+                            }
                         }
                         else if (cbFileType.SelectedIndex == 4)
                         {
@@ -499,7 +585,18 @@ namespace UltimaTileEditor
                         }
                         else
                         {
-                            strExt = ".ULT";
+                            if (cbPalette.SelectedIndex == 1)
+                            {
+                                strExt = ".EGA";
+                            }
+                            else if (cbPalette.SelectedIndex == 2)
+                            {
+                                strExt = ".VGA";
+                            }
+                            else
+                            {
+                                strExt = ".ULT";
+                            } 
                         } 
                         break;
                     case UltimaGame.Ultima4:
