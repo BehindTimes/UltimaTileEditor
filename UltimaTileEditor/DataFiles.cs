@@ -59,8 +59,12 @@ namespace UltimaTileEditor
         "DNG3_18","DNG3_19","DNG3_20","DNG3_21","DNG3_22","DNG3_23","DNG3_25","DNG3_26","DNG3_27"];
 
         public static readonly List<string> Ultima4EGATileFiles = ["SHAPES"];
+        public static readonly List<string> Ultima4VGATileFiles = ["shapes"];
+        public static readonly List<string> Ultima4VGATilePictures = ["shapes_vga"];
 
         public static readonly List<string> Ultima4Charset = ["CHARSET"];
+        public static readonly List<string> Ultima4CharsetVGA = ["charset"];
+        public static readonly List<string> Ultima4CharsetVGAPic = ["charset_vga"];
 
         public static readonly List<string> Ultima4RLE = ["START", "KEY7", "RUNE_0", "RUNE_1", "RUNE_2", "RUNE_3", "RUNE_4", "RUNE_5",
             "STONCRCL", "HONESTY", "COMPASSN", "VALOR", "JUSTICE", "SACRIFIC", "HONOR",

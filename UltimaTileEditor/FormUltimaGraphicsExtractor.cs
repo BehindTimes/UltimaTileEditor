@@ -26,8 +26,8 @@ namespace UltimaTileEditor
         private void FormUltimaEditor_Load(object sender, EventArgs e)
         {
             //rbUltima5.Checked = true;
-            rbUltima3.Checked = true;
-            ChangeGame(UltimaGame.Ultima3);
+            rbUltima4.Checked = true;
+            ChangeGame(UltimaGame.Ultima4);
         }
 
         private void ChangeGame(UltimaGame game)
@@ -76,6 +76,7 @@ namespace UltimaTileEditor
                     cbFileType.Items.Add("LZW Images");
                     cbPalette.Items.Add("EGA");
                     cbPalette.Items.Add("CGA");
+                    cbPalette.Items.Add("VGA Upgrade");
                     cbFileType.SelectedIndex = 0;
                     cbPalette.SelectedIndex = 0;
                     break;
@@ -170,7 +171,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima4:
                             Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbFiles.Items.OfType<string>()];
-                            Ultima4ImageExtractor.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            ie4.ExtractImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
                             Ultima5ImageExtractor ie5 = new();
@@ -220,7 +221,7 @@ namespace UltimaTileEditor
                         case UltimaGame.Ultima4:
                             Ultima4ImageExtractor ie4 = new();
                             itemsArray = [.. lbImages.Items.OfType<string>()];
-                            Ultima4ImageExtractor.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
+                            ie4.CompressImages(itemsArray, strDataDir, strImagesDir, cbFileType.SelectedIndex, cbPalette.SelectedIndex);
                             break;
                         case UltimaGame.Ultima5:
                             Ultima5ImageExtractor ie5 = new();
@@ -414,8 +415,16 @@ namespace UltimaTileEditor
                     switch (cbFileType.SelectedIndex)
                     {
                         case 1: // EGA Char Set
-                            m_DataFiles = DataFiles.Ultima4Charset;
-                            m_ImageFiles = DataFiles.Ultima4Charset;
+                            if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_DataFiles = DataFiles.Ultima4CharsetVGA;
+                                m_ImageFiles = DataFiles.Ultima4CharsetVGAPic;
+                            }
+                            else
+                            {
+                                m_DataFiles = DataFiles.Ultima4Charset;
+                                m_ImageFiles = DataFiles.Ultima4Charset;
+                            }
                             break;
                         case 2: // RLE Images
                             m_DataFiles = DataFiles.Ultima4RLE;
@@ -434,8 +443,16 @@ namespace UltimaTileEditor
                             m_ImageFiles = DataFiles.Ultima4LZW;
                             break;
                         default: // EGA Tiles
-                            m_DataFiles = DataFiles.Ultima4EGATileFiles;
-                            m_ImageFiles = DataFiles.Ultima4EGATileFiles;
+                            if (cbPalette.SelectedIndex == 2) // VGA
+                            {
+                                m_DataFiles = DataFiles.Ultima4VGATileFiles;
+                                m_ImageFiles = DataFiles.Ultima4VGATilePictures;
+                            }
+                            else
+                            {
+                                m_DataFiles = DataFiles.Ultima4EGATileFiles;
+                                m_ImageFiles = DataFiles.Ultima4EGATileFiles;
+                            }  
                             break;
                     }
                     break;
@@ -618,6 +635,10 @@ namespace UltimaTileEditor
                             {
                                 strExt = ".PIC";
                             }
+                        }
+                        else if (cbPalette.SelectedIndex == 2)
+                        {
+                            strExt = ".vga";
                         }
                         else
                         {
