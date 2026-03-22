@@ -2,7 +2,7 @@ ALWAYS BACKUP FILES BEFORE USING THIS
 
 This requires .NET 10.0. (https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
-This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  There's also limited support now for the Ultima upgrades from The Exodus Project (https://exodus.voyd.net/)
+This is a quick utility for extracting and inserting tiles into various Ultima games, currently Ultima 1-5 PC versions.  There's also limited support now for the Ultima upgrades from The Exodus Project (https://exodus.voyd.net/).  (For multiple variants of a tile set, you will need to edit those specifically.  Just load up that specific folder.  They should all share the same name.)
 
 * Ultima 1: Tandy, CGA, EGA
 * Ultima 2: CGA, EGA Upgrade
