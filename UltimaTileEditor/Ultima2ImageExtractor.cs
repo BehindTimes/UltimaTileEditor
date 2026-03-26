@@ -124,7 +124,7 @@ namespace UltimaTileEditor
                 if (image.EndsWith("EGATILES"))
                 {
                     byte[] file_bytes = File.ReadAllBytes(image);
-                    if (file_bytes.Length != 4160)
+                    if (file_bytes.Length != 8320)
                     {
                         return;
                     }
